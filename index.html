@@ -250,7 +250,6 @@ a {color:inherit}
 </section>
 
 
-
 <section class="hero">
 <div class="wrap">
   <h1>Սովորիր վարել վստահ և անվտանգ</h1>
@@ -353,6 +352,8 @@ a {color:inherit}
 <h4>📋 Ամրագրումների հայտեր</h4><div id="adminBookings">Բեռնում...</div></div></div>
 <div class="panel">
 <h3>💬 Աշակերտների նամակագրություն և օնլայն չատ</h3>
+<input id="adminChatPhoneSearch" type="search" inputmode="tel" placeholder="🔎 Արագ որոնում՝ աշակերտի հեռախոսահամարով" autocomplete="off">
+<p id="adminChatSearchInfo" class="muted">Մուտքագրեք հեռախոսահամարը՝ աշակերտին արագ գտնելու համար։</p>
 <select id="adminChatStudent"><option value="">Ընտրեք աշակերտին</option></select>
 <div class="chat-box" id="adminStudentChat"></div>
 <form id="adminStudentChatForm"><input name="reply" required maxlength="2000" placeholder="Գրել պատասխան աշակերտին"><button class="blue">Ուղարկել պատասխանը</button></form>
@@ -497,8 +498,7 @@ $('signup').onsubmit = async e => {
   const phone = String(form.get('phone')).trim();
   const gender = String(form.get('gender')).trim();
   const study_type = String(form.get('study_type')).trim();
-  const driving_goal = String(form.get('driving_goal')).trim();
-  const residence = String(form.get('residence')).trim();
+  const driving_goal = String(form.get('driving_goal')).trim();  const residence = String(form.get('residence')).trim();
   const registration_category = String(form.get('registration_category')).trim();
   const age = Number(form.get('age'));
   const exam_location = String(form.get('exam_location')).trim();
@@ -747,8 +747,7 @@ function renderAdminAvailabilityCalendar(slots){
  const byDate={};slots.forEach(x=>(byDate[x.slot_date]??=[]).push(x));
  const head=document.createElement('div');head.className='calendar-head';
  const prev=document.createElement('button');prev.type='button';prev.className='gray';prev.textContent='‹';
- const title=document.createElement('strong');title.textContent=adminCalendarMonth.toLocaleDateString('hy-AM',{month:'long',year:'numeric'});
- const next=document.createElement('button');next.type='button';next.className='gray';next.textContent='›';
+ const title=document.createElement('strong');title.textContent=adminCalendarMonth.toLocaleDateString('hy-AM',{month:'long',year:'numeric'}); const next=document.createElement('button');next.type='button';next.className='gray';next.textContent='›';
  prev.onclick=()=>{adminCalendarMonth=new Date(adminCalendarMonth.getFullYear(),adminCalendarMonth.getMonth()-1,1);renderAdminAvailabilityCalendar(slots);};
  next.onclick=()=>{adminCalendarMonth=new Date(adminCalendarMonth.getFullYear(),adminCalendarMonth.getMonth()+1,1);renderAdminAvailabilityCalendar(slots);};
  head.append(prev,title,next);root.append(head);
@@ -861,11 +860,30 @@ async function loadStudent() {
   $('studentInfo').replaceChildren(info);
 }
 
+function normalizePhoneSearch(value){return String(value||'').replace(/\\D/g,'');}
+function renderAdminChatStudentOptions(){
+ const sel=$('adminChatStudent'),search=$('adminChatPhoneSearch'),info=$('adminChatSearchInfo');
+ if(!sel)return;
+ const old=sel.value,query=normalizePhoneSearch(search?.value);
+ const matches=(students||[]).filter(st=>{
+  if(!query)return true;
+  return normalizePhoneSearch(st.phone).includes(query);
+ });
+ sel.replaceChildren();
+ const opt=document.createElement('option');opt.value='';opt.textContent=query?'Համընկնող աշակերտներ՝ '+matches.length:'Ընտրեք աշակերտին';sel.append(opt);
+ matches.forEach(st=>{
+  const o=document.createElement('option');o.value=st.id;
+  o.textContent=st.first_name+' '+st.last_name+' — '+(st.phone||'հեռախոս չկա')+' — '+(st.email||'');
+  sel.append(o);
+ });
+ if(old&&matches.some(st=>st.id===old))sel.value=old;
+ else if(old){sel.value='';}
+ if(info)info.textContent=query
+  ? (matches.length?'Գտնվել է '+matches.length+' աշակերտ։ Ընտրեք ցանկից։':'Այս հեռախոսահամարով աշակերտ չի գտնվել։')
+  : 'Մուտքագրեք հեռախոսահամարը՝ աշակերտին արագ գտնելու համար։';
+}
 async function refreshAdminChatStudents(){
- const sel=$('adminChatStudent');if(!sel)return;const old=sel.value;
- sel.replaceChildren();const opt=document.createElement('option');opt.value='';opt.textContent='Ընտրեք աշակերտին';sel.append(opt);
- (students||[]).forEach(st=>{const o=document.createElement('option');o.value=st.id;o.textContent=st.first_name+' '+st.last_name+' — '+st.email;sel.append(o);});
- if(old)sel.value=old;
+ renderAdminChatStudentOptions();
  await loadAdminStudentChat();
 }
 async function loadAdminStudentChat(){
@@ -877,6 +895,7 @@ async function loadAdminStudentChat(){
  if(!data||!data.length)box.textContent='Հաղորդագրություններ դեռ չկան։';box.scrollTop=box.scrollHeight;
 }
 $('adminChatStudent').onchange=loadAdminStudentChat;
+$('adminChatPhoneSearch').addEventListener('input',()=>{renderAdminChatStudentOptions();loadAdminStudentChat();});
 $('adminStudentChatForm').onsubmit=async e=>{
  e.preventDefault();const id=$('adminChatStudent').value;if(!id){message('adminStudentChatMsg','Նախ ընտրեք աշակերտին։',true);return;}
  const body=e.target.elements.reply.value.trim();
@@ -997,8 +1016,7 @@ function renderStudents() {
       addButton('Ապաշրջափակել','pending','good');
     }
 
-    email.style.margin='3px 0';status.style.margin='3px 0';item.append(title,email,phone,extra,status,details,date,actions);
-    list.appendChild(item);
+    email.style.margin='3px 0';status.style.margin='3px 0';item.append(title,email,phone,extra,status,details,date,actions);    list.appendChild(item);
   });
 }
 
