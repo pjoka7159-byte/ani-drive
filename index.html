@@ -442,11 +442,27 @@ $('signup').onsubmit = async e => {
 
     if (error) throw error;
 
+    // Save the new account in the students table so it appears in the admin panel.
+    if (data.user) {
+      const {error: studentError} = await db.from('students').upsert({
+        id: data.user.id,
+        first_name: first,
+        last_name: last,
+        email,
+        phone,
+        status: 'pending'
+      }, {onConflict: 'id'});
+      if (studentError) {
+        console.error('Student profile save failed:', studentError);
+        message('signupMsg','Հաշիվը ստեղծվեց, բայց աշակերտի տվյալները չպահպանվեցին։ Տեղեկացրեք ադմինին։',true);
+        return;
+      }
+    }
+
     if (data.session) {
-      message('signupMsg','Գրանցումը հաջողվեց։ Ձեր հայտը ուղարկված է։');
+      message('signupMsg','Գրանցումը հաջողվեց։ Ձեր տվյալներն ուղարկվեցին ադմինին հաստատման։');
     } else {
-      message('signupMsg',
-        'Գրանցումը կատարվեց։ Խնդրում ենք ստուգել էլեկտրոնային փոստը և հաստատել հաշիվը։');
+      message('signupMsg','Գրանցումը կատարվեց։ Մուտքի համար անհրաժեշտ է էլ․ փոստի հաստատում։');
     }
 
     e.target.reset();
