@@ -855,8 +855,8 @@ async function loadPublicAccessSettings(){
  $('showRegister').classList.toggle('hidden',!reg);
  $('showAuth').classList.toggle('hidden',!login);
  const regSection=$('register'),authSection=$('auth');
- if(!reg)regSection.classList.add('hidden');
- if(!login)authSection.classList.add('hidden');
+ regSection.classList.toggle('hidden',!reg);
+ authSection.classList.toggle('hidden',!login);
  const cta=document.querySelector('.hero a[href="#register"]');
  if(cta)cta.classList.toggle('hidden',!reg);
 }
