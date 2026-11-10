@@ -323,7 +323,7 @@ a {color:inherit}
   <button class="gray admin-refresh" id="refreshBtn" title="Թարմացնել հայտերը">↻</button>
   <button type="button" class="blue admin-compact-toggle" id="toggleStudentApplications" aria-expanded="false">Բացել հայտերը <span>⌄</span></button>
 </div>
-<p class="muted admin-compact-summary">Ընդամենը՝ <strong id="totalCount">0</strong> · Սպասման մեջ՝ <strong id="pendingCount">0</strong> · Հաստատված՝ <strong id="approvedCount">0</strong> · Արգելափակված՝ <strong id="blockedCount">0</strong></p>
+<p class="muted admin-compact-summary">⏱️ Հայտերը 1 րոպե անց ավտոմատ տեղափոխվում են արխիվ։ Ընդամենը՝ <strong id="totalCount">0</strong> · Սպասման մեջ՝ <strong id="pendingCount">0</strong> · Հաստատված՝ <strong id="approvedCount">0</strong> · Արգելափակված՝ <strong id="blockedCount">0</strong></p>
 <div id="studentApplicationsContent" class="hidden">
 <div class="grid">
 </div>
@@ -454,6 +454,7 @@ let currentUser = null;
 let isAdmin = false;
 let students = [];
 let currentFilter = 'all';
+const autoArchiveTimers = new Map();
 let adminNoticeSnapshot=null,studentNoticeSnapshot='';
 function playNotice(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const c=new AC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.setValueAtTime(.001,c.currentTime);g.gain.exponentialRampToValueAtTime(.13,c.currentTime+.04);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.38);o.start();o.stop(c.currentTime+.4);o.onended=()=>c.close();}catch(e){}}
 async function checkAdminNotices(){if(!isAdmin)return;const [b,s]=await Promise.all([db.from('lesson_bookings').select('id',{count:'exact',head:true}).eq('status','pending'),db.from('students').select('id',{count:'exact',head:true}).eq('status','pending')]);if(b.error||s.error)return;const snap=(b.count||0)+':'+(s.count||0);if(adminNoticeSnapshot!==null&&snap!==adminNoticeSnapshot)playNotice();adminNoticeSnapshot=snap;}
@@ -920,6 +921,31 @@ async function loadStudents() {
   }
 
   students = data || [];
+
+  // Յուրաքանչյուր հայտի համար մեկ անգամ սկսել 1 րոպեանոց ավտոարխիվացման հաշվիչը։
+  students.forEach(student => {
+    if (autoArchiveTimers.has(student.id)) return;
+    const timer = setTimeout(async () => {
+      autoArchiveTimers.delete(student.id);
+      if (!isAdmin) return;
+      const {error: archiveError} = await db
+        .from('students')
+        .update({archived_at:new Date().toISOString()})
+        .eq('id',student.id)
+        .is('archived_at',null);
+      if (archiveError) {
+        message('adminMsg','Ավտոարխիվացումը չհաջողվեց։ '+archiveError.message,true);
+        return;
+      }
+      students = students.filter(s => s.id !== student.id);
+      await loadStudents();
+      const registeredSection = $('registeredStudentsSection');
+      if (registeredSection && !registeredSection.classList.contains('hidden')) {
+        await loadRegisteredStudents();
+      }
+    },60000);
+    autoArchiveTimers.set(student.id,timer);
+  });
 
   $('totalCount').textContent = students.length;
   $('pendingCount').textContent =
