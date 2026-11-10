@@ -172,42 +172,8 @@ a {color:inherit}
 </div>
 </header>
 
-<section class="hero">
-<div class="wrap">
-  <h1>Սովորիր վարել վստահ և անվտանգ</h1>
-  <p>Քո ճանապարհը դեպի վստահ վարում սկսվում է այստեղ։ Միացի՛ր ANI DRIVE ավտոդպրոցին։</p>
-  <a class="btn" href="#register">Գրանցվել դասընթացին</a>
-</div>
-</section>
-
-<section class="section">
-<div class="wrap">
-<h2>Մեր դասընթացները</h2>
-<div class="grid">
-  <div class="card">
-    <h3>Տեսական դասեր</h3>
-    <p class="muted">Ճանապարհային երթևեկության կանոններ և նշաններ։</p>
-  </div>
-  <div class="card">
-    <h3>Գործնական վարում</h3>
-    <p class="muted">Վարելու հմտությունների զարգացում հրահանգչի հետ։</p>
-  </div>
-  <div class="card">
-    <h3>Անվտանգ վարում</h3>
-    <p class="muted">Պատասխանատու վարելու սովորություններ։</p>
-  </div>
-</div>
-</div>
-</section>
-
-<section class="section" id="examOffices" style="background:linear-gradient(135deg,#eef5ff,#fff7e8)"><div class="wrap"><h2>🏢 Հաշվառման քննական բաժիններ</h2><p class="muted">Ընտրեք ձեզ հետաքրքրող քննական բաժինը։</p><div class="grid" id="examOfficeGrid"></div><div id="examOfficeDetail" class="card hidden" style="margin-top:18px"></div></div></section>
-<section class="section" id="weatherSection"><div class="wrap"><h2>🌤️ Եղանակի տեսություն</h2><div class="grid" id="weatherCards"><div class="card">Եղանակի տվյալները բեռնվում են…</div></div><p class="muted">Կանխատեսումը՝ Երևան քաղաքի համար։</p></div></section>
-
-<section class="section hidden" id="publishedBlocks"><div class="wrap" id="publishedBlocksInner"></div></section>
-<section class="section hidden" id="publishedMedia"><div class="wrap"><h2>Մեր լուսանկարներն ու տեսանյութերը</h2><div class="grid" id="publishedMediaGrid"></div></div></section>
-
 <!-- Գրանցում -->
-<section class="section" id="register" style="background:var(--bg)">
+<section class="section hidden" id="register" style="background:var(--bg)">
 <div class="wrap">
 <h2>Աշակերտի գրանցում</h2>
 <div class="card">
@@ -248,6 +214,42 @@ a {color:inherit}
 </div>
 </div>
 </section>
+
+
+
+<section class="hero">
+<div class="wrap">
+  <h1>Սովորիր վարել վստահ և անվտանգ</h1>
+  <p>Քո ճանապարհը դեպի վստահ վարում սկսվում է այստեղ։ Միացի՛ր ANI DRIVE ավտոդպրոցին։</p>
+  <a class="btn" href="#register">Գրանցվել դասընթացին</a>
+</div>
+</section>
+
+<section class="section">
+<div class="wrap">
+<h2>Մեր դասընթացները</h2>
+<div class="grid">
+  <div class="card">
+    <h3>Տեսական դասեր</h3>
+    <p class="muted">Ճանապարհային երթևեկության կանոններ և նշաններ։</p>
+  </div>
+  <div class="card">
+    <h3>Գործնական վարում</h3>
+    <p class="muted">Վարելու հմտությունների զարգացում հրահանգչի հետ։</p>
+  </div>
+  <div class="card">
+    <h3>Անվտանգ վարում</h3>
+    <p class="muted">Պատասխանատու վարելու սովորություններ։</p>
+  </div>
+</div>
+</div>
+</section>
+
+<section class="section" id="examOffices" style="background:linear-gradient(135deg,#eef5ff,#fff7e8)"><div class="wrap"><h2>🏢 Հաշվառման քննական բաժիններ</h2><p class="muted">Ընտրեք ձեզ հետաքրքրող քննական բաժինը։</p><div class="grid" id="examOfficeGrid"></div><div id="examOfficeDetail" class="card hidden" style="margin-top:18px"></div></div></section>
+<section class="section" id="weatherSection"><div class="wrap"><h2>🌤️ Եղանակի տեսություն</h2><div class="grid" id="weatherCards"><div class="card">Եղանակի տվյալները բեռնվում են…</div></div><p class="muted">Կանխատեսումը՝ Երևան քաղաքի համար։</p></div></section>
+
+<section class="section hidden" id="publishedBlocks"><div class="wrap" id="publishedBlocksInner"></div></section>
+<section class="section hidden" id="publishedMedia"><div class="wrap"><h2>Մեր լուսանկարներն ու տեսանյութերը</h2><div class="grid" id="publishedMediaGrid"></div></div></section>
 
 <!-- Աշակերտի էջ -->
 <section class="section hidden" id="studentArea"><div class="wrap">
@@ -403,7 +405,7 @@ function show(id) {
   ['auth','register','admin','studentArea'].forEach(x => {
     $(x).classList.toggle('hidden', x !== id);
   });
-  if (id) $(id).scrollIntoView({behavior:'smooth'});
+  if (id) $(id).scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function message(id, text, error=false) {
