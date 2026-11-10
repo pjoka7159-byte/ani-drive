@@ -187,6 +187,19 @@ a {color:inherit}
   .bar {align-items:flex-start}
   .section {padding:38px 0}
 }
+.admin-applications-panel{padding:13px 16px;margin-top:10px;border:1px solid #dce6f4;background:linear-gradient(135deg,#f8fbff,#fff);box-shadow:0 5px 18px #071a360c}
+.admin-applications-panel>.row{gap:8px}
+.admin-applications-panel h3{font-size:17px}
+.admin-refresh{padding:7px 11px;font-size:18px;line-height:1}
+.admin-compact-toggle,.registered-toggle{padding:8px 12px;font-size:13px;border-radius:9px}
+.admin-compact-summary{font-size:12px;margin:5px 0 0}
+.admin-compact-summary strong{color:#174c86}
+#studentApplicationsContent{padding-top:10px}
+#studentApplicationsContent .tabs{margin:10px 0}
+#studentApplicationsContent .admin-item{padding:9px 12px;margin:7px 0}
+.registered-toggle{margin:8px 0!important;background:#eaf1fb;color:#174b88;border:1px solid #d5e2f3}
+#registeredStudentsSection{padding:12px;margin-top:4px}
+@media(max-width:600px){.admin-applications-panel{padding:11px}.admin-applications-panel>.row{align-items:center}.admin-applications-panel h3{font-size:15px}.admin-compact-toggle{margin-left:auto}.admin-compact-summary{line-height:1.8}}
 </style>
 </head>
 
@@ -304,29 +317,15 @@ a {color:inherit}
 <div class="wrap">
 <h2>ANI DRIVE — Ադմինիստրատորի վահանակ</h2>
 
-<div class="panel">
+<div class="panel admin-applications-panel">
 <div class="row">
-  <h3 style="margin-right:auto">Աշակերտների հայտեր</h3>
-  <button class="blue" id="refreshBtn">Թարմացնել</button>
+  <h3 style="margin-right:auto;margin-bottom:4px">🚘 Աշակերտների հայտեր</h3>
+  <button class="gray admin-refresh" id="refreshBtn" title="Թարմացնել հայտերը">↻</button>
+  <button type="button" class="blue admin-compact-toggle" id="toggleStudentApplications" aria-expanded="false">Բացել հայտերը <span>⌄</span></button>
 </div>
-
+<p class="muted admin-compact-summary">Ընդամենը՝ <strong id="totalCount">0</strong> · Սպասման մեջ՝ <strong id="pendingCount">0</strong> · Հաստատված՝ <strong id="approvedCount">0</strong> · Արգելափակված՝ <strong id="blockedCount">0</strong></p>
+<div id="studentApplicationsContent" class="hidden">
 <div class="grid">
-  <div class="card">
-    <h3>Բոլորը</h3>
-    <strong id="totalCount">0</strong>
-  </div>
-  <div class="card">
-    <h3>Սպասման մեջ</h3>
-    <strong id="pendingCount">0</strong>
-  </div>
-  <div class="card">
-    <h3>Հաստատված</h3>
-    <strong id="approvedCount">0</strong>
-  </div>
-  <div class="card">
-    <h3>Արգելափակված</h3>
-    <strong id="blockedCount">0</strong>
-  </div>
 </div>
 
 <div class="tabs">
@@ -342,7 +341,8 @@ a {color:inherit}
 </div>
 <p id="adminMsg" class="message"></p>
 </div>
-<button type="button" class="blue" id="openRegisteredStudents" style="margin:12px 0">👥 Բացել գրանցված անձանց ցանկը և արխիվը</button>
+</div>
+<button type="button" class="gray registered-toggle" id="openRegisteredStudents">👥 Գրանցված անձինք և արխիվ <span>⌄</span></button> style="margin:12px 0">👥 Բացել գրանցված անձանց ցանկը և արխիվը</button>
 <div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
 
 <button type="button" class="blue" id="openBookingAdmin" style="margin:12px 0">📅 Բացել դասաժամերի բաժինը</button><div class="panel hidden" id="adminBookingSection"><h3>📅 Դասաժամերի կառավարում</h3><p class="muted">Նախ ընտրեք ազատ օրը մեծ օրացույցից, ապա՝ հասանելի ժամը։ Զբաղված օրերն ու ժամերը չեն ցուցադրվում որպես ազատ։</p>
@@ -1244,6 +1244,7 @@ document.querySelectorAll('.filterBtn').forEach(btn=>{
   };
 });
 
+$('toggleStudentApplications').onclick=()=>{const box=$('studentApplicationsContent'),btn=$('toggleStudentApplications'),open=box.classList.toggle('hidden')===false;btn.innerHTML=open?'Փակել հայտերը <span>⌃</span>':'Բացել հայտերը <span>⌄</span>';btn.setAttribute('aria-expanded',String(open));};
 $('refreshBtn').onclick = async()=>{await loadStudents();await loadAdminBookingPanel();};
 $('openBookingAdmin').onclick=()=>{$('adminBookingSection').classList.toggle('hidden');if(!$('adminBookingSection').classList.contains('hidden'))loadAdminBookingPanel();};
 $('refreshBtn').addEventListener('click',loadAdminBookingPanel);
