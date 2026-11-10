@@ -820,6 +820,35 @@ body{min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#0b3150 0,tra
   .fx-main>#admin>.wrap>h2{text-align:center!important}
 }
 
+
+/* Booking and registration content must stay inside the main column */
+html,body{max-width:100%;overflow-x:hidden!important}
+.fx-shell{width:100%!important;max-width:100%!important;overflow:visible!important}
+.fx-main{min-width:0!important;width:100%!important;max-width:100%!important;overflow-x:clip!important}
+.fx-main>#publicBookingCalendar,
+.fx-main>#admin,
+.fx-main>#studentArea,
+.fx-main>.section,
+.fx-main>.public-extra-page{
+  position:relative!important;
+  left:auto!important;right:auto!important;
+  margin-left:0!important;margin-right:0!important;
+  width:100%!important;max-width:100%!important;
+  transform:none!important;
+  box-sizing:border-box!important;
+}
+.fx-main>#publicBookingCalendar>.wrap,
+.fx-main>#admin>.wrap,
+.fx-main>#studentArea>.wrap{
+  width:100%!important;max-width:1320px!important;
+  margin-left:auto!important;margin-right:auto!important;
+}
+.fx-main #adminBookingSection,
+.fx-main #adminExistingBookingsPanel{
+  width:100%!important;max-width:100%!important;
+  scroll-margin-top:18px!important;
+}
+
 </style>
 </head>
 
@@ -2089,9 +2118,9 @@ document.querySelectorAll('.filterBtn').forEach(btn=>{
 
 $('toggleStudentApplications').onclick=async()=>{const box=$('studentApplicationsContent'),btn=$('toggleStudentApplications'),open=box.classList.toggle('hidden')===false;btn.innerHTML=open?'Փակել հայտերը <span>⌃</span>':'Բացել հայտերը <span>⌄</span>';btn.setAttribute('aria-expanded',String(open));if(open)await loadStudents();};
 $('refreshBtn').onclick = async()=>{await loadStudents();await loadAdminBookingPanel();};
-$('openBookingAdmin').onclick=async()=>{$('adminExistingBookingsPanel').classList.add('hidden');$('adminBookingSection').classList.remove('hidden');await loadAdminBookingPanel();$('adminBookingSection').scrollIntoView({behavior:'smooth',block:'start'});};
+$('openBookingAdmin').onclick=async()=>{$('adminExistingBookingsPanel').classList.add('hidden');$('adminBookingSection').classList.remove('hidden');await loadAdminBookingPanel();scrollPanelIntoView('adminBookingSection');};
 $('closeBookingAdmin').onclick=()=>$('adminBookingSection').classList.add('hidden');
-$('openExistingBookings').onclick=async()=>{$('adminBookingSection').classList.add('hidden');$('adminExistingBookingsPanel').classList.toggle('hidden');if(!$('adminExistingBookingsPanel').classList.contains('hidden')){await loadAdminBookingPanel();$('adminExistingBookingsPanel').scrollIntoView({behavior:'smooth',block:'start'});}};
+$('openExistingBookings').onclick=async()=>{$('adminBookingSection').classList.add('hidden');$('adminExistingBookingsPanel').classList.toggle('hidden');if(!$('adminExistingBookingsPanel').classList.contains('hidden')){await loadAdminBookingPanel();scrollPanelIntoView('adminExistingBookingsPanel');}};
 $('refreshExistingBookings').onclick=loadAdminBookingPanel;
 $('openRegisteredStudents').onclick=()=>{$('registeredStudentsSection').classList.toggle('hidden');if(!$('registeredStudentsSection').classList.contains('hidden'))loadRegisteredStudents();};
 $('refreshBtn').addEventListener('click',loadAdminBookingPanel);
@@ -2240,6 +2269,14 @@ $('publicBookSelected').onclick=async()=>{
  publicSelectedSlot='';await loadPublicBookingSlots();
 };
 
+
+
+/* Keep booking panels visible in the main content column; never scroll under the menu */
+function scrollPanelIntoView(id){
+ const el=$(id);if(!el)return;
+ const top=el.getBoundingClientRect().top+window.scrollY-18;
+ window.scrollTo({top:Math.max(0,top),left:0,behavior:'smooth'});
+}
 
 function initFuturisticLayout(){
  if(document.querySelector('.fx-shell'))return;
