@@ -253,10 +253,11 @@ a {color:inherit}
 <section class="section hidden" id="studentArea"><div class="wrap">
 <h2>🚘 Աշակերտի անձնական վահանակ</h2><div class="student-layout">
 <nav class="student-sidebar">
-<button class="active" data-stab="home">🚗 Գլխավոր</button><button data-stab="lessons">📚 Իմ դասերը</button><button data-stab="mail">✉️ Նամակագրություն</button><button data-stab="chat">💬 Օնլայն չատ</button><button data-stab="contact">☎️ Կապ ադմինի հետ</button>
+<button class="active" data-stab="home">🚗 Գլխավոր</button><button data-stab="booking">📅 Ամրագրում</button><button data-stab="lessons">📚 Իմ դասերը</button><button data-stab="mail">✉️ Նամակագրություն</button><button data-stab="chat">💬 Օնլայն չատ</button><button data-stab="contact">☎️ Կապ ադմինի հետ</button>
 </nav><div class="student-main">
 <div class="card student-pane" id="pane-home"><h3>👤 Իմ անձնական պրոֆիլը</h3><p id="studentName"></p><p>Հայտի կարգավիճակ՝ <strong id="studentStatus"></strong></p><p id="studentInfo" class="muted"></p>
 <form id="studentProfileForm"><input required name="first_name" placeholder="Անուն"><input required name="last_name" placeholder="Ազգանուն"><select required name="gender"><option value="">Սեռը ընտրեք</option><option>Արական</option><option>Իգական</option><option>Չնշել</option></select><select required name="study_type"><option value="">Ուսուցման տեսակը ընտրեք</option><option>Տեսական</option><option>Գործնական</option><option>Տեսական և գործնական</option></select><input required name="residence" placeholder="Բնակության վայրը"><input required name="phone" type="tel" placeholder="Հեռախոսահամար"><button class="blue">Պահպանել փոփոխությունները</button></form><p id="profileMsg" class="message"></p></div>
+<div class="card student-pane hidden" id="pane-booking"><h3>📅 Օնլայն գրանցում դասաժամի համար</h3><p class="muted">Ընտրեք ադմինի կողմից բացված ազատ օրը և ժամը։</p><form id="studentBookingForm"><select name="slot" required><option value="">Ընտրեք ազատ օր և ժամ</option></select><button class="blue">Ուղարկել ամրագրման հայտը</button></form><p id="studentBookingMsg" class="message"></p><h4>Իմ ամրագրումները</h4><div id="studentBookings"></div></div>
 <div class="card student-pane hidden" id="pane-lessons"><h3>📚 Իմ դասերը և նյութերը</h3><div id="studentBlocks"></div></div>
 <div class="card student-pane hidden" id="pane-mail"><h3>✉️ Նամակագրություն</h3><div id="studentMailList"></div></div>
 <div class="card student-pane hidden" id="pane-chat"><h3>💬 Օնլայն չատ — Ադմին</h3><div class="chat-box" id="studentChatBox"></div><form id="studentChatForm"><input name="chatBody" required maxlength="2000" placeholder="Գրեք հաղորդագրությունը"><button class="blue">Ուղարկել</button></form><p id="studentChatMsg" class="message"></p></div>
@@ -307,6 +308,7 @@ a {color:inherit}
 <p id="adminMsg" class="message"></p>
 </div>
 
+<div class="panel"><h3>📅 Դասաժամերի կառավարում</h3><p class="muted">Ստեղծեք ազատ օրերն ու ժամերը, հաստատեք կամ մերժեք ամրագրումները։</p><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p><h4>Ամրագրումների հայտեր</h4><div id="adminBookings">Բեռնում...</div><h4>Ադմինի կողմից աշակերտի ամրագրում</h4><form id="adminBookingForm"><select name="student" required><option value="">Ընտրեք աշակերտին</option></select><select name="slot" required><option value="">Ընտրեք ազատ ժամ</option></select><button class="good">Ամրագրել աշակերտի համար</button></form><p id="adminBookingMsg" class="message"></p></div>
 <div class="panel">
 <h3>💬 Աշակերտների նամակագրություն և օնլայն չատ</h3>
 <select id="adminChatStudent"><option value="">Ընտրեք աշակերտին</option></select>
@@ -583,6 +585,7 @@ async function loadUser() {
     $('adminBtn').classList.remove('hidden');
     await loadStudents();
     await loadContentTools();
+    await loadAdminBookingPanel();
     show('admin');
   } else {
     $('adminBtn').classList.add('hidden');
@@ -595,6 +598,7 @@ document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>{
  $('pane-'+b.dataset.stab).classList.remove('hidden');
  document.querySelectorAll('[data-stab]').forEach(x=>x.classList.toggle('active',x===b));
  if(b.dataset.stab==='chat'||b.dataset.stab==='mail')loadStudentMessages();
+ if(b.dataset.stab==='booking'){loadStudentSlots();loadStudentBookings();}
 });
 $('studentProfileForm').onsubmit=async e=>{
  e.preventDefault();const f=new FormData(e.target);
@@ -625,6 +629,72 @@ async function loadStudentMessages(){
 async function postStudentMessage(body){const {error}=await db.from('student_messages').insert({student_id:currentUser.id,sender_id:currentUser.id,sender_role:'student',body});if(error)throw error;await loadStudentMessages();}
 $('studentChatForm').onsubmit=async e=>{e.preventDefault();const inp=e.target.elements.chatBody;try{await postStudentMessage(inp.value.trim());inp.value='';message('studentChatMsg','Ուղարկվեց։');}catch(err){message('studentChatMsg','Սխալ՝ '+err.message,true);}};
 $('studentContactForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{await postStudentMessage('Թեմա՝ '+f.get('contactTitle')+'\n'+f.get('contactBody'));e.target.reset();message('studentContactMsg','Ուղարկվեց ադմինին։');}catch(err){message('studentContactMsg','Սխալ՝ '+err.message,true);}};
+
+function slotLabel(s){return new Date(s.slot_date+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'short',day:'numeric',month:'long'})+' · '+String(s.slot_time).slice(0,5);}
+async function loadStudentSlots(){
+ const sel=$('studentBookingForm').elements.slot;sel.replaceChildren(new Option('Ընտրեք ազատ օր և ժամ',''));
+ const {data,error}=await db.from('lesson_slots').select('id,slot_date,slot_time').eq('is_available',true).gte('slot_date',new Date().toISOString().slice(0,10)).order('slot_date').order('slot_time');
+ if(error){message('studentBookingMsg','Ժամերը բեռնել չհաջողվեց։ '+error.message,true);return;}
+ (data||[]).forEach(s=>sel.add(new Option(slotLabel(s),s.id)));
+}
+async function loadStudentBookings(){
+ const box=$('studentBookings');box.replaceChildren();
+ const {data,error}=await db.from('lesson_bookings').select('id,status,created_at,lesson_slots(slot_date,slot_time)').eq('student_id',currentUser.id).order('created_at',{ascending:false});
+ if(error){box.textContent='Ամրագրումները հասանելի չեն։ '+error.message;return;}
+ if(!data?.length){box.textContent='Դեռ ամրագրումներ չունեք։';return;}
+ data.forEach(b=>{const p=document.createElement('p');p.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' — '+({pending:'Սպասում է հաստատման',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);box.append(p);});
+}
+$('studentBookingForm').onsubmit=async e=>{
+ e.preventDefault();const slot_id=e.target.elements.slot.value;if(!slot_id)return;
+ const {data:s}=await db.from('students').select('first_name,last_name,email,phone').eq('id',currentUser.id).maybeSingle();
+ if(!s){message('studentBookingMsg','Աշակերտի տվյալները չգտնվեցին։',true);return;}
+ const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:currentUser.id,student_name:s.first_name+' '+s.last_name,student_email:s.email,student_phone:s.phone,status:'pending'});
+ if(error){message('studentBookingMsg','Ամրագրումը չհաջողվեց․ հնարավոր է ժամը արդեն զբաղված է։ '+error.message,true);return;}
+ message('studentBookingMsg','Հայտն ուղարկվեց ադմինին։ Սպասեք հաստատմանը։');await loadStudentSlots();await loadStudentBookings();
+};
+async function loadAdminBookingPanel(){
+ if(!isAdmin)return;
+ const list=$('adminBookings');list.replaceChildren();
+ const {data,error}=await db.from('lesson_bookings').select('*,lesson_slots(slot_date,slot_time)').order('created_at',{ascending:false});
+ if(error){list.textContent='Բեռնումը ձախողվեց։ '+error.message;return;}
+ if(!data?.length)list.textContent='Ամրագրումներ դեռ չկան։';
+ (data||[]).forEach(b=>{
+  const item=document.createElement('div');item.className='admin-item';
+  const p=document.createElement('p');p.textContent='👤 '+b.student_name+' · '+b.student_phone+' · '+b.student_email;
+  const d=document.createElement('p');d.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' · '+({pending:'Սպասման մեջ',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);
+  item.append(p,d);
+  if(b.status==='pending'){
+   const ok=document.createElement('button');ok.className='good';ok.textContent='Հաստատել';ok.onclick=()=>changeBookingStatus(b.id,'approved');
+   const no=document.createElement('button');no.className='danger';no.textContent='Մերժել';no.style.marginLeft='8px';no.onclick=()=>changeBookingStatus(b.id,'rejected');item.append(ok,no);
+  }
+  list.append(item);
+ });
+ const studentSel=$('adminBookingForm').elements.student,old=studentSel.value;studentSel.replaceChildren(new Option('Ընտրեք աշակերտին',''));
+ (students||[]).forEach(s=>studentSel.add(new Option(s.first_name+' '+s.last_name+' — '+s.email,s.id)));
+ if(old)studentSel.value=old;
+ const slotSel=$('adminBookingForm').elements.slot,oldSlot=slotSel.value;slotSel.replaceChildren(new Option('Ընտրեք ազատ ժամ',''));
+ const {data:slots}=await db.from('lesson_slots').select('id,slot_date,slot_time').eq('is_available',true).gte('slot_date',new Date().toISOString().slice(0,10)).order('slot_date').order('slot_time');
+ (slots||[]).forEach(s=>slotSel.add(new Option(slotLabel(s),s.id)));if(oldSlot)slotSel.value=oldSlot;
+}
+async function changeBookingStatus(id,status){
+ const {error}=await db.from('lesson_bookings').update({status}).eq('id',id);
+ if(error){message('slotMsg','Կարգավիճակը փոխել չհաջողվեց։ '+error.message,true);return;}
+ await loadAdminBookingPanel();message('slotMsg',status==='approved'?'Ամրագրումը հաստատվեց։':'Ամրագրումը մերժվեց։');
+}
+$('slotForm').onsubmit=async e=>{
+ e.preventDefault();const f=new FormData(e.target);
+ const {error}=await db.from('lesson_slots').insert({slot_date:f.get('slotDate'),slot_time:f.get('slotTime'),created_by:currentUser.id,is_available:true});
+ if(error){message('slotMsg','Ժամը չավելացվեց։ '+error.message,true);return;}
+ e.target.reset();message('slotMsg','Ազատ ժամը ավելացվեց։');await loadAdminBookingPanel();
+};
+$('adminBookingForm').onsubmit=async e=>{
+ e.preventDefault();const f=new FormData(e.target),sid=f.get('student'),slot_id=f.get('slot'),s=students.find(x=>x.id===sid);
+ if(!s||!slot_id)return;
+ const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:s.id,student_name:s.first_name+' '+s.last_name,student_email:s.email,student_phone:s.phone,status:'approved'});
+ if(error){message('adminBookingMsg','Ամրագրումը չհաջողվեց։ '+error.message,true);return;}
+ message('adminBookingMsg','Ամրագրումը ավելացվեց և ժամը փակվեց։');await loadAdminBookingPanel();
+};
+
 async function loadStudent() {
   const {data,error} = await db
     .from('students')
@@ -644,6 +714,8 @@ async function loadStudent() {
   ['first_name','last_name','gender','study_type','residence','phone'].forEach(k=>{pf.elements[k].value=data[k]||'';});
   await loadStudentBlocks();
   await loadStudentMessages();
+  await loadStudentSlots();
+  await loadStudentBookings();
 
   $('studentStatus').replaceChildren(makeStatus(data.status));
 
@@ -1015,6 +1087,7 @@ document.querySelectorAll('.filterBtn').forEach(btn=>{
 });
 
 $('refreshBtn').onclick = loadStudents;
+$('refreshBtn').addEventListener('click',loadAdminBookingPanel);
 
 $('adminBtn').onclick = () => show('admin');
 
