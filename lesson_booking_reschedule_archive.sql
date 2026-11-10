@@ -3,7 +3,8 @@
 
 alter table public.lesson_bookings
   add column if not exists archived_at timestamptz,
-  add column if not exists requested_slot_id uuid references public.lesson_slots(id) on delete set null;
+  add column if not exists requested_slot_id uuid references public.lesson_slots(id) on delete set null,
+  add column if not exists cancelled_at timestamptz;
 
 -- Authenticated students must be able to see busy slots too, so they can request a time change.
 drop policy if exists "Read available lesson slots" on public.lesson_slots;
@@ -45,7 +46,7 @@ begin
       update public.lesson_slots set is_available = false where id = new.slot_id;
     end if;
     if old.status is distinct from new.status then
-      if new.status = 'rejected' then
+      if new.status in ('rejected','cancelled') then
         update public.lesson_slots sl
           set is_available = not exists (
             select 1 from public.lesson_bookings b
