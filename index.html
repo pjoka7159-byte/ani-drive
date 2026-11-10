@@ -515,6 +515,7 @@ async function checkAdminNotices(){if(!isAdmin)return;const [b,s]=await Promise.
 async function checkStudentNotices(){if(!currentUser||isAdmin)return;const [b,s]=await Promise.all([db.from('lesson_bookings').select('id,status').eq('student_id',currentUser.id).order('created_at',{ascending:false}).limit(20),db.from('students').select('status').eq('id',currentUser.id).maybeSingle()]);if(b.error||s.error)return;const snap=(b.data||[]).map(x=>x.id+':'+x.status).join('|')+'|profile:'+s.data?.status;if(studentNoticeSnapshot&&snap!==studentNoticeSnapshot)playNotice();studentNoticeSnapshot=snap;}
 
 function show(id) {
+  document.body.classList.toggle('account-view', id === 'admin' || id === 'studentArea');
   ['auth','register','admin','studentArea'].forEach(x => {
     $(x).classList.toggle('hidden', x !== id);
   });
