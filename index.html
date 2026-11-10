@@ -995,25 +995,57 @@ function renderAdminAvailabilityCalendar(slots){
  root.append(times);
 }
 async function loadAdminBookingPanel(){
- if(!isAdmin)return;const list=$('adminBookings');list.replaceChildren();
-
- const slotSel=$('adminBookingForm').elements.slot,oldSlot=slotSel.value;const {data:slots,error:slotsError}=await db.from('lesson_slots').select('id,slot_date,slot_time,is_available').gte('slot_date',new Date().toISOString().slice(0,10)).order('slot_date').order('slot_time');
- if(slotsError){message('adminBookingMsg','Օրացույցը բեռնել չհաջողվեց։ '+slotsError.message,true);return;}adminAllLessonSlots=slots||[];slotSel.value=(slots||[]).some(x=>x.id===oldSlot&&x.is_available)?oldSlot:'';renderAdminAvailabilityCalendar(slots||[]);
- const {data,error}=await db.from('lesson_bookings').select('*,lesson_slots(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)').order('created_at',{ascending:false});
- if(error){list.textContent='Բեռնումը ձախողվեց։ '+error.message;return;}
- const visible=(data||[]).filter(x=>adminBookingArchiveView?!!x.archived_at:!x.archived_at);if(!visible.length)list.textContent=adminBookingArchiveView?'Արխիվում դասաժամեր դեռ չկան։':'Ակտիվ ամրագրումներ դեռ չկան։';
- visible.forEach(b=>{const item=document.createElement('div');item.className='admin-item';if(b.status==='cancelled')item.classList.add('cancelled-waiting');const student=students.find(x=>x.id===b.student_id)||{};
- const p=document.createElement('p');p.textContent='👤 '+b.student_name+' · '+(student.phone||b.student_phone)+' · '+(student.email||b.student_email);
- const d=document.createElement('p');d.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' · '+({pending:'Սպասման մեջ',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);
- const details=document.createElement('p');details.className='muted';details.textContent='Տարիք՝ '+(student.age||'—')+' · Սեռ՝ '+(student.gender||'—')+' · Ուսուցում՝ '+(student.study_type||'—')+' · Բնակավայր՝ '+(student.residence||'—')+' · Քննական բաժին՝ '+(student.exam_location||'—');item.append(p,d,details);
- if(b.requested_slot){const req=document.createElement('p');req.className='booking-change-request';req.textContent='🔔 Նոր ժամի հայտ՝ '+slotLabel(b.requested_slot);item.append(req);const okReq=document.createElement('button');okReq.type='button';okReq.className='good';okReq.textContent='Հաստատել փոփոխությունը';okReq.onclick=()=>approveBookingTimeRequest(b);item.append(okReq);}
- if(!adminBookingArchiveView&&['pending','approved'].includes(b.status)){const wrap=document.createElement('div');wrap.className='reschedule-controls';const sel=document.createElement('select');sel.innerHTML='<option value="">Ընտրել նոր ազատ ժամ</option>';adminAllLessonSlots.filter(x=>x.id!==b.slot_id&&x.is_available).forEach(sl=>sel.add(new Option(slotLabel(sl),sl.id)));const move=document.createElement('button');move.type='button';move.className='blue';move.textContent='✏️ Փոփոխել ընտրված դասաժամը';move.onclick=()=>adminMoveBooking(b.id,sel.value);wrap.append(sel,move);item.append(wrap);}
- if(!adminBookingArchiveView&&b.status==='pending'){const ok=document.createElement('button');ok.className='good';ok.textContent='Հաստատել';ok.onclick=()=>changeBookingStatus(b.id,'approved');const no=document.createElement('button');no.className='danger';no.textContent='Մերժել';no.onclick=()=>changeBookingStatus(b.id,'rejected');item.append(ok,no);}
- const archive=document.createElement('button');archive.type='button';archive.className='gray';archive.textContent=adminBookingArchiveView?'Վերականգնել':'📦 Տեղափոխել արխիվ';archive.onclick=()=>archiveLessonBooking(b.id,!adminBookingArchiveView);item.append(archive);
- const cancel=document.createElement('button');cancel.className='danger';cancel.textContent='🗑 Հեռացնել դասաժամը';cancel.onclick=()=>cancelBooking(b.id,'admin');item.append(cancel);list.append(item);
- });
- const studentSel=$('adminBookingForm').elements.student,old=studentSel.value;studentSel.replaceChildren(new Option('Գրանցված աշակերտ (ըստ ցանկության)',''));(students||[]).forEach(st=>studentSel.add(new Option(st.first_name+' '+st.last_name+' — '+st.email,st.id)));if(old)studentSel.value=old;
-
+ const calendar=$('adminCalendar'),list=$('adminBookings');
+ if(!isAdmin){
+  if(calendar)calendar.innerHTML='<p class="muted">Օրացույցը հասանելի է միայն ադմինին։</p>';
+  return;
+ }
+ if(list)list.textContent='Բեռնում...';
+ if(calendar)calendar.innerHTML='<p class="muted">Օրացույցի տվյալները բեռնվում են…</p>';
+ try{
+  const form=$('adminBookingForm');
+  const slotSel=form.elements.slot,oldSlot=slotSel.value;
+  // Բեռնում ենք բոլոր ժամերը, որպեսզի օրացույցում երևան և՛ ազատ, և՛ զբաղված ժամերը։
+  const {data:slots,error:slotsError}=await db.from('lesson_slots')
+   .select('id,slot_date,slot_time,is_available')
+   .order('slot_date',{ascending:true}).order('slot_time',{ascending:true});
+  if(slotsError){
+   if(calendar)calendar.innerHTML='<div class="cancelled-waiting"><strong>⚠️ Օրացույցը չբեռնվեց</strong><p>'+String(slotsError.message).replace(/[<>]/g,'')+'</p><p>Ստուգեք Supabase-ում lesson_slots աղյուսակի SELECT թույլտվությունը և կիրառեք lesson_booking_reschedule_archive.sql-ը։</p><button type="button" class="blue" id="retryAdminCalendar">↻ Կրկին փորձել</button></div>';
+   const retry=$('retryAdminCalendar');if(retry)retry.onclick=loadAdminBookingPanel;
+   message('adminBookingMsg','Օրացույցի տվյալները ստանալ չհաջողվեց։ '+slotsError.message,true);
+   if(list)list.textContent='Դասաժամերի ցանկը չի բեռնվել, քանի որ ժամերի տվյալները հասանելի չեն։';
+   return;
+  }
+  adminAllLessonSlots=slots||[];
+  slotSel.value=adminAllLessonSlots.some(x=>x.id===oldSlot&&x.is_available)?oldSlot:'';
+  renderAdminAvailabilityCalendar(adminAllLessonSlots);
+  if(!adminAllLessonSlots.length){
+   const empty=document.createElement('p');empty.className='muted';empty.textContent='Օրացույցը բեռնվեց, բայց ազատ կամ զբաղված ժամեր դեռ ավելացված չեն։ Ավելացրեք նոր ազատ օր և ժամ ներքևի ձևով։';calendar.append(empty);
+  }
+  const {data,error}=await db.from('lesson_bookings')
+   .select('*,lesson_slots(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)')
+   .order('created_at',{ascending:false});
+  if(error){if(list)list.textContent='Ամրագրումները բեռնել չհաջողվեց։ '+error.message;return;}
+  const visible=(data||[]).filter(x=>adminBookingArchiveView?!!x.archived_at:!x.archived_at);
+  if(!visible.length&&list)list.textContent=adminBookingArchiveView?'Արխիվում դասաժամեր դեռ չկան։':'Ակտիվ ամրագրումներ դեռ չկան։';
+  visible.forEach(b=>{
+   const item=document.createElement('div');item.className='admin-item';if(b.status==='cancelled')item.classList.add('cancelled-waiting');const student=students.find(x=>x.id===b.student_id)||{};
+   const p=document.createElement('p');p.textContent='👤 '+b.student_name+' · '+(student.phone||b.student_phone)+' · '+(student.email||b.student_email);
+   const d=document.createElement('p');d.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' · '+({pending:'Սպասման մեջ',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);
+   const details=document.createElement('p');details.className='muted';details.textContent='Տարիք՝ '+(student.age||'—')+' · Սեռ՝ '+(student.gender||'—')+' · Ուսուցում՝ '+(student.study_type||'—')+' · Բնակավայր՝ '+(student.residence||'—')+' · Քննական բաժին՝ '+(student.exam_location||'—');item.append(p,d,details);
+   if(b.requested_slot){const req=document.createElement('p');req.className='booking-change-request';req.textContent='🔔 Նոր ժամի հայտ՝ '+slotLabel(b.requested_slot);item.append(req);const okReq=document.createElement('button');okReq.type='button';okReq.className='good';okReq.textContent='Հաստատել փոփոխությունը';okReq.onclick=()=>approveBookingTimeRequest(b);item.append(okReq);}
+   if(!adminBookingArchiveView&&['pending','approved'].includes(b.status)){const wrap=document.createElement('div');wrap.className='reschedule-controls';const sel=document.createElement('select');sel.innerHTML='<option value="">Ընտրել նոր ազատ ժամ</option>';adminAllLessonSlots.filter(x=>x.id!==b.slot_id&&x.is_available).forEach(sl=>sel.add(new Option(slotLabel(sl),sl.id)));const move=document.createElement('button');move.type='button';move.className='blue';move.textContent='✏️ Փոփոխել ընտրված դասաժամը';move.onclick=()=>adminMoveBooking(b.id,sel.value);wrap.append(sel,move);item.append(wrap);}
+   if(!adminBookingArchiveView&&b.status==='pending'){const ok=document.createElement('button');ok.className='good';ok.textContent='Հաստատել';ok.onclick=()=>changeBookingStatus(b.id,'approved');const no=document.createElement('button');no.className='danger';no.textContent='Մերժել';no.onclick=()=>changeBookingStatus(b.id,'rejected');item.append(ok,no);}
+   const archive=document.createElement('button');archive.type='button';archive.className='gray';archive.textContent=adminBookingArchiveView?'Վերականգնել':'📦 Տեղափոխել արխիվ';archive.onclick=()=>archiveLessonBooking(b.id,!adminBookingArchiveView);item.append(archive);
+   const cancel=document.createElement('button');cancel.className='danger';cancel.textContent='🗑 Հեռացնել դասաժամը';cancel.onclick=()=>cancelBooking(b.id,'admin');item.append(cancel);list.append(item);
+  });
+  const studentSel=form.elements.student,old=studentSel.value;studentSel.replaceChildren(new Option('Գրանցված աշակերտ (ըստ ցանկության)',''));(students||[]).forEach(st=>studentSel.add(new Option(st.first_name+' '+st.last_name+' — '+st.email,st.id)));if(old)studentSel.value=old;
+ }catch(err){
+  const detail=String(err&&err.message||err).replace(/[<>]/g,'');
+  if(calendar)calendar.innerHTML='<div class="cancelled-waiting"><strong>⚠️ Օրացույցի բեռնման սխալ</strong><p>'+detail+'</p><button type="button" class="blue" id="retryAdminCalendar">↻ Կրկին փորձել</button></div>';
+  const retry=$('retryAdminCalendar');if(retry)retry.onclick=loadAdminBookingPanel;
+  if(list)list.textContent='Սխալ՝ '+detail;
+ }
 }
 async function archiveLessonBooking(id,archived){const {error}=await db.from('lesson_bookings').update({archived_at:archived?new Date().toISOString():null}).eq('id',id);if(error){message('slotMsg','Արխիվը թարմացնել չհաջողվեց։ '+error.message,true);return;}playNotice();await loadAdminBookingPanel();}
 async function adminMoveBooking(id,slotId){if(!slotId){message('slotMsg','Ընտրեք ազատ նոր ժամ։',true);return;}const {error}=await db.from('lesson_bookings').update({slot_id:slotId,requested_slot_id:null}).eq('id',id);if(error){message('slotMsg','Ժամը փոխել չհաջողվեց․ հնարավոր է արդեն զբաղված է։ '+error.message,true);return;}playNotice();message('slotMsg','✅ Դասաժամը փոխվեց անմիջապես։');await loadAdminBookingPanel();}
