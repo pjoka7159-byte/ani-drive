@@ -424,6 +424,100 @@ body.public-nav-active>#publicBookingCalendar{margin-left:252px!important;width:
 .public-booking-card .calendar-day.busy{background:linear-gradient(135deg,#fee2e2,#fecaca);border-color:#f87171;color:#991b1b;font-weight:700}
 @media(max-width:850px){body.public-nav-active>#publicBookingCalendar{margin-left:0!important;width:100%!important}}
 
+
+
+/* ANI DRIVE — unified modern driving-school template */
+:root{
+ --navy:#092443;--blue:#1769c2;--blue2:#0e4f91;--gold:#e7ad38;
+ --bg:#f3f6fa;--muted:#65758b;--line:#e1e8f0;--surface:#fff;
+}
+html{scroll-behavior:smooth}
+body{font-family:Inter,"Segoe UI",Arial,sans-serif!important;background:#f4f7fb!important;color:#172b45!important;line-height:1.55}
+.wrap{max-width:1180px!important}
+header{position:relative;z-index:20;background:rgba(7,29,54,.97)!important;padding:14px 0!important;box-shadow:0 8px 28px #071a3620}
+.logo{font-size:25px!important;letter-spacing:1.2px}
+.logo span{color:#f2bd52!important}
+header .row{align-items:center;gap:12px}
+header a[href^="tel:"]{font-weight:800;text-decoration:none;letter-spacing:.4px}
+button,.btn{border-radius:12px!important;padding:11px 17px!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease!important;font-weight:750!important}
+button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 7px 18px #071a3620}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f2bd52!important;outline-offset:2px}
+.blue{background:linear-gradient(135deg,#247bd3,#12539a)!important;color:#fff!important}
+.dark{background:#092443!important;color:#fff!important}
+.good{background:#16804a!important;color:#fff!important}
+.danger{background:#b42318!important;color:#fff!important}
+.gray{background:#e9eef5!important;color:#344b67!important}
+.outline{border:1px solid #ffffff70!important;background:#ffffff12!important;color:#fff!important}
+.ani-car-hero{height:clamp(220px,29vw,330px)!important;min-height:220px!important;padding:5px 0 12px!important;background:radial-gradient(ellipse at 50% 80%,#287bb6 0,#0c4678 45%,#071d38 100%)!important;border:0!important;box-shadow:inset 0 -1px #ffffff20!important}
+.ani-car-3d{width:min(700px,88%)!important}
+.ani-car-caption{background:#071d38a8!important;border:1px solid #ffffff55!important;backdrop-filter:blur(8px);letter-spacing:1.5px!important}
+body.public-nav-active>header,
+body.public-nav-active>#publicBookingCalendar,
+body.public-nav-active>footer{margin-left:262px!important;width:calc(100% - 274px)!important}
+.public-booking-section{padding:44px 0 52px!important;background:linear-gradient(145deg,#edf4fb,#f8fafc 58%,#fff8e9)!important}
+.public-booking-heading{margin-bottom:24px!important}
+.public-booking-heading>span{background:#e2edf9!important;color:#124c86!important;font-size:12px;letter-spacing:1.5px}
+.public-booking-heading h2{font-size:clamp(25px,3.2vw,38px)!important;letter-spacing:-.6px}
+.public-booking-card{max-width:900px!important;padding:clamp(18px,3vw,32px)!important;border:1px solid #dce5ef!important;border-radius:24px!important;box-shadow:0 20px 55px #0a2a4b12!important}
+.public-booking-card .calendar-day{min-height:54px!important;border-radius:12px!important}
+.public-booking-card .calendar-day.available{background:#e2f7e9!important;border-color:#9bd7ad!important;color:#17653a!important}
+.public-booking-card .calendar-day.busy{background:#fff0ef!important;border-color:#f2b8b5!important;color:#a43b35!important}
+.public-booking-card .calendar-day.selected{background:#145da8!important;color:#fff!important}
+.public-booking-card h3{font-size:17px!important}
+.public-book-button{margin-top:18px;min-width:min(100%,280px);box-shadow:0 8px 20px #1769c233}
+.public-nav{background:linear-gradient(165deg,#071d38 0%,#0d3d6b 65%,#125b99 100%)!important;border:1px solid #ffffff18!important;border-radius:18px!important;padding:14px!important;box-shadow:0 18px 48px #06182e40!important}
+.public-nav-head{padding:10px 6px 15px!important;font-size:17px!important}
+.public-nav>button:not(.public-nav-head button){border:1px solid #ffffff16!important;border-radius:11px!important;padding:10px 11px!important;font-size:13px!important;transition:all .18s ease!important}
+.public-nav>button.active,.public-nav>button:hover{background:linear-gradient(100deg,#f0b94b,#ffe2a0)!important;color:#172b45!important;border-color:transparent!important;box-shadow:0 6px 16px #0002}
+.section{padding:58px 0!important}
+.section h2{color:#102f51;font-size:clamp(24px,3vw,34px);letter-spacing:-.5px;margin:0 0 22px}
+.grid{gap:20px!important}
+.card,.admin-item,.panel{border:1px solid #e1e8f0!important;border-radius:18px!important;background:#fff!important;box-shadow:0 10px 28px #0b29450a!important}
+.card{padding:24px!important}
+.feature-card{background:linear-gradient(145deg,#fff,#f5f9fe)!important;animation:none!important}
+.feature-card:hover{box-shadow:0 18px 38px #0b29451b!important}
+.feature-detail{border-radius:22px!important;border:1px solid #dce6f1!important;box-shadow:0 18px 45px #0b294514!important}
+.panel{padding:22px!important;background:#f9fbfd!important}
+.admin-shortcuts-blue{padding:22px!important;border-radius:22px!important;background:linear-gradient(125deg,#082c59,#1769b4 62%,#2b80c5)!important}
+.admin-shortcut{border-radius:16px!important;min-height:132px!important}
+.admin-shortcut strong{line-height:1.4}
+.admin-applications-panel{background:#fff!important}
+input,select,textarea{border:1px solid #d4deea!important;border-radius:11px!important;background:#fff!important;padding:13px 14px!important;color:#172b45!important;min-height:46px}
+input:focus,select:focus,textarea:focus{border-color:#287ac5!important;box-shadow:0 0 0 3px #287ac51a!important;outline:0!important}
+form{gap:14px!important}
+form button{justify-self:start}
+.tabs{gap:9px!important}
+.admin-item{padding:18px!important}
+.chat-box{border:1px solid #dce5ef!important;border-radius:16px!important;background:#f5f8fc!important}
+.student-layout{gap:22px!important}
+.student-sidebar{border-radius:18px!important;padding:14px!important;background:linear-gradient(165deg,#092443,#145b9d)!important;box-shadow:0 12px 28px #09244320}
+.student-sidebar button{border-radius:11px!important;padding:12px!important}
+.student-main .card{border-top:0!important;border-left:4px solid #e7ad38!important}
+footer{background:linear-gradient(120deg,#071d38,#0d477b)!important;padding:36px 20px!important}
+.status{padding:7px 12px!important}
+@media(max-width:850px){
+ body.public-nav-active>header,body.public-nav-active>#publicBookingCalendar,body.public-nav-active>footer{margin-left:0!important;width:100%!important}
+ .public-booking-section{padding:30px 0 38px!important}
+ .section{padding:40px 0!important}
+ .public-nav{box-shadow:12px 0 40px #06182e50!important}
+ .nav-open-btn{border-radius:0 0 12px 0!important;padding:12px 15px!important;background:#092443!important;color:white!important}
+}
+@media(max-width:600px){
+ .wrap{padding-left:15px!important;padding-right:15px!important}
+ .ani-car-hero{height:220px!important;min-height:220px!important}
+ header .bar{align-items:center!important}
+ header .row{gap:7px!important}
+ header .row button{padding:9px 11px!important;font-size:12px!important}
+ .logo{font-size:21px!important}
+ .public-booking-card{padding:14px!important;border-radius:18px!important}
+ .public-booking-card .calendar-grid{gap:4px!important}
+ .public-booking-card .calendar-day{min-height:43px!important;font-size:12px!important;padding:5px 1px!important}
+ .card,.panel{padding:17px!important}
+ .admin-shortcuts{grid-template-columns:1fr!important}
+ .student-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .student-sidebar button{font-size:12px!important}
+}
+
 </style>
 </head>
 
