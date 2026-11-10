@@ -16,4 +16,75 @@ $('authBtn').onclick=()=>{$('auth').classList.toggle('hidden');$('auth').scrollI
 $('adminBtn').onclick=()=>{$('admin').classList.toggle('hidden');$('admin').scrollIntoView({behavior:'smooth'});};
 $('signup').onsubmit=e=>{e.preventDefault();$('msg').textContent='Գրանցումը դեռ չի ուղարկվել․ նախ պետք է միացնել և կարգավորել Supabase Auth և տվյալների բազան։';};
 $('login').onsubmit=e=>{e.preventDefault();$('loginMsg').textContent='Մուտքը դեռ ակտիվացված չէ․ անհրաժեշտ է Supabase Auth կարգավորումը։';};
+  
+<div id="ani-admin" style="max-width:420px;margin:30px auto;padding:24px;border:1px solid #ddd;border-radius:14px;font-family:Arial">
+  <h2>ANI DRIVE — Ադմինի մուտք</h2>
+  <input id="admin-email" type="email" placeholder="Էլ․ փոստ" style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box">
+  <input id="admin-password" type="password" placeholder="Գաղտնաբառ" style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box">
+  <button id="admin-login" style="width:100%;padding:12px;background:#111;color:white;border:0;border-radius:8px">Մուտք գործել</button>
+  <p id="admin-message"></p>
+  <div id="admin-panel" hidden>
+    <h3>Ադմինի վահանակ</h3>
+    <p>Մուտքը հաստատված է։</p>
+    <button id="admin-logout">Դուրս գալ</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/config.js"></script>
+<script>
+(async function () {
+  const cfg = window.ANI_DRIVE_CONFIG;
+  const msg = document.getElementById('admin-message');
+  const panel = document.getElementById('admin-panel');
+
+  if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+    msg.textContent = 'Supabase-ի կարգավորումները չեն գտնվել։';
+    return;
+  }
+
+  const db = window.supabase.createClient(
+    cfg.supabaseUrl,
+    cfg.supabaseAnonKey
+  );
+
+  document.getElementById('admin-login').onclick = async () => {
+    msg.textContent = 'Ստուգում ենք մուտքը...';
+
+    const email = document.getElementById('admin-email').value.trim();
+    const password = document.getElementById('admin-password').value;
+
+    const { data, error } = await db.auth.signInWithPassword({
+      email, password
+    });
+
+    if (error) {
+      msg.textContent = 'Մուտքը չհաջողվեց։ Ստուգեք տվյալները։';
+      return;
+    }
+
+    const { data: admin, error: adminError } = await db
+      .from('admins')
+      .select('email')
+      .eq('user_id', data.user.id)
+      .maybeSingle();
+
+    if (adminError || !admin) {
+      await db.auth.signOut();
+      msg.textContent = 'Այս հաշիվը ադմինի իրավունք չունի։';
+      return;
+    }
+
+    panel.hidden = false;
+    msg.textContent = 'Բարի գալուստ, ադմին։';
+  };
+
+  document.getElementById('admin-logout').onclick = async () => {
+    await db.auth.signOut();
+    panel.hidden = true;
+    msg.textContent = 'Դուրս եք եկել համակարգից։';
+  };
+})();
+</script>
+
 </script></body></html>
