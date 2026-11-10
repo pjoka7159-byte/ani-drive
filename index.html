@@ -923,29 +923,32 @@ async function loadStudents() {
   students = data || [];
 
   // Յուրաքանչյուր հայտի համար մեկ անգամ սկսել 1 րոպեանոց ավտոարխիվացման հաշվիչը։
-  students.forEach(student => {
-    if (autoArchiveTimers.has(student.id)) return;
-    const timer = setTimeout(async () => {
-      autoArchiveTimers.delete(student.id);
-      if (!isAdmin) return;
-      const {error: archiveError} = await db
-        .from('students')
-        .update({archived_at:new Date().toISOString()})
-        .eq('id',student.id)
-        .is('archived_at',null);
-      if (archiveError) {
-        message('adminMsg','Ավտոարխիվացումը չհաջողվեց։ '+archiveError.message,true);
-        return;
-      }
-      students = students.filter(s => s.id !== student.id);
-      await loadStudents();
-      const registeredSection = $('registeredStudentsSection');
-      if (registeredSection && !registeredSection.classList.contains('hidden')) {
-        await loadRegisteredStudents();
-      }
-    },60000);
-    autoArchiveTimers.set(student.id,timer);
-  });
+  const applicationsBox = $('studentApplicationsContent');
+  if (applicationsBox && !applicationsBox.classList.contains('hidden')) {
+    students.forEach(student => {
+      if (autoArchiveTimers.has(student.id)) return;
+      const timer = setTimeout(async () => {
+        autoArchiveTimers.delete(student.id);
+        if (!isAdmin) return;
+        const {error: archiveError} = await db
+          .from('students')
+          .update({archived_at:new Date().toISOString()})
+          .eq('id',student.id)
+          .is('archived_at',null);
+        if (archiveError) {
+          message('adminMsg','Ավտոարխիվացումը չհաջողվեց։ '+archiveError.message,true);
+          return;
+        }
+        students = students.filter(s => s.id !== student.id);
+        await loadStudents();
+        const registeredSection = $('registeredStudentsSection');
+        if (registeredSection && !registeredSection.classList.contains('hidden')) {
+          await loadRegisteredStudents();
+        }
+      },60000);
+      autoArchiveTimers.set(student.id,timer);
+    });
+  }
 
   $('totalCount').textContent = students.length;
   $('pendingCount').textContent =
@@ -1270,7 +1273,7 @@ document.querySelectorAll('.filterBtn').forEach(btn=>{
   };
 });
 
-$('toggleStudentApplications').onclick=()=>{const box=$('studentApplicationsContent'),btn=$('toggleStudentApplications'),open=box.classList.toggle('hidden')===false;btn.innerHTML=open?'Փակել հայտերը <span>⌃</span>':'Բացել հայտերը <span>⌄</span>';btn.setAttribute('aria-expanded',String(open));};
+$('toggleStudentApplications').onclick=async()=>{const box=$('studentApplicationsContent'),btn=$('toggleStudentApplications'),open=box.classList.toggle('hidden')===false;btn.innerHTML=open?'Փակել հայտերը <span>⌃</span>':'Բացել հայտերը <span>⌄</span>';btn.setAttribute('aria-expanded',String(open));if(open)await loadStudents();};
 $('refreshBtn').onclick = async()=>{await loadStudents();await loadAdminBookingPanel();};
 $('openBookingAdmin').onclick=()=>{$('adminBookingSection').classList.toggle('hidden');if(!$('adminBookingSection').classList.contains('hidden'))loadAdminBookingPanel();};
 $('refreshBtn').addEventListener('click',loadAdminBookingPanel);
