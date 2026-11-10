@@ -785,6 +785,41 @@ body{min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#0b3150 0,tra
   }
 }
 
+
+/* ADMIN DASHBOARD — centered in the available screen area */
+@media(min-width:651px){
+  .fx-main>#admin{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0 auto!important;
+    padding:30px clamp(18px,3vw,48px)!important;
+  }
+  .fx-main>#admin>.wrap{
+    width:100%!important;
+    max-width:1320px!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    padding-left:0!important;
+    padding-right:0!important;
+  }
+  .fx-main>#admin>.wrap>h2{
+    text-align:center!important;
+    margin:0 auto 24px!important;
+  }
+  .fx-main>#admin .admin-shortcuts-blue,
+  .fx-main>#admin>.wrap>.panel{
+    width:100%!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+  }
+}
+@media(max-width:650px){
+  .fx-main>#admin{width:100%!important;margin:0 auto!important;padding:18px 10px!important}
+  .fx-main>#admin>.wrap{width:100%!important;max-width:100%!important;margin:0 auto!important;padding:0!important}
+  .fx-main>#admin>.wrap>h2{text-align:center!important}
+}
+
 </style>
 </head>
 
