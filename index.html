@@ -1011,6 +1011,29 @@ html,body{max-width:100%;overflow-x:hidden!important}
  }
 }
 
+
+/* COMPACT RIGHT DRAWER: page content stays full width */
+.fx-shell,.fx-shell.nav-is-open{display:block!important;position:relative!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important;gap:0!important}
+.fx-shell>.fx-main,.fx-shell.nav-is-open>.fx-main{display:block!important;position:relative!important;grid-column:auto!important;grid-row:auto!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important}
+.fx-shell>#publicNav,.fx-shell.nav-is-open>#publicNav{
+ display:flex!important;position:fixed!important;top:10px!important;right:8px!important;left:auto!important;bottom:10px!important;
+ width:clamp(190px,17vw,220px)!important;max-width:calc(100vw - 24px)!important;height:auto!important;max-height:calc(100vh - 20px)!important;min-height:0!important;
+ margin:0!important;padding:10px!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;
+ transform:translateX(calc(100% + 20px))!important;transition:transform .22s ease!important;z-index:100100!important;border-radius:15px!important;box-shadow:0 12px 38px #0009!important
+}
+.fx-shell>#publicNav.open,.fx-shell.nav-is-open>#publicNav.open{transform:translateX(0)!important}
+.fx-shell>#publicNav .public-nav-head{padding:7px 8px!important;margin-bottom:7px!important;min-height:34px!important}
+.fx-shell>#publicNav .public-nav-head strong{font-size:13px!important}
+.fx-shell>#publicNav>button{width:100%!important;min-height:31px!important;padding:7px 9px!important;margin:3px 0!important;font-size:11px!important;line-height:1.25!important;border-radius:9px!important}
+.fx-shell .fx-main .nav-open-btn{display:inline-flex!important;position:fixed!important;top:12px!important;right:12px!important;left:auto!important;bottom:auto!important;inset:auto 12px auto auto!important;z-index:100101!important;padding:8px 12px!important;min-height:34px!important;width:auto!important;max-width:170px!important;margin:0!important;font-size:12px!important;border-radius:10px!important;box-shadow:0 5px 18px #0006!important}
+@media(max-width:650px){
+ .fx-shell,.fx-shell.nav-is-open{display:block!important;width:100%!important;padding:0!important}
+ .fx-shell>.fx-main,.fx-shell.nav-is-open>.fx-main{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important}
+ .fx-shell>#publicNav,.fx-shell.nav-is-open>#publicNav{top:8px!important;right:8px!important;bottom:8px!important;width:min(215px,84vw)!important;max-width:84vw!important;max-height:calc(100vh - 16px)!important;padding:9px!important}
+ .fx-shell .fx-main .nav-open-btn{top:8px!important;right:8px!important;left:auto!important;min-height:32px!important;padding:7px 10px!important}
+ .fx-shell>#publicNav>button{font-size:11px!important;min-height:30px!important;padding:6px 8px!important}
+}
+
 </style>
 </head>
 
