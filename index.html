@@ -641,6 +641,19 @@ body{min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#0b3150 0,tra
  .fx-main .row{flex-wrap:wrap}
 }
 
+
+/* NAVIGATION POSITION — move full menu to the right side */
+@media(min-width:651px){
+ .fx-shell{grid-template-columns:minmax(0,1fr) minmax(215px,250px)!important}
+ .fx-shell>.public-nav,.fx-shell #publicNav{grid-column:2!important;grid-row:1!important}
+ .fx-main{grid-column:1!important;grid-row:1!important}
+}
+@media(max-width:650px){
+ .fx-shell{flex-direction:column!important}
+ .fx-shell>.public-nav,.fx-shell #publicNav{order:0!important}
+ .fx-main{order:1!important}
+}
+
 </style>
 </head>
 
