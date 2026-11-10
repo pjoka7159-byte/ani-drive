@@ -385,6 +385,19 @@ const $ = id => document.getElementById(id);
 
 const cfg = window.ANI_DRIVE_CONFIG;
 
+// Մուտք/գրանցում բաժինները բացել էջի հենց վերևում՝ անկախ Supabase-ի բեռնումից։
+function openTopAuthSection(id) {
+  ['auth','register'].forEach(sectionId => {
+    const section = document.getElementById(sectionId);
+    if (section) section.classList.toggle('hidden', sectionId !== id);
+  });
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+$('showAuth').type = 'button';
+$('showRegister').type = 'button';
+$('showAuth').addEventListener('click', () => openTopAuthSection('auth'));
+$('showRegister').addEventListener('click', () => openTopAuthSection('register'));
+
 if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
   $('signupMsg').textContent =
     'Supabase-ը կարգավորված չէ։ Ստուգեք config.js ֆայլը։';
@@ -429,9 +442,6 @@ function makeStatus(status) {
   span.textContent = statusText(status);
   return span;
 }
-
-$('showAuth').onclick = () => show('auth');
-$('showRegister').onclick = () => show('register');
 
 $('signup').onsubmit = async e => {
   e.preventDefault();
