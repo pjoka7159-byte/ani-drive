@@ -810,7 +810,9 @@ $('studentBookingForm').onsubmit=async e=>{
  playNotice();message('studentBookingMsg','Հայտն ուղարկվեց ադմինին։ Սպասեք հաստատմանը։');await loadStudentSlots();await loadStudentBookings();
 };
 
-let adminCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);\nlet adminBookingArchiveView=false;\nlet adminAllLessonSlots=[];
+let adminCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let adminBookingArchiveView=false;
+let adminAllLessonSlots=[];
 let adminSelectedDate='';
 function renderAdminAvailabilityCalendar(slots){
  const root=$('adminCalendar');root.replaceChildren();root.classList.add('admin-calendar');
