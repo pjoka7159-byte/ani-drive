@@ -435,6 +435,10 @@ let currentUser = null;
 let isAdmin = false;
 let students = [];
 let currentFilter = 'all';
+let adminNoticeSnapshot=null,studentNoticeSnapshot='';
+function playNotice(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const c=new AC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.setValueAtTime(.001,c.currentTime);g.gain.exponentialRampToValueAtTime(.13,c.currentTime+.04);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.38);o.start();o.stop(c.currentTime+.4);o.onended=()=>c.close();}catch(e){}}
+async function checkAdminNotices(){if(!isAdmin)return;const [b,s]=await Promise.all([db.from('lesson_bookings').select('id',{count:'exact',head:true}).eq('status','pending'),db.from('students').select('id',{count:'exact',head:true}).eq('status','pending')]);if(b.error||s.error)return;const snap=(b.count||0)+':'+(s.count||0);if(adminNoticeSnapshot!==null&&snap!==adminNoticeSnapshot)playNotice();adminNoticeSnapshot=snap;}
+async function checkStudentNotices(){if(!currentUser||isAdmin)return;const {data,error}=await db.from('lesson_bookings').select('id,status').eq('student_id',currentUser.id).order('created_at',{ascending:false}).limit(20);if(error||!data)return;const snap=data.map(x=>x.id+':'+x.status).join('|');if(studentNoticeSnapshot&&snap!==studentNoticeSnapshot)playNotice();studentNoticeSnapshot=snap;}
 
 function show(id) {
   ['auth','register','admin','studentArea'].forEach(x => {
@@ -623,10 +627,14 @@ async function loadUser() {
     await loadStudents();
     await loadContentTools();
     await loadAdminBookingPanel();
+    await checkAdminNotices();
+    if(!window.aniAdminNoticeTimer)window.aniAdminNoticeTimer=setInterval(checkAdminNotices,20000);
     show('admin');
   } else {
     $('adminBtn').classList.add('hidden');
     await loadStudent();
+    await checkStudentNotices();
+    if(!window.aniStudentNoticeTimer)window.aniStudentNoticeTimer=setInterval(checkStudentNotices,20000);
   }
 }
 
@@ -830,8 +838,9 @@ async function loadStudents() {
   $('studentsList').textContent = 'Բեռնում...';
 
   const {data,error} = await db
-    .from('students')
+     .from('students')
     .select('*')
+    .is('archived_at',null)
     .order('created_at',{ascending:false});
 
   if (error) {
