@@ -698,7 +698,7 @@ $('adminBookingForm').onsubmit=async e=>{
 async function loadStudent() {
   const {data,error} = await db
     .from('students')
-    .select('first_name,last_name,email,phone,status,gender,study_type,residence)
+    .select('first_name,last_name,email,phone,status,gender,study_type,residence,age,exam_location,registration_category')
     .eq('id',currentUser.id)
     .maybeSingle();
 
