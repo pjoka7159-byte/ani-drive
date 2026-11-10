@@ -302,6 +302,13 @@ a {color:inherit}
 </div>
 
 <div class="panel">
+<h3>💬 Աշակերտների նամակագրություն և օնլայն չատ</h3>
+<select id="adminChatStudent"><option value="">Ընտրեք աշակերտին</option></select>
+<div class="chat-box" id="adminStudentChat"></div>
+<form id="adminStudentChatForm"><input name="reply" required maxlength="2000" placeholder="Գրել պատասխան աշակերտին"><button class="blue">Ուղարկել պատասխանը</button></form>
+<p id="adminStudentChatMsg" class="message"></p>
+</div>
+<div class="panel">
 <h3>Կայքի բովանդակության կառավարում</h3>
 <p class="muted">Ավելացրեք կամ խմբագրեք կայքի տեքստային բաժինները և պատկերների հղումները։</p>
 <form id="contentForm">
@@ -641,6 +648,29 @@ async function loadStudent() {
   $('studentInfo').replaceChildren(info);
 }
 
+async function refreshAdminChatStudents(){
+ const sel=$('adminChatStudent');if(!sel)return;const old=sel.value;
+ sel.replaceChildren();const opt=document.createElement('option');opt.value='';opt.textContent='Ընտրեք աշակերտին';sel.append(opt);
+ (students||[]).forEach(st=>{const o=document.createElement('option');o.value=st.id;o.textContent=st.first_name+' '+st.last_name+' — '+st.email;sel.append(o);});
+ if(old)sel.value=old;
+ await loadAdminStudentChat();
+}
+async function loadAdminStudentChat(){
+ const id=$('adminChatStudent').value,box=$('adminStudentChat');box.replaceChildren();
+ if(!id){box.textContent='Ընտրեք աշակերտին՝ նամակագրությունը տեսնելու համար։';return;}
+ const {data,error}=await db.from('student_messages').select('*').eq('student_id',id).order('created_at');
+ if(error){box.textContent='Չատը հասանելի չէ։ Կիրառեք student_profile_chat.sql-ը։ '+error.message;return;}
+ (data||[]).forEach(r=>{const d=document.createElement('div');d.className='chat-msg'+(r.sender_id===currentUser.id?' mine':'');const p=document.createElement('div');p.textContent=r.body;const sm=document.createElement('small');sm.textContent=(r.sender_role==='admin'?'Ադմին':'Աշակերտ')+' · '+new Date(r.created_at).toLocaleString('hy-AM');d.append(p,sm);box.append(d);});
+ if(!data||!data.length)box.textContent='Հաղորդագրություններ դեռ չկան։';box.scrollTop=box.scrollHeight;
+}
+$('adminChatStudent').onchange=loadAdminStudentChat;
+$('adminStudentChatForm').onsubmit=async e=>{
+ e.preventDefault();const id=$('adminChatStudent').value;if(!id){message('adminStudentChatMsg','Նախ ընտրեք աշակերտին։',true);return;}
+ const body=e.target.elements.reply.value.trim();
+ const {error}=await db.from('student_messages').insert({student_id:id,sender_id:currentUser.id,sender_role:'admin',body});
+ if(error){message('adminStudentChatMsg','Ուղարկել չհաջողվեց։ '+error.message,true);return;}
+ e.target.reset();message('adminStudentChatMsg','Պատասխանը ուղարկվեց։');await loadAdminStudentChat();
+};
 async function loadStudents() {
   if (!isAdmin) return;
 
@@ -667,6 +697,7 @@ async function loadStudents() {
     students.filter(s=>s.status==='blocked').length;
 
   renderStudents();
+  await refreshAdminChatStudents();
 }
 
 function renderStudents() {
