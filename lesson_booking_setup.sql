@@ -17,9 +17,11 @@ create table if not exists public.lesson_bookings (
   student_email text not null,
   student_phone text not null,
   status text not null default 'pending' check (status in ('pending','approved','rejected')),
-  created_at timestamptz not null default now(),
-  unique(slot_id)
+  created_at timestamptz not null default now()
 );
+
+create unique index if not exists lesson_bookings_one_active_per_slot
+  on public.lesson_bookings(slot_id) where status in ('pending','approved');
 
 create index if not exists lesson_bookings_student_idx
   on public.lesson_bookings(student_id, created_at desc);
@@ -58,6 +60,11 @@ with check (
     where sl.id = slot_id and sl.is_available = true
   )
 );
+
+drop policy if exists "Admins create bookings" on public.lesson_bookings;
+create policy "Admins create bookings" on public.lesson_bookings
+for insert to authenticated
+with check (exists (select 1 from public.admins a where a.user_id = auth.uid()));
 
 drop policy if exists "Admins update bookings" on public.lesson_bookings;
 create policy "Admins update bookings" on public.lesson_bookings
