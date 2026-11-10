@@ -865,15 +865,16 @@ $('adminBookingForm').onsubmit=async e=>{
  if(!slot_id){message('adminBookingMsg','Նախ ընտրեք օրացույցից կանաչ ազատ ժամը։',true);return;}
  let s=null;
  if(sid){const found=await db.from('students').select('*').eq('id',sid).maybeSingle();if(found.error){message('adminBookingMsg',found.error.message,true);return;}s=found.data;}
- const name=s?(s.first_name+' '+s.last_name):String(f.get('manualName')||'').trim();
  const phone=s?(s.phone||''):String(f.get('manualPhone')||'').trim();
- if(!name||!phone){message('adminBookingMsg','Ընտրեք գրանցված աշակերտին կամ լրացրեք անունն ու հեռախոսահամարը։',true);return;}
+ if(!phone){message('adminBookingMsg','Լրացրեք հեռախոսահամարը կամ ընտրեք գտնված աշակերտին։',true);return;}
  if(!s){
   const matches=await findRegisteredStudentsByPhone(phone);
   const exact=matches.find(x=>normalizePhoneSearch(x.phone)===normalizePhoneSearch(phone));
   if(exact)s=exact;
  }
- const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:s?s.id:null,student_name:s?(s.first_name+' '+s.last_name):name,student_email:s?.email||'',student_phone:s?.phone||phone,status:'approved'});
+ const name=s?(s.first_name+' '+s.last_name):String(f.get('manualName')||'').trim();
+ if(!name){message('adminBookingMsg','Այս հեռախոսահամարով գրանցված աշակերտ չի գտնվել։ Լրացրեք անունն ու ազգանունը։',true);return;}
+ const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:s?s.id:null,student_name:name,student_email:s?.email||'',student_phone:s?.phone||phone,status:'approved'});
  if(error){message('adminBookingMsg','Ամրագրումը չհաջողվեց։ '+error.message,true);return;}
  message('adminBookingMsg',s?'Ամրագրումը հաստատվեց և կերևա աշակերտի անձնական էջում։':'Ամրագրումը հաստատվեց։ Նշված հեռախոսահամարը գրանցված հաշվի հետ չհամընկավ, ուստի անձնական էջում չի ցուցադրվի։');
  e.target.elements.manualName.value='';e.target.elements.manualPhone.value='';e.target.elements.student.value='';e.target.elements.slot.value='';$('bookingPhoneSearch').value='';$('bookingStudentSearchInfo').textContent='Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։';
