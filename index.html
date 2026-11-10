@@ -698,6 +698,7 @@ async function loadContentTools(){
  await loadMediaFiles();
  await loadAdminAccounts();
  await loadSiteSwitches();
+ await loadPublicAccessSettings();
  const box=$('contentList'); box.textContent='Բեռնում...';
  const {data,error}=await db.from('site_content').select('*').order('content_key');
  if(error){box.textContent='Բովանդակության աղյուսակը հասանելի չէ։ Կիրառեք admin_setup.sql-ը։ '+error.message;return;}
@@ -832,6 +833,17 @@ async function setSwitch(key,value,label){
  if(error){message('adminMsg',error.message,true);return;}
  await loadSiteSwitches();
 }
+async function loadPublicAccessSettings(){
+ const reg=await readSwitch('registration_enabled',true);
+ const login=await readSwitch('login_enabled',true);
+ $('showRegister').classList.toggle('hidden',!reg);
+ $('showAuth').classList.toggle('hidden',!login);
+ const regSection=$('register'),authSection=$('auth');
+ if(!reg)regSection.classList.add('hidden');
+ if(!login)authSection.classList.add('hidden');
+ const cta=document.querySelector('.hero a[href="#register"]');
+ if(cta)cta.classList.toggle('hidden',!reg);
+}
 async function loadSiteSwitches(){
  const reg=await readSwitch('registration_enabled',true),login=await readSwitch('login_enabled',true);
  const rb=$('toggleRegistration'),lb=$('toggleLogin');
@@ -874,6 +886,7 @@ db.auth.onAuthStateChange((event,session)=>{
 
 await loadPublicBlocks();
 await loadPublicMedia();
+await loadPublicAccessSettings();
 const {data:{session}} = await db.auth.getSession();
 if (session) await loadUser();
 
