@@ -817,10 +817,10 @@ async function loadAdminBookingPanel(){
  const studentSel=$('adminBookingForm').elements.student,old=studentSel.value;studentSel.replaceChildren(new Option('Գրանցված աշակերտ (ըստ ցանկության)',''));
  (students||[]).forEach(s=>studentSel.add(new Option(s.first_name+' '+s.last_name+' — '+s.email,s.id)));
  if(old)studentSel.value=old;
- const slotSel=$('adminBookingForm').elements.slot,oldSlot=slotSel.value;slotSel.replaceChildren(new Option('Ընտրեք ազատ ժամ',''));
+ const slotSel=$('adminBookingForm').elements.slot,oldSlot=slotSel.value;
  const {data:slots,error:slotsError}=await db.from('lesson_slots').select('id,slot_date,slot_time,is_available').gte('slot_date',new Date().toISOString().slice(0,10)).order('slot_date').order('slot_time');
  if(slotsError){message('adminBookingMsg','Օրացույցը բեռնել չհաջողվեց։ '+slotsError.message,true);return;}
- (slots||[]).filter(x=>x.is_available).forEach(s=>slotSel.add(new Option(slotLabel(s),s.id)));if(oldSlot)slotSel.value=oldSlot;
+ slotSel.value=(slots||[]).some(x=>x.id===oldSlot&&x.is_available)?oldSlot:'';
  renderAdminAvailabilityCalendar(slots||[]);
 }
 async function changeBookingStatus(id,status){
