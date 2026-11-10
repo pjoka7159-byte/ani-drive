@@ -211,6 +211,17 @@ a {color:inherit}
 .admin-time-list button.available-time{background:#dcfce7;color:#166534;border-color:#86d6a5}
 .admin-time-list button.available-time.selected{background:#1769d2;color:white}
 @media(max-width:700px){.admin-shortcuts{grid-template-columns:1fr}.admin-shortcut{min-height:90px}}
+
+/* ANI DRIVE public navigation */
+.public-nav{position:fixed;z-index:1000;left:12px;top:88px;bottom:12px;width:245px;overflow:auto;padding:12px;border-radius:18px;background:linear-gradient(160deg,#071a36,#174c86);box-shadow:0 14px 35px #071a3635;display:flex;flex-direction:column;gap:6px}
+.public-nav-head{display:flex;align-items:center;justify-content:space-between;color:white;padding:8px 5px 12px;border-bottom:1px solid #ffffff35;margin-bottom:5px}
+.public-nav-head button{padding:5px 10px;background:#ffffff20;color:white;font-size:20px}
+.public-nav>button:not(.public-nav-head button){text-align:left;background:transparent;color:white;border:1px solid #ffffff25;padding:11px 10px;border-radius:10px;font-size:13px;line-height:1.4}
+.public-nav>button.active,.public-nav>button:hover{background:linear-gradient(90deg,#f4b942,#ffe6a8);color:#14233b}
+.nav-open-btn{display:none;position:fixed;z-index:999;left:12px;top:92px;background:#071a36;color:white}
+body.public-nav-active>.hero,body.public-nav-active>#courseSection,body.public-nav-active>#examOffices,body.public-nav-active>#weatherSection,body.public-nav-active>#publishedBlocks,body.public-nav-active>#publishedMedia,body.public-nav-active>#register,body.public-nav-active>#auth,body.public-nav-active>.public-extra-page{margin-left:270px;width:calc(100% - 270px)}
+@media(max-width:850px){.public-nav{top:0;bottom:0;left:0;width:min(310px,86vw);border-radius:0 18px 18px 0;transform:translateX(-105%);transition:transform .25s}.public-nav.open{transform:translateX(0)}.nav-open-btn{display:block}body.public-nav-active>.hero,body.public-nav-active>#courseSection,body.public-nav-active>#examOffices,body.public-nav-active>#weatherSection,body.public-nav-active>#publishedBlocks,body.public-nav-active>#publishedMedia,body.public-nav-active>#register,body.public-nav-active>#auth,body.public-nav-active>.public-extra-page{margin-left:0;width:100%}}
+body.account-view .public-nav,body.account-view .nav-open-btn{display:none!important}
 </style>
 </head>
 
@@ -218,7 +229,7 @@ a {color:inherit}
 
 <header>
 <div class="wrap bar">
-  <div class="logo">ANI <span>DRIVE</span></div>
+  <div class="logo" id="aniHomeLogo" role="button" tabindex="0" title="Գլխավոր էջ" style="cursor:pointer">ANI <span>DRIVE</span></div>
   <div class="row">
     <a href="tel:+37441334477" style="color:white">041 334477</a>
     <button class="outline" id="showAuth">Մուտք</button>
@@ -228,6 +239,25 @@ a {color:inherit}
   </div>
 </div>
 </header>
+<aside class="public-nav" id="publicNav">
+<div class="public-nav-head"><strong>🚘 ANI DRIVE</strong><button type="button" id="closePublicNav">×</button></div>
+<button type="button" data-page="home" class="active">🏠 Գլխավոր էջ</button>
+<button type="button" data-page="registration">📝 Օնլայն գրանցում — ավտովարման դասեր</button>
+<button type="button" data-page="about">ℹ️ Մեր մասին</button>
+<button type="button" data-page="ani">🚘 Անի Դրայվի մասին</button>
+<button type="button" data-page="instructors">👨‍🏫 Հրահանգիչներ</button>
+<button type="button" data-page="licenses">📜 Լիցենզիաներ</button>
+<button type="button" data-page="reviews">⭐ Կարծիքներ</button>
+<button type="button" data-page="grounds">🅿️ Քննական տարածքներ</button>
+<button type="button" data-page="routes">🛣️ Քննական երթուղիներ</button>
+<button type="button" data-page="offices">🏢 ՀՔԲ — հասցեներ</button>
+<button type="button" data-page="documents">📄 Քննության համար անհրաժեշտ փաստաթղթեր</button>
+<button type="button" data-page="links">🔗 Կարևոր կայքերի հղումներ</button>
+<button type="button" data-page="content">📚 Այլ նյութեր</button>
+<button type="button" data-page="media">🖼️ Նկարներ և տեսանյութեր</button>
+</aside>
+<button type="button" class="nav-open-btn" id="openPublicNav">☰ Բաժիններ</button>
+
 
 <!-- Գրանցում -->
 <section class="section hidden" id="register" style="background:var(--bg)">
@@ -308,6 +338,15 @@ a {color:inherit}
 <section class="section hidden" id="publishedBlocks"><div class="wrap" id="publishedBlocksInner"></div></section>
 <section class="section hidden" id="publishedMedia"><div class="wrap"><h2>Մեր լուսանկարներն ու տեսանյութերը</h2><div class="grid" id="publishedMediaGrid"></div></div></section>
 
+<section class="section public-extra-page hidden" id="aboutPage"><div class="wrap"><div class="feature-detail"><h2>ℹ️ Մեր մասին</h2><p>ANI DRIVE-ը ավտոդպրոց է, որի նպատակն է օգնել սովորողներին ձեռք բերել ճանապարհային երթևեկության կանոնների գիտելիքներ և անվտանգ վարելու հմտություններ։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="aniPage"><div class="wrap"><div class="feature-detail"><h2>🚘 ԱՆԻ ԴՐԱՅՎԻ ՄԱՍԻՆ</h2><p>ANI DRIVE — քո վստահ և անվտանգ ճանապարհի մեկնարկը։ Այստեղ կարող եք ծանոթանալ դասընթացներին, գրանցվել ավտովարման դասերի և ստանալ քննություններին պատրաստվելու համար անհրաժեշտ տեղեկություններ։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="instructorsPage"><div class="wrap"><div class="feature-detail"><h2>👨‍🏫 ՀՐԱՀԱՆԳԻՉՆԵՐ</h2><p>Հրահանգիչների անունները, փորձը և կապի տվյալները կհրապարակվեն այս բաժնում՝ ավտոդպրոցի կողմից հաստատումից հետո։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="licensesPage"><div class="wrap"><div class="feature-detail"><h2>📜 ԼԻՑԵՆԶԻԱՆԵՐ</h2><p>Ավտոդպրոցի լիցենզիաների և թույլտվությունների վերաբերյալ հաստատված փաստաթղթերը կցուցադրվեն այստեղ։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="reviewsPage"><div class="wrap"><div class="feature-detail"><h2>⭐ ԿԱՐԾԻՔՆԵՐ</h2><p>Աշակերտների իրական կարծիքները կհրապարակվեն այս բաժնում։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="groundsPage"><div class="wrap"><div class="feature-detail"><h2>🅿️ ՔՆՆԱԿԱՆ ՏԱՐԱԾՔՆԵՐ</h2><p>Քննական տարածքների նկարները, հասցեները և օգտակար տեղեկությունները կտեղադրվեն այստեղ։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="routesPage"><div class="wrap"><div class="feature-detail"><h2>🛣️ ՔՆՆԱԿԱՆ ԵՐԹՈՒՂԻՆԵՐ</h2><p>Քննական երթուղիների նկարագրությունները և ուսումնական նյութերը կցուցադրվեն այս բաժնում։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="documentsPage"><div class="wrap"><div class="feature-detail"><h2>📄 ՔՆՆՈՒԹՅԱՆ ՀԱՄԱՐ ԱՆՀՐԱԺԵՇՏ ՓԱՍՏԱԹՂԹԵՐ</h2><p>Անձը հաստատող փաստաթուղթ՝ անձնագիր կամ ID քարտ։ Բժշկական տեղեկանք և վճարի անդորրագիր՝ եթե պահանջվում են տվյալ քննության կարգով։ Վերջնական ցանկը ճշտեք պաշտոնական աղբյուրներից։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="linksPage"><div class="wrap"><div class="feature-detail"><h2>🔗 ԿԱՐԵՎՈՐ ԿԱՅՔԵՐԻ ՀՂՈՒՄՆԵՐ</h2><a class="card" style="display:block;max-width:420px" href="https://roadpolice.am/" target="_blank" rel="noopener noreferrer"><h3>🚔 ROADPOLICE.AM</h3><p>Ճանապարհային ոստիկանության պաշտոնական կայք</p><strong>Բացել կայքը ↗</strong></a><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
 <!-- Աշակերտի էջ -->
 <section class="section hidden" id="studentArea"><div class="wrap">
 <h2>🚘 Աշակերտի անձնական վահանակ</h2><div class="student-layout">
@@ -1368,11 +1407,24 @@ document.querySelectorAll('#courseSection .grid .card').forEach((card,index)=>{
   detail.append(back);card.replaceChildren(detail);
  });
 });
+
+function initPublicNavigation(){
+ const nav=$('publicNav');if(!nav)return;
+ const pages={home:['hero','courseSection','weatherSection'],registration:['register'],about:['aboutPage'],ani:['aniPage'],instructors:['instructorsPage'],licenses:['licensesPage'],reviews:['reviewsPage'],grounds:['groundsPage'],routes:['routesPage'],offices:['examOffices'],documents:['documentsPage'],links:['linksPage'],content:['publishedBlocks'],media:['publishedMedia']};
+ const all=['hero','courseSection','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
+ function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+ nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
+ $('openPublicNav').onclick=()=>nav.classList.add('open');$('closePublicNav').onclick=()=>nav.classList.remove('open');
+ $('aniHomeLogo').onclick=()=>go('home');$('aniHomeLogo').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go('home');}};
+ document.querySelectorAll('.public-back-home').forEach(b=>b.addEventListener('click',()=>go('home')));go('home');
+}
+
 await loadPublicBlocks();
 await loadPublicMedia();
 loadExamOffices();
 loadWeather();
 await loadPublicAccessSettings();
+initPublicNavigation();
 const {data:{session}} = await db.auth.getSession();
 if (session) await loadUser();
 
