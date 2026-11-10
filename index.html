@@ -267,6 +267,109 @@ body.account-view .public-nav,body.account-view .nav-open-btn{display:none!impor
 <button type="button" class="nav-open-btn" id="openPublicNav">☰ Բաժիններ</button>
 
 
+<!-- Ադմին -->
+<section class="section hidden" id="admin">
+<div class="wrap">
+<h2>ANI DRIVE — Ադմինիստրատորի վահանակ</h2>
+<div class="admin-shortcuts admin-shortcuts-blue">
+  <button type="button" class="admin-shortcut existing-bookings-shortcut" id="openExistingBookings"><span>📋</span><strong>Գրանցված դասաժամերի ցանկ</strong><small>Դիտել և կառավարել ամրագրումները</small></button>
+  <button type="button" class="admin-shortcut new-booking-shortcut" id="openBookingAdmin"><span>➕</span><strong>Նոր դասաժամի գրանցում</strong><small>Ընտրել օրն ու ազատ ժամը</small></button>
+  <button type="button" class="admin-shortcut students-shortcut" id="openRegisteredStudents"><span>👥</span><strong>Աշակերտների ցանկ և արխիվ</strong><small>Գրանցված աշակերտների տվյալներ</small></button>
+</div>
+<div class="panel hidden" id="adminExistingBookingsPanel"><div class="row"><h3 style="margin-right:auto">📋 Գրանցված դասաժամերի ցանկ</h3><button type="button" class="gray" id="refreshExistingBookings">↻ Թարմացնել</button></div>
+<div class="panel hidden" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
+<h4>👤 Աշակերտի տվյալներ</h4><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p>
+<h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
+<h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p></div>
+<div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
+<div class="booking-archive-tabs"><button type="button" class="blue" id="showActiveBookings">Ակտիվ դասաժամեր</button><button type="button" class="gray" id="showArchivedBookings">📦 Արխիվ</button></div><div id="adminBookings">Բեռնում...</div></div>
+
+<div class="panel admin-applications-panel">
+<div class="row">
+  <h3 style="margin-right:auto;margin-bottom:4px">🚘 Աշակերտների հայտեր</h3>
+  <button class="gray admin-refresh" id="refreshBtn" title="Թարմացնել հայտերը">↻</button>
+  <button type="button" class="blue admin-compact-toggle" id="toggleStudentApplications" aria-expanded="false">Բացել հայտերը <span>⌄</span></button>
+</div>
+<p class="muted admin-compact-summary">⏱️ Հայտերը 1 րոպե անց ավտոմատ տեղափոխվում են արխիվ։ Ընդամենը՝ <strong id="totalCount">0</strong> · Սպասման մեջ՝ <strong id="pendingCount">0</strong> · Հաստատված՝ <strong id="approvedCount">0</strong> · Արգելափակված՝ <strong id="blockedCount">0</strong></p>
+<div id="studentApplicationsContent" class="hidden">
+<div class="grid">
+</div>
+
+<div class="tabs">
+  <button class="dark filterBtn" data-filter="all">Բոլորը</button>
+  <button class="filterBtn" data-filter="pending">Նոր հայտեր</button>
+  <button class="filterBtn" data-filter="approved">Հաստատված</button>
+  <button class="filterBtn" data-filter="rejected">Մերժված</button>
+  <button class="filterBtn" data-filter="blocked">Արգելափակված</button>
+</div>
+
+<div id="studentsList">
+  <p class="muted">Բեռնում...</p>
+</div>
+<p id="adminMsg" class="message"></p>
+</div>
+</div>
+
+<div class="panel">
+<h3>💬 Աշակերտների նամակագրություն և օնլայն չատ</h3>
+<input id="adminChatPhoneSearch" type="search" inputmode="tel" placeholder="🔎 Արագ որոնում՝ աշակերտի հեռախոսահամարով" autocomplete="off">
+<p id="adminChatSearchInfo" class="muted">Մուտքագրեք հեռախոսահամարը՝ աշակերտին արագ գտնելու համար։</p>
+<select id="adminChatStudent"><option value="">Ընտրեք աշակերտին</option></select>
+<div class="chat-box" id="adminStudentChat"></div>
+<form id="adminStudentChatForm"><input name="reply" required maxlength="2000" placeholder="Գրել պատասխան աշակերտին"><button class="blue">Ուղարկել պատասխանը</button></form>
+<p id="adminStudentChatMsg" class="message"></p>
+</div>
+<div class="panel">
+<h3>Կայքի բովանդակության կառավարում</h3>
+<p class="muted">Ավելացրեք կամ խմբագրեք կայքի տեքստային բաժինները և պատկերների հղումները։</p>
+<form id="contentForm">
+<input name="contentKey" required placeholder="Բաժնի բանալի (օր. hero_title)">
+<input name="contentLabel" required placeholder="Բաժնի անվանումը">
+<select name="contentType"><option value="text">Տեքստ</option><option value="image">Նկարի հղում</option><option value="video">Տեսանյութի հղում</option><option value="link">Արտաքին հղում</option></select>
+<input name="contentValue" placeholder="Տեքստ կամ URL (ըստ ցանկության)">
+<label><input type="checkbox" name="isPublished" checked style="width:auto"> Հրապարակված</label>
+<button class="blue">Պահպանել բաժինը</button>
+</form>
+<div id="contentList"></div>
+</div>
+<div class="panel">
+<h3>Նկարների և տեսանյութերի վերբեռնում</h3>
+<p class="muted">Ընտրեք առավելագույնը 20 նկար կամ տեսանյութ։ Ֆայլերը կպահվեն Supabase Storage-ում։</p>
+<form id="mediaForm">
+<input type="file" name="mediaFiles" accept="image/*,video/*" multiple required>
+<input name="mediaTitle" placeholder="Նկարների/տեսանյութերի ընդհանուր անվանումը">
+<button class="blue">Վերբեռնել ընտրված ֆայլերը</button>
+</form>
+<div id="mediaList"></div>
+<p id="mediaMsg" class="message"></p>
+</div>
+<div class="panel">
+<h3>Գրանցման և մուտքի կառավարում</h3>
+<p class="muted">Միացնել կամ անջատել կայքի գրանցման և մուտքի բաժինները։</p>
+<div class="row">
+<button id="toggleRegistration" class="gray">Գրանցման վիճակ՝ բեռնում...</button>
+<button id="toggleLogin" class="gray">Մուտքի վիճակ՝ բեռնում...</button>
+</div>
+<p class="muted">Կարգավորումները պահպանվում են կայքի բովանդակության բաժնում։</p>
+</div>
+<div class="panel">
+<h3>Ադմինների ցանկ</h3>
+<p class="muted">Երկու հաստատված ադմինների հաշիվները կառավարվում են Supabase Auth-ից և admins աղյուսակից։</p>
+<div id="adminsList">Բեռնում...</div>
+</div>
+<div class="panel">
+<h3>Հաղորդագրություններ աշակերտներին</h3>
+<form id="messageForm">
+<input name="messageTitle" required placeholder="Վերնագիր">
+<input name="messageBody" required placeholder="Հաղորդագրության տեքստը">
+<button class="blue">Ավելացնել հաղորդագրություն</button>
+</form>
+<div id="messageList"></div>
+<p class="muted">Էլեկտրոնային նամակների ավտոմատ ուղարկումը պահանջում է առանձին անվտանգ սերվերային ֆունկցիա։</p>
+</div>
+</div>
+</section>
+
 <!-- Գրանցում -->
 <section class="section hidden" id="register" style="background:var(--bg)">
 <div class="wrap">
@@ -370,107 +473,7 @@ body.account-view .public-nav,body.account-view .nav-open-btn{display:none!impor
 <div class="card student-pane hidden" id="pane-contact"><h3>☎️ Կապ ադմինի հետ</h3><form id="studentContactForm"><input name="contactTitle" required placeholder="Թեմա"><input name="contactBody" required placeholder="Հաղորդագրություն"><button class="blue">Ուղարկել ադմինին</button></form><p id="studentContactMsg" class="message"></p></div>
 </div></div></div></section>
 
-<!-- Ադմին -->
-<section class="section hidden" id="admin">
-<div class="wrap">
-<h2>ANI DRIVE — Ադմինիստրատորի վահանակ</h2>
-<div class="admin-shortcuts admin-shortcuts-blue">
-  <button type="button" class="admin-shortcut new-booking-shortcut" id="openBookingAdmin"><span>➕</span><strong>Նոր դասաժամի գրանցում</strong><small>Ընտրել օրն ու ազատ ժամը</small></button>
-  <button type="button" class="admin-shortcut existing-bookings-shortcut" id="openExistingBookings"><span>📋</span><strong>Գրանցված դասաժամերի ցանկ</strong><small>Դիտել և կառավարել ամրագրումները</small></button>
-  <button type="button" class="admin-shortcut students-shortcut" id="openRegisteredStudents"><span>👥</span><strong>Աշակերտների ցանկ և արխիվ</strong><small>Գրանցված աշակերտների տվյալներ</small></button>
-</div>
-<div class="panel hidden" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
-<h4>👤 Աշակերտի տվյալներ</h4><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p>
-<h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
-<h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p></div>
-<div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
-<div class="panel hidden" id="adminExistingBookingsPanel"><div class="row"><h3 style="margin-right:auto">📋 Գրանցված դասաժամերի ցանկ</h3><button type="button" class="gray" id="refreshExistingBookings">↻ Թարմացնել</button></div><div class="booking-archive-tabs"><button type="button" class="blue" id="showActiveBookings">Ակտիվ դասաժամեր</button><button type="button" class="gray" id="showArchivedBookings">📦 Արխիվ</button></div><div id="adminBookings">Բեռնում...</div></div>
 
-<div class="panel admin-applications-panel">
-<div class="row">
-  <h3 style="margin-right:auto;margin-bottom:4px">🚘 Աշակերտների հայտեր</h3>
-  <button class="gray admin-refresh" id="refreshBtn" title="Թարմացնել հայտերը">↻</button>
-  <button type="button" class="blue admin-compact-toggle" id="toggleStudentApplications" aria-expanded="false">Բացել հայտերը <span>⌄</span></button>
-</div>
-<p class="muted admin-compact-summary">⏱️ Հայտերը 1 րոպե անց ավտոմատ տեղափոխվում են արխիվ։ Ընդամենը՝ <strong id="totalCount">0</strong> · Սպասման մեջ՝ <strong id="pendingCount">0</strong> · Հաստատված՝ <strong id="approvedCount">0</strong> · Արգելափակված՝ <strong id="blockedCount">0</strong></p>
-<div id="studentApplicationsContent" class="hidden">
-<div class="grid">
-</div>
-
-<div class="tabs">
-  <button class="dark filterBtn" data-filter="all">Բոլորը</button>
-  <button class="filterBtn" data-filter="pending">Նոր հայտեր</button>
-  <button class="filterBtn" data-filter="approved">Հաստատված</button>
-  <button class="filterBtn" data-filter="rejected">Մերժված</button>
-  <button class="filterBtn" data-filter="blocked">Արգելափակված</button>
-</div>
-
-<div id="studentsList">
-  <p class="muted">Բեռնում...</p>
-</div>
-<p id="adminMsg" class="message"></p>
-</div>
-</div>
-
-<div class="panel">
-<h3>💬 Աշակերտների նամակագրություն և օնլայն չատ</h3>
-<input id="adminChatPhoneSearch" type="search" inputmode="tel" placeholder="🔎 Արագ որոնում՝ աշակերտի հեռախոսահամարով" autocomplete="off">
-<p id="adminChatSearchInfo" class="muted">Մուտքագրեք հեռախոսահամարը՝ աշակերտին արագ գտնելու համար։</p>
-<select id="adminChatStudent"><option value="">Ընտրեք աշակերտին</option></select>
-<div class="chat-box" id="adminStudentChat"></div>
-<form id="adminStudentChatForm"><input name="reply" required maxlength="2000" placeholder="Գրել պատասխան աշակերտին"><button class="blue">Ուղարկել պատասխանը</button></form>
-<p id="adminStudentChatMsg" class="message"></p>
-</div>
-<div class="panel">
-<h3>Կայքի բովանդակության կառավարում</h3>
-<p class="muted">Ավելացրեք կամ խմբագրեք կայքի տեքստային բաժինները և պատկերների հղումները։</p>
-<form id="contentForm">
-<input name="contentKey" required placeholder="Բաժնի բանալի (օր. hero_title)">
-<input name="contentLabel" required placeholder="Բաժնի անվանումը">
-<select name="contentType"><option value="text">Տեքստ</option><option value="image">Նկարի հղում</option><option value="video">Տեսանյութի հղում</option><option value="link">Արտաքին հղում</option></select>
-<input name="contentValue" placeholder="Տեքստ կամ URL (ըստ ցանկության)">
-<label><input type="checkbox" name="isPublished" checked style="width:auto"> Հրապարակված</label>
-<button class="blue">Պահպանել բաժինը</button>
-</form>
-<div id="contentList"></div>
-</div>
-<div class="panel">
-<h3>Նկարների և տեսանյութերի վերբեռնում</h3>
-<p class="muted">Ընտրեք առավելագույնը 20 նկար կամ տեսանյութ։ Ֆայլերը կպահվեն Supabase Storage-ում։</p>
-<form id="mediaForm">
-<input type="file" name="mediaFiles" accept="image/*,video/*" multiple required>
-<input name="mediaTitle" placeholder="Նկարների/տեսանյութերի ընդհանուր անվանումը">
-<button class="blue">Վերբեռնել ընտրված ֆայլերը</button>
-</form>
-<div id="mediaList"></div>
-<p id="mediaMsg" class="message"></p>
-</div>
-<div class="panel">
-<h3>Գրանցման և մուտքի կառավարում</h3>
-<p class="muted">Միացնել կամ անջատել կայքի գրանցման և մուտքի բաժինները։</p>
-<div class="row">
-<button id="toggleRegistration" class="gray">Գրանցման վիճակ՝ բեռնում...</button>
-<button id="toggleLogin" class="gray">Մուտքի վիճակ՝ բեռնում...</button>
-</div>
-<p class="muted">Կարգավորումները պահպանվում են կայքի բովանդակության բաժնում։</p>
-</div>
-<div class="panel">
-<h3>Ադմինների ցանկ</h3>
-<p class="muted">Երկու հաստատված ադմինների հաշիվները կառավարվում են Supabase Auth-ից և admins աղյուսակից։</p>
-<div id="adminsList">Բեռնում...</div>
-</div>
-<div class="panel">
-<h3>Հաղորդագրություններ աշակերտներին</h3>
-<form id="messageForm">
-<input name="messageTitle" required placeholder="Վերնագիր">
-<input name="messageBody" required placeholder="Հաղորդագրության տեքստը">
-<button class="blue">Ավելացնել հաղորդագրություն</button>
-</form>
-<div id="messageList"></div>
-<p class="muted">Էլեկտրոնային նամակների ավտոմատ ուղարկումը պահանջում է առանձին անվտանգ սերվերային ֆունկցիա։</p>
-</div>
-</div>
-</section>
 
 <footer>
 ANI DRIVE • Երևան •
