@@ -1450,7 +1450,7 @@ async function runLessonAutoArchive(){
   if(b.status==='cancelled'&&b.cancelled_at)archive=now-new Date(b.cancelled_at).getTime()>=120*60*60*1000;
   if(['approved','pending'].includes(b.status)&&b.lesson_slots){
    const starts=new Date(b.lesson_slots.slot_date+'T'+String(b.lesson_slots.slot_time).slice(0,8));
-   if(!Number.isNaN(starts.getTime())&&starts.getTime()<now)archive=true;
+   if(!Number.isNaN(starts.getTime())&&starts.getTime()+60*60000<now)archive=true;
   }
   if(archive)await db.from('lesson_bookings').update({archived_at:new Date().toISOString()}).eq('id',b.id);
  }
