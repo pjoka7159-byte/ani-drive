@@ -329,6 +329,8 @@ a {color:inherit}
 </div>
 <p id="adminMsg" class="message"></p>
 </div>
+<button type="button" class="blue" id="openRegisteredStudents" style="margin:12px 0">👥 Բացել գրանցված անձանց ցանկը և արխիվը</button>
+<div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
 
 <div class="panel"><h3>📅 Դասաժամերի կառավարում</h3><p class="muted">Ստեղծեք ազատ օրերն ու ժամերը, հաստատեք կամ մերժեք ամրագրումները։ Զբաղված ժամերը ինքնաշխատ փակվում են աշակերտների օրացույցից։</p><div id="adminCalendar" class="calendar-shell" style="margin-bottom:14px">Օրացույցի ազատ ժամերը կցուցադրվեն այստեղ։</div><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p><h4>Ամրագրումների հայտեր</h4><div id="adminBookings">Բեռնում...</div><h4>Ադմինի կողմից աշակերտի ամրագրում</h4><form id="adminBookingForm"><select name="student" required><option value="">Ընտրեք աշակերտին</option></select><select name="slot" required><option value="">Ընտրեք ազատ ժամ</option></select><button class="good">Ամրագրել աշակերտի համար</button></form><p id="adminBookingMsg" class="message"></p></div>
 <div class="panel">
@@ -846,6 +848,19 @@ async function loadStudents() {
   await refreshAdminChatStudents();
 }
 
+
+let registeredListMode='active';
+async function loadRegisteredStudents(){
+ if(!isAdmin)return;const box=$('registeredStudentsList');box.textContent='Բեռնում...';
+ const {data,error}=await db.from('students').select('*').order('created_at',{ascending:false});
+ if(error){box.textContent='Չհաջողվեց բեռնել ցանկը։ '+error.message;return;}
+ const rows=(data||[]).filter(x=>registeredListMode==='archived'?!!x.archived_at:!x.archived_at);box.replaceChildren();
+ if(!rows.length){box.textContent=registeredListMode==='archived'?'Արխիվը դատարկ է։':'Գրանցված անձինք դեռ չկան։';return;}
+ rows.forEach(st=>{const item=document.createElement('div');item.className='admin-item';const h=document.createElement('strong');h.textContent='👤 '+st.first_name+' '+st.last_name;const p=document.createElement('p');p.textContent='☎️ '+(st.phone||'—')+' · '+(st.email||'—');const d=document.createElement('p');d.textContent='Տարիք՝ '+(st.age||'—')+' · Քննական բաժին՝ '+(st.exam_location||'—');const b=document.createElement('button');b.className=registeredListMode==='archived'?'good':'gray';b.textContent=registeredListMode==='archived'?'Վերականգնել':'Արխիվացնել';b.onclick=async()=>{if(!confirm('Շարունակե՞լ։'))return;const {error}=await db.from('students').update({archived_at:registeredListMode==='archived'?null:new Date().toISOString()}).eq('id',st.id);if(error){message('adminMsg',error.message,true);return;}loadRegisteredStudents();};item.append(h,p,d,b);box.append(item);});
+}
+$('openRegisteredStudents').onclick=()=>{$('registeredStudentsSection').classList.toggle('hidden');if(!$('registeredStudentsSection').classList.contains('hidden'))loadRegisteredStudents();};
+$('showActiveStudents').onclick=()=>{registeredListMode='active';loadRegisteredStudents();};
+$('showArchivedStudents').onclick=()=>{registeredListMode='archived';loadRegisteredStudents();};
 function renderStudents() {
   const list = $('studentsList');
   list.replaceChildren();
