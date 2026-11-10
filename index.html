@@ -802,7 +802,7 @@ async function changeStudentBookingTime(id,slotId){
 }
 async function cancelBooking(id,role){if(!confirm('Չեղարկե՞լ այս դասաժամը։'))return;const {error}=await db.from('lesson_bookings').delete().eq('id',id);if(error){message(role==='admin'?'slotMsg':'studentBookingMsg','Չեղարկել չհաջողվեց։ '+error.message,true);return;}if(role==='admin')await loadAdminBookingPanel();else{await loadStudentSlots();await loadStudentBookings();}}
 $('studentBookingForm').onsubmit=async e=>{
- e.preventDefault();const slot_id=e.target.elements.slot.value;if(!slot_id){message('studentBookingMsg','Նախ ընտրեք ազատ օրը և ժամը։',true);return;}
+ e.preventDefault();const slot_id=e.target.elements.slot.value;if(!slot_id){message('studentBookingMsg','Նախ ընտրեք ազատ օրը և ժամը։',true);return;}const chosen=studentAvailableSlots.find(x=>x.id===slot_id);if(!chosen||!chosen.is_available){message('studentBookingMsg','Այս ժամը զբաղված է։ Նոր ամրագրումը հնարավոր է միայն կանաչ՝ ազատ ժամի համար։ Փոփոխության հայտ ուղարկեք արդեն գրանցված դասաժամի կողքի ընտրացանկից։',true);return;}
  const {data:s}=await db.from('students').select('first_name,last_name,email,phone').eq('id',currentUser.id).maybeSingle();
  if(!s){message('studentBookingMsg','Աշակերտի տվյալները չգտնվեցին։',true);return;}
  const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:currentUser.id,student_name:s.first_name+' '+s.last_name,student_email:s.email,student_phone:s.phone,status:'pending'});
