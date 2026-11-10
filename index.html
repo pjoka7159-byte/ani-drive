@@ -849,6 +849,44 @@ html,body{max-width:100%;overflow-x:hidden!important}
   scroll-margin-top:18px!important;
 }
 
+
+/* COLLAPSIBLE RIGHT NAV — opens on menu button, closes on outside click */
+@media(min-width:651px){
+  .fx-shell{display:block!important;padding:12px!important}
+  .fx-shell>.fx-main{width:100%!important;max-width:100%!important;margin:0!important}
+  .fx-shell>#publicNav,.fx-shell>.public-nav{
+    position:fixed!important;right:12px!important;left:auto!important;
+    top:12px!important;bottom:12px!important;
+    width:250px!important;max-width:min(250px,85vw)!important;
+    height:auto!important;max-height:none!important;
+    z-index:100001!important;
+    transform:translateX(calc(100% + 24px))!important;
+    transition:transform .25s ease!important;
+    box-shadow:0 16px 45px #0009!important;
+  }
+  .fx-shell>#publicNav.open,.fx-shell>.public-nav.open{
+    transform:translateX(0)!important;
+  }
+  .fx-shell .nav-open-btn,.fx-main .nav-open-btn{
+    display:block!important;position:fixed!important;
+    right:18px!important;left:auto!important;top:18px!important;
+    z-index:100002!important;
+  }
+}
+@media(max-width:650px){
+  .fx-shell>#publicNav,.fx-shell>.public-nav{
+    position:fixed!important;right:8px!important;left:auto!important;
+    top:8px!important;bottom:8px!important;
+    transform:translateX(calc(100% + 16px))!important;
+    z-index:100001!important;
+  }
+  .fx-shell>#publicNav.open,.fx-shell>.public-nav.open{transform:translateX(0)!important}
+  .fx-shell .nav-open-btn,.fx-main .nav-open-btn{
+    display:block!important;position:fixed!important;
+    right:10px!important;left:auto!important;top:10px!important;z-index:100002!important;
+  }
+}
+
 </style>
 </head>
 
@@ -2162,7 +2200,15 @@ function initPublicNavigation(){
  const all=['hero','publicBookingCalendar','courseSection','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
  function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
  nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
- $('openPublicNav').onclick=()=>nav.classList.add('open');$('closePublicNav').onclick=()=>nav.classList.remove('open');
+ $('openPublicNav').onclick=()=>nav.classList.toggle('open');
+ $('closePublicNav').onclick=()=>nav.classList.remove('open');
+ // Փակել մենյուն միայն այն ժամանակ, երբ սեղմում են մենյուից դուրս։
+ document.addEventListener('click',e=>{
+  if(!nav.classList.contains('open'))return;
+  if(nav.contains(e.target)||$('openPublicNav')?.contains(e.target))return;
+  nav.classList.remove('open');
+ });
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')nav.classList.remove('open');});
  $('aniHomeLogo').onclick=()=>go('home');$('aniHomeLogo').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go('home');}};
  document.querySelectorAll('.public-back-home').forEach(b=>b.addEventListener('click',()=>go('home')));go('home');
 }
