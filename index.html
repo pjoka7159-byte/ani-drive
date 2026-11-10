@@ -271,6 +271,46 @@ body.account-view #admin>.wrap{max-width:1200px!important;width:100%!important}
  body.account-view #admin{margin-left:0!important;width:100%!important;padding:45px 8px 10px!important}
 }
 
+
+/* Final fix: keep the left navigation visible in the administrator workspace */
+body.account-view #publicNav,
+body.account-view #publicNav.admin-nav-visible {
+  position:fixed!important;
+  z-index:100000!important;
+  left:12px!important;
+  top:18px!important;
+  bottom:14px!important;
+  width:238px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow-y:auto!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:translateX(0)!important;
+  pointer-events:auto!important;
+}
+body.account-view #admin,
+body.account-view #studentArea {
+  margin-left:262px!important;
+  width:calc(100% - 274px)!important;
+}
+@media(max-width:850px) {
+  body.account-view #publicNav,
+  body.account-view #publicNav.admin-nav-visible {
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    width:min(260px,78vw)!important;
+    border-radius:0 18px 18px 0!important;
+    transform:translateX(0)!important;
+  }
+  body.account-view #admin,
+  body.account-view #studentArea {
+    margin-left:0!important;
+    width:100%!important;
+    padding:12px 8px 10px 270px!important;
+  }
+}
 </style>
 </head>
 
@@ -603,7 +643,25 @@ async function checkAdminNotices(){if(!isAdmin)return;const [b,s,r]=await Promis
 async function checkStudentNotices(){if(!currentUser||isAdmin)return;const [b,s]=await Promise.all([db.from('lesson_bookings').select('id,status').eq('student_id',currentUser.id).order('created_at',{ascending:false}).limit(20),db.from('students').select('status').eq('id',currentUser.id).maybeSingle()]);if(b.error||s.error)return;const snap=(b.data||[]).map(x=>x.id+':'+x.status).join('|')+'|profile:'+s.data?.status;if(studentNoticeSnapshot&&snap!==studentNoticeSnapshot)playNotice();studentNoticeSnapshot=snap;}
 
 function show(id) {
-  document.body.classList.toggle('account-view', id === 'admin' || id === 'studentArea');
+  const accountView = id === 'admin' || id === 'studentArea';
+  document.body.classList.toggle('account-view', accountView);
+  const sideNav = $('publicNav');
+  if (sideNav) {
+    sideNav.classList.remove('hidden');
+    if (accountView) {
+      sideNav.classList.add('admin-nav-visible');
+      sideNav.style.setProperty('display','flex','important');
+      sideNav.style.setProperty('visibility','visible','important');
+      sideNav.style.setProperty('opacity','1','important');
+      sideNav.style.setProperty('transform','translateX(0)','important');
+    } else {
+      sideNav.classList.remove('admin-nav-visible');
+      sideNav.style.removeProperty('display');
+      sideNav.style.removeProperty('visibility');
+      sideNav.style.removeProperty('opacity');
+      sideNav.style.removeProperty('transform');
+    }
+  }
   ['auth','register','admin','studentArea'].forEach(x => {
     $(x).classList.toggle('hidden', x !== id);
   });
