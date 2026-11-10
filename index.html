@@ -236,29 +236,88 @@ body.account-view #admin>.wrap{max-width:1200px}
  
 
 /* ANI DRIVE animated 3D learner Kia Forte hero */
-.ani-car-hero{min-height:510px;padding:28px 0 40px;background:radial-gradient(ellipse at 50% 45%,#f7fafc 0,#e7edf3 52%,#d4dde7 100%);overflow:hidden}
-.ani-car-wrap{max-width:1100px}
-.ani-car-scene{position:relative;height:430px;display:flex;align-items:center;justify-content:center;perspective:1100px;isolation:isolate}
-.ani-car-glow{position:absolute;width:70%;height:55%;border-radius:50%;background:radial-gradient(ellipse,#ffffff 0, #b9c7d5 42%,transparent 72%);filter:blur(12px)}
-.ani-road{position:absolute;bottom:34px;left:4%;right:4%;height:80px;border-radius:50%;background:linear-gradient(180deg,#56616d,#202a36);transform:rotateX(65deg);box-shadow:0 22px 28px #1c293b55;overflow:hidden}
+.ani-car-hero{min-height:300px;height:300px;padding:6px 0 12px;background:linear-gradient(120deg,#06264d,#0b4d88 55%,#1267a8);overflow:hidden;border-bottom:4px solid #f4b942;box-shadow:0 8px 24px #061b3540}
+.ani-car-wrap{max-width:980px;height:100%}
+.ani-car-scene{position:relative;height:100%;display:flex;align-items:center;justify-content:center;perspective:1100px;isolation:isolate}
+.ani-car-glow{position:absolute;width:62%;height:65%;border-radius:50%;background:radial-gradient(ellipse,#9ec9ee55 0,#6fa8d544 42%,transparent 72%);filter:blur(12px)}
+.ani-road{position:absolute;bottom:4px;left:10%;right:10%;height:55px;border-radius:50%;background:linear-gradient(180deg,#56616d,#202a36);transform:rotateX(65deg);box-shadow:0 22px 28px #1c293b55;overflow:hidden}
 .ani-road span{position:absolute;top:38px;width:90px;height:6px;background:#f4b942;border-radius:10px;animation:roadMove 1.5s linear infinite}
 .ani-road span:nth-child(1){left:5%}.ani-road span:nth-child(2){left:45%;animation-delay:-.5s}.ani-road span:nth-child(3){left:85%;animation-delay:-1s}
-.ani-car-3d{position:relative;z-index:2;width:min(850px,98%);transform-style:preserve-3d;animation:forteFloat 4s ease-in-out infinite,forteTurn 8s ease-in-out infinite;filter:drop-shadow(0 25px 18px #17283b40)}
+.ani-car-3d{position:relative;z-index:2;width:min(680px,88%);transform-style:preserve-3d;animation:forteFloat 4s ease-in-out infinite,forteTurn 8s ease-in-out infinite;filter:drop-shadow(0 25px 18px #17283b40)}
 .ani-car-3d svg{display:block;width:100%;overflow:visible}
 .ani-wheel{transform-box:fill-box;transform-origin:center;animation:wheelSpin 1.3s linear infinite}
-.ani-car-caption{position:absolute;bottom:0;z-index:3;color:#18324d;font-weight:900;font-size:clamp(23px,4vw,36px);letter-spacing:2px;text-shadow:0 2px 0 white}
+.ani-car-caption{position:absolute;top:8px;right:8%;z-index:3;color:#fff;font-weight:900;font-size:clamp(15px,2vw,22px);letter-spacing:1px;text-shadow:0 2px 8px #00152d;background:#ffffff18;border:1px solid #ffffff55;border-radius:30px;padding:5px 15px}
 @keyframes forteFloat{0%,100%{translate:0 5px}50%{translate:0 -12px}}
 @keyframes forteTurn{0%,100%{rotate:y -7deg}50%{rotate:y 7deg}}
 @keyframes wheelSpin{to{rotate:360deg}}
 @keyframes roadMove{from{transform:translateX(0)}to{transform:translateX(170px)}}
-@media(max-width:600px){.ani-car-hero{min-height:330px;padding:10px 0 28px}.ani-car-scene{height:310px}.ani-car-3d{width:115%;max-width:none;margin-left:-7%}.ani-road{bottom:30px}.ani-car-caption{bottom:0}}
+@media(max-width:600px){.ani-car-hero{min-height:215px;height:215px;padding:3px 0 8px}.ani-car-scene{height:100%}.ani-car-3d{width:105%;max-width:none;margin-left:-2%}.ani-road{bottom:0}.ani-car-caption{top:4px;right:4%;font-size:14px;padding:3px 10px}}
 @media(prefers-reduced-motion:reduce){.ani-car-3d,.ani-wheel,.ani-road span{animation:none!important}}
+
+
+/* Reliable permanent left website menu */
+.public-nav{position:fixed!important;z-index:4000!important;left:12px!important;top:18px!important;bottom:14px!important;width:238px!important;display:flex!important;visibility:visible!important;opacity:1!important;transform:translateX(0)!important;background:linear-gradient(160deg,#061a35,#10538c)!important}
+body.public-nav-active>.hero,body.public-nav-active>#courseSection,body.public-nav-active>#examOffices,body.public-nav-active>#weatherSection,body.public-nav-active>#publishedBlocks,body.public-nav-active>#publishedMedia,body.public-nav-active>#register,body.public-nav-active>#auth,body.public-nav-active>.public-extra-page{margin-left:262px!important;width:calc(100% - 274px)!important}
+body.account-view #publicNav{display:flex!important;transform:translateX(0)!important}
+body.account-view #admin{display:block!important;margin-left:262px!important;width:calc(100% - 274px)!important;padding-top:8px!important}
+body.account-view #admin>.wrap{max-width:1200px!important;width:100%!important}
+.nav-open-btn{display:none!important}
+@media(max-width:850px){
+ .public-nav{left:0!important;top:0!important;bottom:0!important;width:min(285px,82vw)!important;transform:translateX(-105%)!important;border-radius:0 18px 18px 0!important}
+ .public-nav.open{transform:translateX(0)!important}
+ .nav-open-btn{display:block!important;position:fixed!important;left:10px!important;top:10px!important;z-index:3999!important}
+ body.account-view #publicNav{transform:translateX(0)!important}
+ body.public-nav-active>.hero,body.public-nav-active>#courseSection,body.public-nav-active>#examOffices,body.public-nav-active>#weatherSection,body.public-nav-active>#publishedBlocks,body.public-nav-active>#publishedMedia,body.public-nav-active>#register,body.public-nav-active>#auth,body.public-nav-active>.public-extra-page{margin-left:0!important;width:100%!important}
+ body.account-view #admin{margin-left:0!important;width:100%!important;padding:45px 8px 10px!important}
+}
 
 </style>
 </head>
 
 <body>
 
+
+<section class="hero ani-car-hero" id="hero">
+ <div class="wrap ani-car-wrap">
+  <div class="ani-car-scene" role="img" aria-label="Մոխրագույն Kia Forte ուսումնական ավտոմեքենա՝ Անի Դրայվ գրությամբ">
+   <div class="ani-car-glow"></div><div class="ani-road"><span></span><span></span><span></span></div>
+   <div class="ani-car-3d">
+    <svg viewBox="0 0 900 430" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+     <defs>
+      <linearGradient id="forteBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0f1f3"/><stop offset=".25" stop-color="#9da3ab"/><stop offset=".52" stop-color="#555d68"/><stop offset=".78" stop-color="#aeb4bc"/><stop offset="1" stop-color="#343b45"/></linearGradient>
+      <linearGradient id="forteGlass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#172b40"/><stop offset="1" stop-color="#60788d"/></linearGradient>
+      <linearGradient id="forteMetal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f8fafc"/><stop offset=".45" stop-color="#707984"/><stop offset="1" stop-color="#252b33"/></linearGradient>
+      <filter id="carShadow"><feGaussianBlur stdDeviation="12"/></filter>
+     </defs>
+     <ellipse cx="455" cy="355" rx="330" ry="35" fill="#020817" opacity=".55" filter="url(#carShadow)"/>
+     <!-- wheels -->
+     <g class="ani-wheel"><circle cx="270" cy="319" r="69" fill="#10151c"/><circle cx="270" cy="319" r="48" fill="#68717b" stroke="#d6dbe0" stroke-width="5"/><circle cx="270" cy="319" r="13" fill="#202833"/><path d="M270 275v88M226 319h88M239 288l62 62M301 288l-62 62" stroke="#dce1e6" stroke-width="8"/></g>
+     <g class="ani-wheel"><circle cx="650" cy="319" r="69" fill="#10151c"/><circle cx="650" cy="319" r="48" fill="#68717b" stroke="#d6dbe0" stroke-width="5"/><circle cx="650" cy="319" r="13" fill="#202833"/><path d="M650 275v88M606 319h88M619 288l62 62M681 288l-62 62" stroke="#dce1e6" stroke-width="8"/></g>
+     <!-- body and roof -->
+     <path d="M105 291 Q123 250 190 239 L260 218 Q308 130 390 112 L585 112 Q655 122 710 220 L770 241 Q815 255 820 294 L805 330 L728 341 Q712 278 650 278 Q585 278 574 341 L350 341 Q338 278 270 278 Q204 278 190 341 L120 326Z" fill="url(#forteBody)" stroke="#e0e4e8" stroke-width="5"/>
+     <path d="M285 211 Q330 137 395 130 L470 130 L470 218Z" fill="url(#forteGlass)" stroke="#d8dde3" stroke-width="6"/>
+     <path d="M485 130 L580 132 Q634 145 680 220 L485 218Z" fill="url(#forteGlass)" stroke="#d8dde3" stroke-width="6"/>
+     <path d="M478 128v93" stroke="#454d58" stroke-width="8"/>
+     <path d="M116 278Q200 244 281 242L698 243Q768 247 806 278" fill="none" stroke="#f6f7f8" stroke-width="5" opacity=".55"/>
+     <path d="M130 294h62M736 292h64" stroke="#202833" stroke-width="8"/>
+     <path d="M116 270q24-23 58-15l-8 23h-49z" fill="#fff3c4" stroke="#fff" stroke-width="4"/>
+     <path d="M763 265q26 0 44 18l-5 12h-42z" fill="#d92f43"/>
+     <path d="M430 245h130" stroke="#e8edf2" stroke-width="4" opacity=".6"/>
+     <path d="M490 246h30" stroke="#28313b" stroke-width="5" stroke-linecap="round"/>
+     <path d="M210 238l-5 68" stroke="#454e59" stroke-width="4"/>\n      <path d="M330 250Q470 258 610 250L595 330Q460 340 345 330Z" fill="none" stroke="#68717b" stroke-width="3" opacity=".8"/>
+     <rect x="355" y="254" width="210" height="54" rx="12" fill="#243345" opacity=".9"/>
+     <text x="460" y="290" fill="#fff" font-size="31" font-weight="800" text-anchor="middle">Անի Դրայվ</text>
+     <path d="M380 306h160" stroke="#f4b942" stroke-width="5" stroke-linecap="round"/>
+     <rect x="420" y="102" width="95" height="12" rx="5" fill="#202833"/>
+     <path d="M434 103L451 55Q457 42 470 42Q483 42 489 55L507 103Z" fill="#fff" stroke="#d72d3b" stroke-width="8"/>
+     <text x="470" y="88" fill="#111827" font-size="48" font-weight="900" text-anchor="middle">Ու</text>
+     <path d="M145 321h34M760 321h33" stroke="#252c35" stroke-width="9" stroke-linecap="round"/>
+    </svg>
+   </div>
+   <div class="ani-car-caption">Անի Դրայվ</div>
+  </div>
+ </div>
+</section>
 
 <header>
 <div class="wrap bar">
@@ -439,47 +498,7 @@ body.account-view #admin>.wrap{max-width:1200px}
 </section>
 
 
-<section class="hero ani-car-hero" id="hero">
- <div class="wrap ani-car-wrap">
-  <div class="ani-car-scene" role="img" aria-label="Մոխրագույն Kia Forte ուսումնական ավտոմեքենա՝ Անի Դրայվ գրությամբ">
-   <div class="ani-car-glow"></div><div class="ani-road"><span></span><span></span><span></span></div>
-   <div class="ani-car-3d">
-    <svg viewBox="0 0 900 430" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-     <defs>
-      <linearGradient id="forteBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0f1f3"/><stop offset=".25" stop-color="#9da3ab"/><stop offset=".52" stop-color="#555d68"/><stop offset=".78" stop-color="#aeb4bc"/><stop offset="1" stop-color="#343b45"/></linearGradient>
-      <linearGradient id="forteGlass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#172b40"/><stop offset="1" stop-color="#60788d"/></linearGradient>
-      <linearGradient id="forteMetal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f8fafc"/><stop offset=".45" stop-color="#707984"/><stop offset="1" stop-color="#252b33"/></linearGradient>
-      <filter id="carShadow"><feGaussianBlur stdDeviation="12"/></filter>
-     </defs>
-     <ellipse cx="455" cy="355" rx="330" ry="35" fill="#020817" opacity=".55" filter="url(#carShadow)"/>
-     <!-- wheels -->
-     <g class="ani-wheel"><circle cx="270" cy="319" r="69" fill="#10151c"/><circle cx="270" cy="319" r="48" fill="#68717b" stroke="#d6dbe0" stroke-width="5"/><circle cx="270" cy="319" r="13" fill="#202833"/><path d="M270 275v88M226 319h88M239 288l62 62M301 288l-62 62" stroke="#dce1e6" stroke-width="8"/></g>
-     <g class="ani-wheel"><circle cx="650" cy="319" r="69" fill="#10151c"/><circle cx="650" cy="319" r="48" fill="#68717b" stroke="#d6dbe0" stroke-width="5"/><circle cx="650" cy="319" r="13" fill="#202833"/><path d="M650 275v88M606 319h88M619 288l62 62M681 288l-62 62" stroke="#dce1e6" stroke-width="8"/></g>
-     <!-- body and roof -->
-     <path d="M105 291 Q123 250 190 239 L260 218 Q308 130 390 112 L585 112 Q655 122 710 220 L770 241 Q815 255 820 294 L805 330 L728 341 Q712 278 650 278 Q585 278 574 341 L350 341 Q338 278 270 278 Q204 278 190 341 L120 326Z" fill="url(#forteBody)" stroke="#e0e4e8" stroke-width="5"/>
-     <path d="M285 211 Q330 137 395 130 L470 130 L470 218Z" fill="url(#forteGlass)" stroke="#d8dde3" stroke-width="6"/>
-     <path d="M485 130 L580 132 Q634 145 680 220 L485 218Z" fill="url(#forteGlass)" stroke="#d8dde3" stroke-width="6"/>
-     <path d="M478 128v93" stroke="#454d58" stroke-width="8"/>
-     <path d="M116 278Q200 244 281 242L698 243Q768 247 806 278" fill="none" stroke="#f6f7f8" stroke-width="5" opacity=".55"/>
-     <path d="M130 294h62M736 292h64" stroke="#202833" stroke-width="8"/>
-     <path d="M116 270q24-23 58-15l-8 23h-49z" fill="#fff3c4" stroke="#fff" stroke-width="4"/>
-     <path d="M763 265q26 0 44 18l-5 12h-42z" fill="#d92f43"/>
-     <path d="M430 245h130" stroke="#e8edf2" stroke-width="4" opacity=".6"/>
-     <path d="M490 246h30" stroke="#28313b" stroke-width="5" stroke-linecap="round"/>
-     <path d="M210 238l-5 68M710 236l7 68" stroke="#454e59" stroke-width="4"/>
-     <rect x="355" y="254" width="210" height="54" rx="12" fill="#243345" opacity=".9"/>
-     <text x="460" y="290" fill="#fff" font-size="31" font-weight="800" text-anchor="middle">Անի Դրայվ</text>
-     <path d="M380 306h160" stroke="#f4b942" stroke-width="5" stroke-linecap="round"/>
-     <rect x="420" y="102" width="95" height="12" rx="5" fill="#202833"/>
-     <path d="M434 103L451 55Q457 42 470 42Q483 42 489 55L507 103Z" fill="#fff" stroke="#d72d3b" stroke-width="8"/>
-     <text x="470" y="88" fill="#111827" font-size="48" font-weight="900" text-anchor="middle">Ու</text>
-     <path d="M145 321h34M760 321h33" stroke="#252c35" stroke-width="9" stroke-linecap="round"/>
-    </svg>
-   </div>
-   <div class="ani-car-caption">Անի Դրայվ</div>
-  </div>
- </div>
-</section>
+
 
 <section class="section" id="courseSection">
 <div class="wrap">
@@ -930,10 +949,10 @@ async function loadAdminBookingPanel(){
  const d=document.createElement('p');d.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' · '+({pending:'Սպասման մեջ',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);
  const details=document.createElement('p');details.className='muted';details.textContent='Տարիք՝ '+(student.age||'—')+' · Սեռ՝ '+(student.gender||'—')+' · Ուսուցում՝ '+(student.study_type||'—')+' · Բնակավայր՝ '+(student.residence||'—')+' · Քննական բաժին՝ '+(student.exam_location||'—');item.append(p,d,details);
  if(b.requested_slot){const req=document.createElement('p');req.className='booking-change-request';req.textContent='🔔 Նոր ժամի հայտ՝ '+slotLabel(b.requested_slot);item.append(req);const okReq=document.createElement('button');okReq.type='button';okReq.className='good';okReq.textContent='Հաստատել փոփոխությունը';okReq.onclick=()=>approveBookingTimeRequest(b);item.append(okReq);}
- if(!adminBookingArchiveView&&['pending','approved'].includes(b.status)){const wrap=document.createElement('div');wrap.className='reschedule-controls';const sel=document.createElement('select');sel.innerHTML='<option value="">Ընտրել նոր ազատ ժամ</option>';adminAllLessonSlots.filter(x=>x.id!==b.slot_id&&x.is_available).forEach(sl=>sel.add(new Option(slotLabel(sl),sl.id)));const move=document.createElement('button');move.type='button';move.className='blue';move.textContent='✏️ Փոփոխել օրը և ժամը';move.onclick=()=>adminMoveBooking(b.id,sel.value);wrap.append(sel,move);item.append(wrap);}
+ if(!adminBookingArchiveView&&['pending','approved'].includes(b.status)){const wrap=document.createElement('div');wrap.className='reschedule-controls';const sel=document.createElement('select');sel.innerHTML='<option value="">Ընտրել նոր ազատ ժամ</option>';adminAllLessonSlots.filter(x=>x.id!==b.slot_id&&x.is_available).forEach(sl=>sel.add(new Option(slotLabel(sl),sl.id)));const move=document.createElement('button');move.type='button';move.className='blue';move.textContent='✏️ Փոփոխել ընտրված դասաժամը';move.onclick=()=>adminMoveBooking(b.id,sel.value);wrap.append(sel,move);item.append(wrap);}
  if(!adminBookingArchiveView&&b.status==='pending'){const ok=document.createElement('button');ok.className='good';ok.textContent='Հաստատել';ok.onclick=()=>changeBookingStatus(b.id,'approved');const no=document.createElement('button');no.className='danger';no.textContent='Մերժել';no.onclick=()=>changeBookingStatus(b.id,'rejected');item.append(ok,no);}
  const archive=document.createElement('button');archive.type='button';archive.className='gray';archive.textContent=adminBookingArchiveView?'Վերականգնել':'📦 Տեղափոխել արխիվ';archive.onclick=()=>archiveLessonBooking(b.id,!adminBookingArchiveView);item.append(archive);
- const cancel=document.createElement('button');cancel.className='danger';cancel.textContent='🗑 Հեռացնել / չեղարկել';cancel.onclick=()=>cancelBooking(b.id,'admin');item.append(cancel);list.append(item);
+ const cancel=document.createElement('button');cancel.className='danger';cancel.textContent='🗑 Հեռացնել դասաժամը';cancel.onclick=()=>cancelBooking(b.id,'admin');item.append(cancel);list.append(item);
  });
  const studentSel=$('adminBookingForm').elements.student,old=studentSel.value;studentSel.replaceChildren(new Option('Գրանցված աշակերտ (ըստ ցանկության)',''));(students||[]).forEach(st=>studentSel.add(new Option(st.first_name+' '+st.last_name+' — '+st.email,st.id)));if(old)studentSel.value=old;
 
