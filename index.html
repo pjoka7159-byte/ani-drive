@@ -1065,9 +1065,8 @@ async function loadPublicAccessSettings(){
  const login=await readSwitch('login_enabled',true);
  $('showRegister').classList.toggle('hidden',!reg);
  $('showAuth').classList.toggle('hidden',!login);
- const regSection=$('register'),authSection=$('auth');
- regSection.classList.toggle('hidden',!reg);
- authSection.classList.toggle('hidden',!login);
+ // Մուտքի և գրանցման դաշտերը բացվում են միայն համապատասխան կոճակը սեղմելիս։
+ // Այստեղ կառավարում ենք միայն կոճակների հասանելիությունը, ոչ թե բաժինների ցուցադրումը։
  const cta=document.querySelector('.hero a[href="#register"]');
  if(cta)cta.classList.toggle('hidden',!reg);
 }
