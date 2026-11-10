@@ -1,90 +1,671 @@
-<!doctype html>
-<html lang="hy"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#071a36"><title>ANI DRIVE — Ավտոդպրոց</title>
+
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071a36">
+<title>ANI DRIVE — Ավտոդպրոց</title>
+
 <style>
-:root{--navy:#071a36;--blue:#1769d2;--gold:#f4b942;--muted:#65748b;--bg:#f4f7fb}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:#17243a}header{background:var(--navy);color:white;padding:18px 0}.wrap{max-width:1050px;margin:auto;padding:0 20px}.bar{display:flex;justify-content:space-between;align-items:center;gap:15px}.logo{font-size:25px;font-weight:900}.logo span{color:var(--gold)}button,.btn{border:0;border-radius:8px;padding:12px 17px;background:var(--gold);font-weight:bold;cursor:pointer;color:#14233b}.outline{background:transparent;border:1px solid #ffffff70;color:white}.hero{background:linear-gradient(120deg,#071a36,#174c86);color:white;padding:75px 0}.hero h1{font-size:clamp(36px,6vw,60px);margin:0 0 15px}.hero p{font-size:18px;line-height:1.6;color:#dce8f7;max-width:650px}.section{padding:55px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.card{border:1px solid #e1e8f1;border-radius:14px;padding:22px;background:white}.muted{color:var(--muted)}form{display:grid;gap:12px;max-width:520px}input,select,textarea{padding:13px;border:1px solid #ccd6e3;border-radius:8px;font:inherit;width:100%}.blue{background:var(--blue);color:white}.hidden{display:none!important}.panel{background:var(--bg);border-radius:14px;padding:22px;margin-top:18px}.status{font-weight:bold}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.danger{background:#b42318;color:white}.good{background:#16804a;color:white}footer{background:var(--navy);color:white;padding:28px;text-align:center}@media(max-width:600px){.bar{align-items:flex-start;flex-direction:column}}
-</style></head><body>
-<header><div class="wrap bar"><div class="logo">ANI <span>DRIVE</span></div><div class="row"><a href="tel:+37441334477" style="color:white">041 334477</a><button class="outline" id="authBtn">Մուտք / Գրանցում</button><button class="hidden" id="adminBtn">Ադմինիստրատոր</button></div></div></header>
-<section class="hero"><div class="wrap"><h1>Սովորիր վարել վստահ և անվտանգ</h1><p>Քո ճանապարհը դեպի վստահ վարում սկսվում է այստեղ։ Միացի՛ր ANI DRIVE ավտոդպրոցին։</p><a class="btn" href="#register">Գրանցվել դասընթացին</a></div></section>
-<section class="section"><div class="wrap"><h2>Մեր դասընթացները</h2><div class="grid"><div class="card"><h3>Տեսական դասեր</h3><p class="muted">Ճանապարհային երթևեկության կանոններ և նշաններ։</p></div><div class="card"><h3>Գործնական վարում</h3><p class="muted">Վարելու հմտությունների զարգացում հրահանգչի հետ։</p></div><div class="card"><h3>Անվտանգ վարում</h3><p class="muted">Պատասխանատու վարելու սովորություններ։</p></div></div></div></section>
-<section class="section" id="register" style="background:var(--bg)"><div class="wrap"><h2>Աշակերտի գրանցում</h2><p class="muted">Գրանցման և մուտքի համար անհրաժեշտ է Supabase կարգավորումը։</p><div class="card"><form id="signup"><input required name="first" placeholder="Անուն"><input required name="last" placeholder="Ազգանուն"><input required type="email" name="email" placeholder="Էլ․ փոստ"><input required type="tel" name="phone" placeholder="Հեռախոսահամար"><input required type="password" name="password" minlength="8" placeholder="Գաղտնաբառ (առնվազն 8 նիշ)"><input required type="password" name="confirm" minlength="8" placeholder="Կրկնել գաղտնաբառը"><button class="blue">Գրանցվել</button></form><p id="msg" class="muted"></p></div></div></section>
-<section class="section hidden" id="auth"><div class="wrap"><h2>Մուտք</h2><form id="login" class="card"><input type="email" name="email" required placeholder="Էլ․ փոստ"><input type="password" name="password" required placeholder="Գաղտնաբառ"><button class="blue">Մուտք գործել</button></form><p id="loginMsg" class="muted"></p></div></section>
-<section class="section hidden" id="admin"><div class="wrap"><h2>Ադմինիստրատորի վահանակ</h2><div class="panel"><p>Այս վահանակը կցուցադրի հայտերը, հաստատման/մերժման և արգելափակման կոճակները՝ միայն backend-ի անվտանգ միացումից հետո։</p><p class="muted">Ադմինի իրավասությունները ստուգվում են սերվերում, ոչ միայն էջում։</p></div></div></section>
-<footer>ANI DRIVE • Երևան • <a style="color:#f4b942" href="tel:+37441334477">041 334477</a></footer>
-<script src="config.js"></script><script>
-const $=id=>document.getElementById(id);
-$('authBtn').onclick=()=>{$('auth').classList.toggle('hidden');$('auth').scrollIntoView({behavior:'smooth'});};
-$('adminBtn').onclick=()=>{$('admin').classList.toggle('hidden');$('admin').scrollIntoView({behavior:'smooth'});};
-$('signup').onsubmit=e=>{e.preventDefault();$('msg').textContent='Գրանցումը դեռ չի ուղարկվել․ նախ պետք է միացնել և կարգավորել Supabase Auth և տվյալների բազան։';};
-$('login').onsubmit=e=>{e.preventDefault();$('loginMsg').textContent='Մուտքը դեռ ակտիվացված չէ․ անհրաժեշտ է Supabase Auth կարգավորումը։';};
-  
-<div id="ani-admin" style="max-width:420px;margin:30px auto;padding:24px;border:1px solid #ddd;border-radius:14px;font-family:Arial">
-  <h2>ANI DRIVE — Ադմինի մուտք</h2>
-  <input id="admin-email" type="email" placeholder="Էլ․ փոստ" style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box">
-  <input id="admin-password" type="password" placeholder="Գաղտնաբառ" style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box">
-  <button id="admin-login" style="width:100%;padding:12px;background:#111;color:white;border:0;border-radius:8px">Մուտք գործել</button>
-  <p id="admin-message"></p>
-  <div id="admin-panel" hidden>
-    <h3>Ադմինի վահանակ</h3>
-    <p>Մուտքը հաստատված է։</p>
-    <button id="admin-logout">Դուրս գալ</button>
+:root {
+  --navy:#071a36;
+  --blue:#1769d2;
+  --gold:#f4b942;
+  --bg:#f4f7fb;
+  --muted:#65748b;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  color:#17243a;
+  background:white;
+}
+header {
+  background:var(--navy);
+  color:white;
+  padding:18px 0;
+}
+.wrap {
+  max-width:1100px;
+  margin:auto;
+  padding:0 20px;
+}
+.bar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+}
+.logo {font-size:26px;font-weight:900}
+.logo span {color:var(--gold)}
+button,.btn {
+  border:0;
+  border-radius:8px;
+  padding:12px 17px;
+  background:var(--gold);
+  font-weight:bold;
+  cursor:pointer;
+  color:#14233b;
+  text-decoration:none;
+  display:inline-block;
+}
+button:disabled {opacity:.5;cursor:not-allowed}
+.blue {background:var(--blue);color:white}
+.dark {background:var(--navy);color:white}
+.danger {background:#b42318;color:white}
+.good {background:#16804a;color:white}
+.gray {background:#64748b;color:white}
+.outline {
+  background:transparent;
+  border:1px solid #ffffff70;
+  color:white;
+}
+.hero {
+  background:linear-gradient(120deg,#071a36,#174c86);
+  color:white;
+  padding:75px 0;
+}
+.hero h1 {
+  font-size:clamp(36px,6vw,60px);
+  margin:0 0 15px;
+}
+.hero p {
+  font-size:18px;
+  line-height:1.7;
+  color:#dce8f7;
+  max-width:650px;
+}
+.section {padding:55px 0}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+.card {
+  border:1px solid #e1e8f1;
+  border-radius:14px;
+  padding:22px;
+  background:white;
+}
+.muted {color:var(--muted)}
+form {display:grid;gap:12px}
+input,select {
+  padding:13px;
+  border:1px solid #ccd6e3;
+  border-radius:8px;
+  font:inherit;
+  width:100%;
+}
+.hidden {display:none!important}
+.panel {
+  background:var(--bg);
+  border-radius:14px;
+  padding:20px;
+  margin-top:18px;
+}
+.message {margin-top:12px;line-height:1.6}
+.status {
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:bold;
+}
+.pending {background:#fff0c2;color:#805600}
+.approved {background:#d8f5e4;color:#116438}
+.rejected {background:#ffe0e0;color:#a31b1b}
+.blocked {background:#e2e5e9;color:#333}
+.row {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.admin-item {
+  background:white;
+  border:1px solid #e1e8f1;
+  border-radius:12px;
+  padding:16px;
+  margin:12px 0;
+}
+.admin-item p {overflow-wrap:anywhere}
+.tabs {display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+footer {
+  background:var(--navy);
+  color:white;
+  padding:28px;
+  text-align:center;
+}
+a {color:inherit}
+@media(max-width:600px) {
+  .hero {padding:55px 0}
+  .bar {align-items:flex-start}
+  .section {padding:38px 0}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="wrap bar">
+  <div class="logo">ANI <span>DRIVE</span></div>
+  <div class="row">
+    <a href="tel:+37441334477" style="color:white">041 334477</a>
+    <button class="outline" id="showAuth">Մուտք</button>
+    <button id="showRegister">Գրանցում</button>
+    <button class="hidden" id="adminBtn">Ադմինիստրատոր</button>
+    <button class="hidden danger" id="logoutBtn">Ելք</button>
+  </div>
+</div>
+</header>
+
+<section class="hero">
+<div class="wrap">
+  <h1>Սովորիր վարել վստահ և անվտանգ</h1>
+  <p>Քո ճանապարհը դեպի վստահ վարում սկսվում է այստեղ։ Միացի՛ր ANI DRIVE ավտոդպրոցին։</p>
+  <a class="btn" href="#register">Գրանցվել դասընթացին</a>
+</div>
+</section>
+
+<section class="section">
+<div class="wrap">
+<h2>Մեր դասընթացները</h2>
+<div class="grid">
+  <div class="card">
+    <h3>Տեսական դասեր</h3>
+    <p class="muted">Ճանապարհային երթևեկության կանոններ և նշաններ։</p>
+  </div>
+  <div class="card">
+    <h3>Գործնական վարում</h3>
+    <p class="muted">Վարելու հմտությունների զարգացում հրահանգչի հետ։</p>
+  </div>
+  <div class="card">
+    <h3>Անվտանգ վարում</h3>
+    <p class="muted">Պատասխանատու վարելու սովորություններ։</p>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- Գրանցում -->
+<section class="section" id="register" style="background:var(--bg)">
+<div class="wrap">
+<h2>Աշակերտի գրանցում</h2>
+<div class="card">
+<form id="signup">
+  <input required name="first" placeholder="Անուն" maxlength="60">
+  <input required name="last" placeholder="Ազգանուն" maxlength="60">
+  <input required type="email" name="email" placeholder="Էլ․ փոստ">
+  <input required type="tel" name="phone" placeholder="Հեռախոսահամար" maxlength="20">
+  <input required type="password" name="password" minlength="8" placeholder="Գաղտնաբառ (առնվազն 8 նիշ)">
+  <input required type="password" name="confirm" minlength="8" placeholder="Կրկնել գաղտնաբառը">
+  <button class="blue">Գրանցվել</button>
+</form>
+<p id="signupMsg" class="message muted"></p>
+</div>
+</div>
+</section>
+
+<!-- Մուտք -->
+<section class="section hidden" id="auth">
+<div class="wrap">
+<h2>Մուտք համակարգ</h2>
+<div class="card">
+<form id="login">
+  <input required type="email" name="email" placeholder="Էլ․ փոստ">
+  <input required type="password" name="password" placeholder="Գաղտնաբառ">
+  <button class="blue">Մուտք գործել</button>
+</form>
+<button class="gray" id="forgotBtn" style="margin-top:12px">
+  Վերականգնել գաղտնաբառը
+</button>
+<p id="loginMsg" class="message muted"></p>
+</div>
+</div>
+</section>
+
+<!-- Աշակերտի էջ -->
+<section class="section hidden" id="studentArea">
+<div class="wrap">
+<h2>Իմ հայտը</h2>
+<div class="card">
+<p id="studentName"></p>
+<p>Հայտի կարգավիճակ՝ <strong id="studentStatus"></strong></p>
+<p id="studentInfo" class="muted"></p>
+</div>
+</div>
+</section>
+
+<!-- Ադմին -->
+<section class="section hidden" id="admin">
+<div class="wrap">
+<h2>ANI DRIVE — Ադմինիստրատորի վահանակ</h2>
+
+<div class="panel">
+<div class="row">
+  <h3 style="margin-right:auto">Աշակերտների հայտեր</h3>
+  <button class="blue" id="refreshBtn">Թարմացնել</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Բոլորը</h3>
+    <strong id="totalCount">0</strong>
+  </div>
+  <div class="card">
+    <h3>Սպասման մեջ</h3>
+    <strong id="pendingCount">0</strong>
+  </div>
+  <div class="card">
+    <h3>Հաստատված</h3>
+    <strong id="approvedCount">0</strong>
+  </div>
+  <div class="card">
+    <h3>Արգելափակված</h3>
+    <strong id="blockedCount">0</strong>
   </div>
 </div>
 
+<div class="tabs">
+  <button class="dark filterBtn" data-filter="all">Բոլորը</button>
+  <button class="filterBtn" data-filter="pending">Նոր հայտեր</button>
+  <button class="filterBtn" data-filter="approved">Հաստատված</button>
+  <button class="filterBtn" data-filter="rejected">Մերժված</button>
+  <button class="filterBtn" data-filter="blocked">Արգելափակված</button>
+</div>
+
+<div id="studentsList">
+  <p class="muted">Բեռնում...</p>
+</div>
+<p id="adminMsg" class="message"></p>
+</div>
+</div>
+</section>
+
+<footer>
+ANI DRIVE • Երևան •
+<a style="color:#f4b942" href="tel:+37441334477">041 334477</a>
+</footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/config.js"></script>
-<script>
-(async function () {
-  const cfg = window.ANI_DRIVE_CONFIG;
-  const msg = document.getElementById('admin-message');
-  const panel = document.getElementById('admin-panel');
 
-  if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
-    msg.textContent = 'Supabase-ի կարգավորումները չեն գտնվել։';
+<script>
+(async function() {
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+const cfg = window.ANI_DRIVE_CONFIG;
+
+if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+  $('signupMsg').textContent =
+    'Supabase-ը կարգավորված չէ։ Ստուգեք config.js ֆայլը։';
+  return;
+}
+
+const db = window.supabase.createClient(
+  cfg.supabaseUrl,
+  cfg.supabaseAnonKey
+);
+
+let currentUser = null;
+let isAdmin = false;
+let students = [];
+let currentFilter = 'all';
+
+function show(id) {
+  ['auth','register','admin','studentArea'].forEach(x => {
+    $(x).classList.toggle('hidden', x !== id);
+  });
+  if (id) $(id).scrollIntoView({behavior:'smooth'});
+}
+
+function message(id, text, error=false) {
+  $(id).textContent = text;
+  $(id).style.color = error ? '#b42318' : '#16804a';
+}
+
+function statusText(status) {
+  const names = {
+    pending:'Սպասման մեջ',
+    approved:'Հաստատված',
+    rejected:'Մերժված',
+    blocked:'Արգելափակված'
+  };
+  return names[status] || status;
+}
+
+function makeStatus(status) {
+  const span = document.createElement('span');
+  span.className = 'status ' + status;
+  span.textContent = statusText(status);
+  return span;
+}
+
+$('showAuth').onclick = () => show('auth');
+$('showRegister').onclick = () => show('register');
+
+$('signup').onsubmit = async e => {
+  e.preventDefault();
+
+  const form = new FormData(e.target);
+  const first = String(form.get('first')).trim();
+  const last = String(form.get('last')).trim();
+  const email = String(form.get('email')).trim().toLowerCase();
+  const phone = String(form.get('phone')).trim();
+  const password = String(form.get('password'));
+  const confirm = String(form.get('confirm'));
+
+  if (password !== confirm) {
+    message('signupMsg','Գաղտնաբառերը չեն համընկնում։',true);
     return;
   }
 
-  const db = window.supabase.createClient(
-    cfg.supabaseUrl,
-    cfg.supabaseAnonKey
-  );
+  if (password.length < 8) {
+    message('signupMsg','Գաղտնաբառը պետք է ունենա առնվազն 8 նիշ։',true);
+    return;
+  }
 
-  document.getElementById('admin-login').onclick = async () => {
-    msg.textContent = 'Ստուգում ենք մուտքը...';
+  const btn = e.target.querySelector('button');
+  btn.disabled = true;
+  message('signupMsg','Գրանցումը կատարվում է...');
 
-    const email = document.getElementById('admin-email').value.trim();
-    const password = document.getElementById('admin-password').value;
-
-    const { data, error } = await db.auth.signInWithPassword({
-      email, password
+  try {
+    const {data,error} = await db.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name:first,
+          last_name:last,
+          phone:phone
+        }
+      }
     });
 
-    if (error) {
-      msg.textContent = 'Մուտքը չհաջողվեց։ Ստուգեք տվյալները։';
-      return;
+    if (error) throw error;
+
+    if (data.session) {
+      message('signupMsg','Գրանցումը հաջողվեց։ Ձեր հայտը ուղարկված է։');
+    } else {
+      message('signupMsg',
+        'Գրանցումը կատարվեց։ Խնդրում ենք ստուգել էլեկտրոնային փոստը և հաստատել հաշիվը։');
     }
 
-    const { data: admin, error: adminError } = await db
-      .from('admins')
-      .select('email')
-      .eq('user_id', data.user.id)
-      .maybeSingle();
+    e.target.reset();
 
-    if (adminError || !admin) {
-      await db.auth.signOut();
-      msg.textContent = 'Այս հաշիվը ադմինի իրավունք չունի։';
-      return;
+  } catch(err) {
+    const msg = err.message || '';
+    if (msg.toLowerCase().includes('duplicate') ||
+        msg.toLowerCase().includes('unique')) {
+      message('signupMsg','Այս հեռախոսահամարը կամ տվյալներն արդեն օգտագործվում են։',true);
+    } else {
+      message('signupMsg','Գրանցումը չհաջողվեց։ ' + msg,true);
+    }
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+$('login').onsubmit = async e => {
+  e.preventDefault();
+
+  const form = new FormData(e.target);
+  const email = String(form.get('email')).trim().toLowerCase();
+  const password = String(form.get('password'));
+
+  message('loginMsg','Մուտքը ստուգվում է...');
+
+  const {data,error} = await db.auth.signInWithPassword({
+    email,password
+  });
+
+  if (error) {
+    message('loginMsg','Սխալ էլ․ փոստ կամ գաղտնաբառ։',true);
+    return;
+  }
+
+  currentUser = data.user;
+  await loadUser();
+};
+
+$('forgotBtn').onclick = async () => {
+  const email = $('login').elements.email.value.trim();
+
+  if (!email) {
+    message('loginMsg','Նախ լրացրեք էլեկտրոնային փոստը։',true);
+    return;
+  }
+
+  const {error} = await db.auth.resetPasswordForEmail(email,{
+    redirectTo:location.origin
+  });
+
+  if (error) {
+    message('loginMsg',error.message,true);
+  } else {
+    message('loginMsg','Վերականգնման հղումն ուղարկվել է էլ․ փոստին։');
+  }
+};
+
+async function loadUser() {
+  const {data:{user},error} = await db.auth.getUser();
+
+  if (error || !user) {
+    currentUser = null;
+    return;
+  }
+
+  currentUser = user;
+
+  const {data:admin,error:adminError} = await db
+    .from('admins')
+    .select('user_id')
+    .eq('user_id',user.id)
+    .maybeSingle();
+
+  isAdmin = !adminError && !!admin;
+
+  $('logoutBtn').classList.remove('hidden');
+  $('showAuth').classList.add('hidden');
+  $('showRegister').classList.add('hidden');
+
+  if (isAdmin) {
+    $('adminBtn').classList.remove('hidden');
+    await loadStudents();
+    show('admin');
+  } else {
+    $('adminBtn').classList.add('hidden');
+    await loadStudent();
+  }
+}
+
+async function loadStudent() {
+  const {data,error} = await db
+    .from('students')
+    .select('first_name,last_name,email,phone,status')
+    .eq('id',currentUser.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    message('loginMsg','Աշակերտի տվյալները չեն գտնվել։',true);
+    return;
+  }
+
+  show('studentArea');
+  $('studentName').textContent =
+    'Բարի գալուստ, ' + data.first_name + ' ' + data.last_name;
+
+  $('studentStatus').replaceChildren(makeStatus(data.status));
+
+  const info = document.createElement('span');
+  info.textContent = data.status === 'approved'
+    ? 'Ձեր հայտը հաստատված է։'
+    : data.status === 'rejected'
+    ? 'Ձեր հայտը մերժվել է։ Կապվեք ավտոդպրոցի հետ։'
+    : data.status === 'blocked'
+    ? 'Ձեր հաշիվը արգելափակված է։ Կապվեք ադմինիստրատորի հետ։'
+    : 'Ձեր հայտը ստացվել է։ Սպասեք ադմինիստրատորի պատասխանին։';
+
+  $('studentInfo').replaceChildren(info);
+}
+
+async function loadStudents() {
+  if (!isAdmin) return;
+
+  $('studentsList').textContent = 'Բեռնում...';
+
+  const {data,error} = await db
+    .from('students')
+    .select('*')
+    .order('created_at',{ascending:false});
+
+  if (error) {
+    $('studentsList').textContent = 'Տվյալների բեռնումը չհաջողվեց։ ' + error.message;
+    return;
+  }
+
+  students = data || [];
+
+  $('totalCount').textContent = students.length;
+  $('pendingCount').textContent =
+    students.filter(s=>s.status==='pending').length;
+  $('approvedCount').textContent =
+    students.filter(s=>s.status==='approved').length;
+  $('blockedCount').textContent =
+    students.filter(s=>s.status==='blocked').length;
+
+  renderStudents();
+}
+
+function renderStudents() {
+  const list = $('studentsList');
+  list.replaceChildren();
+
+  const filtered = currentFilter === 'all'
+    ? students
+    : students.filter(s=>s.status===currentFilter);
+
+  if (!filtered.length) {
+    list.textContent = 'Հայտեր չեն գտնվել։';
+    return;
+  }
+
+  filtered.forEach(student => {
+    const item = document.createElement('div');
+    item.className = 'admin-item';
+
+    const title = document.createElement('h3');
+    title.textContent = student.first_name + ' ' + student.last_name;
+
+    const email = document.createElement('p');
+    email.textContent = 'Էլ․ փոստ՝ ' + student.email;
+
+    const phone = document.createElement('p');
+    phone.textContent = 'Հեռախոս՝ ' + student.phone;
+
+    const status = document.createElement('p');
+    status.append('Կարգավիճակ՝ ',makeStatus(student.status));
+
+    const date = document.createElement('p');
+    date.className = 'muted';
+    date.textContent = 'Գրանցում՝ ' +
+      new Date(student.created_at).toLocaleString('hy-AM');
+
+    const actions = document.createElement('div');
+    actions.className = 'row';
+
+    const addButton = (label,newStatus,className) => {
+      const btn = document.createElement('button');
+      btn.textContent = label;
+      btn.className = className;
+      btn.onclick = () => updateStatus(student.id,newStatus);
+      actions.appendChild(btn);
+    };
+
+    if (student.status !== 'approved') {
+      addButton('Հաստատել','approved','good');
     }
 
-    panel.hidden = false;
-    msg.textContent = 'Բարի գալուստ, ադմին։';
-  };
+    if (student.status !== 'rejected') {
+      addButton('Մերժել','rejected','danger');
+    }
 
-  document.getElementById('admin-logout').onclick = async () => {
-    await db.auth.signOut();
-    panel.hidden = true;
-    msg.textContent = 'Դուրս եք եկել համակարգից։';
+    if (student.status !== 'blocked') {
+      addButton('Արգելափակել','blocked','gray');
+    } else {
+      addButton('Ապաշրջափակել','pending','good');
+    }
+
+    item.append(title,email,phone,status,date,actions);
+    list.appendChild(item);
+  });
+}
+
+async function updateStatus(id,status) {
+  if (!isAdmin) return;
+
+  const confirmation = confirm(
+    'Փոխե՞լ աշակերտի կարգավիճակը՝ ' + statusText(status) + '։'
+  );
+
+  if (!confirmation) return;
+
+  const {error} = await db
+    .from('students')
+    .update({status})
+    .eq('id',id);
+
+  if (error) {
+    message('adminMsg','Փոփոխությունը չհաջողվեց։ ' + error.message,true);
+    return;
+  }
+
+  message('adminMsg','Կարգավիճակը հաջողությամբ փոխվեց։');
+  await loadStudents();
+}
+
+document.querySelectorAll('.filterBtn').forEach(btn=>{
+  btn.onclick=()=>{
+    currentFilter=btn.dataset.filter;
+    renderStudents();
+
+    document.querySelectorAll('.filterBtn').forEach(b=>{
+      b.classList.toggle('dark',b===btn);
+    });
   };
+});
+
+$('refreshBtn').onclick = loadStudents;
+
+$('adminBtn').onclick = () => show('admin');
+
+$('logoutBtn').onclick = async () => {
+  await db.auth.signOut();
+  location.reload();
+};
+
+db.auth.onAuthStateChange((event,session)=>{
+  if (event === 'SIGNED_IN' && session) {
+    currentUser = session.user;
+    setTimeout(loadUser,0);
+  }
+  if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    isAdmin = false;
+  }
+});
+
+const {data:{session}} = await db.auth.getSession();
+if (session) await loadUser();
+
 })();
 </script>
 
-</script></body></html>
+</body>
+</html>
