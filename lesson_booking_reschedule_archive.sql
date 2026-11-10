@@ -8,6 +8,7 @@ alter table public.lesson_bookings
 
 -- Authenticated students must be able to see busy slots too, so they can request a time change.
 drop policy if exists "Read available lesson slots" on public.lesson_slots;
+drop policy if exists "Read lesson slots for signed-in users" on public.lesson_slots;
 create policy "Read lesson slots for signed-in users" on public.lesson_slots
 for select to authenticated
 using (true);
