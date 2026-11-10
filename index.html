@@ -887,6 +887,65 @@ html,body{max-width:100%;overflow-x:hidden!important}
   }
 }
 
+
+/* FINAL NAV TOGGLE FIX — collapsed by default, opens on click */
+.fx-shell{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ gap:16px!important;
+ align-items:start!important;
+}
+.fx-shell>.fx-main{grid-column:1!important;grid-row:1!important;min-width:0!important;width:100%!important;max-width:100%!important}
+.fx-shell>#publicNav{
+ display:none!important;
+ position:sticky!important;
+ grid-column:2!important;
+ grid-row:1!important;
+ inset:auto!important;
+ top:14px!important;
+ width:100%!important;
+ max-width:250px!important;
+ height:calc(100vh - 28px)!important;
+ max-height:calc(100vh - 28px)!important;
+ margin:0!important;
+ transform:none!important;
+ overflow-y:auto!important;
+ z-index:50!important;
+}
+.fx-shell.nav-is-open{
+ grid-template-columns:minmax(0,1fr) minmax(215px,250px)!important;
+}
+.fx-shell.nav-is-open>#publicNav{display:flex!important}
+.fx-shell .fx-main .nav-open-btn{
+ display:inline-flex!important;
+ position:relative!important;
+ inset:auto!important;
+ z-index:60!important;
+ margin:10px 12px!important;
+ padding:11px 16px!important;
+ width:auto!important;
+ max-width:calc(100% - 24px)!important;
+ border-radius:12px!important;
+ cursor:pointer!important;
+}
+@media(max-width:650px){
+ .fx-shell{display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important}
+ .fx-shell.nav-is-open{display:flex!important;flex-direction:column!important}
+ .fx-shell>#publicNav{
+  order:0!important;position:relative!important;inset:auto!important;
+  width:100%!important;max-width:100%!important;height:auto!important;
+  max-height:0!important;min-height:0!important;padding:0 12px!important;
+  margin:0!important;overflow:hidden!important;transform:none!important;
+  border-radius:0 0 16px 16px!important;
+ }
+ .fx-shell.nav-is-open>#publicNav{
+  display:flex!important;max-height:75vh!important;height:auto!important;
+  padding:12px!important;overflow-y:auto!important;
+ }
+ .fx-shell>.fx-main{order:1!important;width:100%!important;max-width:100%!important}
+ .fx-shell .fx-main .nav-open-btn{display:inline-flex!important;margin:10px 12px!important}
+}
+
 </style>
 </head>
 
@@ -2198,17 +2257,17 @@ function initPublicNavigation(){
  const nav=$('publicNav');if(!nav)return;
  const pages={home:['hero','publicBookingCalendar','courseSection','weatherSection'],registration:['publicBookingCalendar','register'],about:['aboutPage'],ani:['aniPage'],instructors:['instructorsPage'],licenses:['licensesPage'],reviews:['reviewsPage'],grounds:['groundsPage'],routes:['routesPage'],offices:['examOffices'],documents:['documentsPage'],links:['linksPage'],content:['publishedBlocks'],media:['publishedMedia']};
  const all=['hero','publicBookingCalendar','courseSection','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
- function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
+ function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');window.scrollTo({top:0,behavior:'smooth'});}
  nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
- $('openPublicNav').onclick=()=>nav.classList.toggle('open');
- $('closePublicNav').onclick=()=>nav.classList.remove('open');
+ $('openPublicNav').onclick=(e)=>{e.stopPropagation();const opened=nav.classList.toggle('open');document.querySelector('.fx-shell')?.classList.toggle('nav-is-open',opened);};
+ $('closePublicNav').onclick=()=>{nav.classList.remove('open');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');};
  // Փակել մենյուն միայն այն ժամանակ, երբ սեղմում են մենյուից դուրս։
  document.addEventListener('click',e=>{
   if(!nav.classList.contains('open'))return;
   if(nav.contains(e.target)||$('openPublicNav')?.contains(e.target))return;
-  nav.classList.remove('open');
+  nav.classList.remove('open');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');
  });
- document.addEventListener('keydown',e=>{if(e.key==='Escape')nav.classList.remove('open');});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){nav.classList.remove('open');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');}});
  $('aniHomeLogo').onclick=()=>go('home');$('aniHomeLogo').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go('home');}};
  document.querySelectorAll('.public-back-home').forEach(b=>b.addEventListener('click',()=>go('home')));go('home');
 }
