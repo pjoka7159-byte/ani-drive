@@ -726,7 +726,7 @@ async function loadAdminBookingPanel(){
  const {data,error}=await db.from('lesson_bookings').select('*,lesson_slots(slot_date,slot_time)').order('created_at',{ascending:false});
  if(error){list.textContent='Բեռնումը ձախողվեց։ '+error.message;return;}
  if(!data?.length)list.textContent='Ամրագրումներ դեռ չկան։';
- (data||[]).forEach(b=>{
+ (data||[]).slice().sort((a,b)=>String(a.lesson_slots?.slot_date||'').localeCompare(String(b.lesson_slots?.slot_date||''))||String(a.lesson_slots?.slot_time||'').localeCompare(String(b.lesson_slots?.slot_time||''))).forEach(b=>{
   const item=document.createElement('div');item.className='admin-item';
   const student=students.find(x=>x.id===b.student_id)||{};
   const p=document.createElement('p');p.textContent='👤 '+b.student_name+' · '+(student.phone||b.student_phone)+' · '+(student.email||b.student_email);
