@@ -860,7 +860,7 @@ async function loadStudent() {
   $('studentInfo').replaceChildren(info);
 }
 
-function normalizePhoneSearch(value){return String(value||'').replace(/\\D/g,'');}
+function normalizePhoneSearch(value){return String(value||'').replace(/[^0-9]/g,'');}
 function renderAdminChatStudentOptions(){
  const sel=$('adminChatStudent'),search=$('adminChatPhoneSearch'),info=$('adminChatSearchInfo');
  if(!sel)return;
