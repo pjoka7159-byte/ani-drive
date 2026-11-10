@@ -28,7 +28,7 @@ create policy "Admins manage messages" on public.admin_messages
  using (exists(select 1 from public.admins a where a.user_id=auth.uid()))
  with check (exists(select 1 from public.admins a where a.user_id=auth.uid()));
 -- Add the two approved administrator accounts (only accounts already registered in Supabase Auth):
-insert into public.admins(user_id)
-select id from auth.users
+insert into public.admins(user_id,email)
+select id,email from auth.users
 where lower(email) in ('pjoka7159@gmail.com','graergrigoryan1986@gmail.com')
 on conflict do nothing;
