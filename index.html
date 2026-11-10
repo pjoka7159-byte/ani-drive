@@ -744,6 +744,15 @@ async function loadContentTools(){
   item.append(h,p,edit,del);mb.append(item);
  });
 }
+const contentTypeField=$('contentForm').elements.contentType;
+const contentValueField=$('contentForm').elements.contentValue;
+function updateContentValueRequirement(){
+ const needsUrl=contentTypeField.value==='link';
+ contentValueField.required=needsUrl;
+ contentValueField.placeholder=needsUrl?'Արտաքին հղման URL (պարտադիր)':'Տեքստ կամ URL (ըստ ցանկության)';
+}
+contentTypeField.addEventListener('change',updateContentValueRequirement);
+updateContentValueRequirement();
 $('contentForm').onsubmit=async e=>{
  e.preventDefault();if(!isAdmin)return;
  const f=new FormData(e.target),key=String(f.get('contentKey')).trim();
