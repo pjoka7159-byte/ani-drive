@@ -574,6 +574,35 @@ body{min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#0b3150 0,tra
 @media(max-width:900px){.fx-shell{grid-template-columns:190px minmax(0,1fr);gap:9px;padding:7px}.fx-shell>.public-nav,.fx-shell #publicNav{width:190px!important;padding:9px!important}.fx-shell .public-nav>button:not(.public-nav-head button){font-size:10px!important;padding:8px 6px!important}.fx-main>header .wrap{padding:0 14px!important}}
 @media(max-width:650px){.fx-shell{display:block;padding:0}.fx-shell>.public-nav,.fx-shell #publicNav{position:fixed!important;left:8px!important;top:8px!important;bottom:8px!important;width:min(285px,84vw)!important;height:auto!important;max-height:none!important;z-index:100000!important;transform:translateX(-110%)!important;border-radius:0 18px 18px 0!important;transition:transform .25s!important}.fx-shell #publicNav.open{transform:translateX(0)!important}.fx-shell .nav-open-btn{display:block!important;position:fixed!important;z-index:99999!important;left:8px!important;top:8px!important}.fx-main{border-radius:0;border-left:0;border-right:0}.fx-main>header .wrap{padding-left:58px!important}.fx-main>.hero{height:235px!important;min-height:235px!important}.fx-main .section{padding:30px 0!important}.fx-main .public-booking-card{padding:13px!important}.fx-main .public-booking-card .calendar-day{min-height:40px!important}}
 
+
+/* FUTURISTIC DRIVE — final neon polish */
+:root{--fx-blue:#00baff;--fx-cyan:#8af2ff;--fx-glow:0 0 34px #00baff30}
+.fx-main{position:relative}
+.fx-main:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.16;background-image:linear-gradient(#1c91c522 1px,transparent 1px),linear-gradient(90deg,#1c91c522 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 75%)}
+.fx-main>*{position:relative}
+.fx-main>.hero{isolation:isolate;overflow:hidden}
+.fx-main>.hero:after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 70%,#00c8ff30,transparent 48%),linear-gradient(115deg,transparent 25%,#57e5ff12 50%,transparent 75%);background-size:auto,220% 100%;animation:fx-scan 9s linear infinite}
+@keyframes fx-scan{to{background-position:center, -220% 0}}
+.fx-main>.hero .ani-car-scene{filter:drop-shadow(0 18px 35px #00baff35)}
+.fx-main .ani-car-caption{letter-spacing:4px;text-transform:uppercase}
+.fx-main .public-booking-card,.fx-main .card,.fx-main .panel,.fx-main .feature-detail,.fx-main .admin-item{position:relative;overflow:hidden;transition:transform .22s,border-color .22s,box-shadow .22s}
+.fx-main .public-booking-card:hover,.fx-main .card:hover,.fx-main .panel:hover,.fx-main .feature-detail:hover{transform:translateY(-3px);border-color:#38d9ff!important;box-shadow:0 14px 38px #00baff20!important}
+.fx-main .public-booking-heading h2,.fx-main .section h2{letter-spacing:.3px;text-shadow:0 0 22px #20baff30}
+.fx-main .public-booking-heading>span{border-radius:999px;padding:8px 15px;letter-spacing:2px}
+.fx-main .public-booking-card{border-radius:24px!important;background:linear-gradient(145deg,#102941,#081827)!important}
+.fx-main .calendar-head strong{color:#a9edff!important;letter-spacing:1px}
+.fx-main .calendar-day.available,.fx-main .admin-time-list button.available-time{box-shadow:inset 0 0 14px #16e0b02b,0 0 12px #16e0b018}
+.fx-main .calendar-day.selected,.fx-main .slot-choice.selected{outline:2px solid #8af2ff!important;outline-offset:2px}
+.fx-main input:focus,.fx-main select:focus,.fx-main textarea:focus{outline:2px solid #20caff!important;outline-offset:2px;box-shadow:0 0 18px #00baff30!important}
+.fx-main button,.fx-main .btn{transition:transform .18s,filter .18s,box-shadow .18s!important}
+.fx-main button:hover,.fx-main .btn:hover{transform:translateY(-2px);filter:brightness(1.15)}
+.fx-shell>.public-nav,.fx-shell #publicNav{backdrop-filter:blur(18px);background:linear-gradient(155deg,#06111fef,#092d49f2 65%,#041a2bef)!important}
+.fx-shell .public-nav-head{letter-spacing:2px!important;text-shadow:0 0 16px #20caff55}
+.fx-shell .public-nav>button.active{box-shadow:0 0 22px #00c8ff44!important}
+.fx-main footer{position:relative;overflow:hidden}
+@media(prefers-reduced-motion:reduce){.fx-main:before,.fx-main>.hero:after{animation:none!important}.fx-main button,.fx-main .btn,.fx-main .card,.fx-main .panel{transition:none!important}}
+@media(max-width:650px){.fx-main>.hero{height:260px!important}.fx-main .public-booking-heading h2{font-size:23px!important}.fx-main .public-booking-card{border-radius:17px!important}}
+
 </style>
 </head>
 
