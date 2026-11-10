@@ -247,6 +247,31 @@ body.account-view #admin>.wrap{max-width:1200px}
 @keyframes introFadeOut{to{opacity:0;visibility:hidden;pointer-events:none}}
 @media(prefers-reduced-motion:reduce){#aniIntro,.intro-content,.intro-brand,.intro-road{animation:none!important}#aniIntro{display:none}}
 
+ 
+/* Keep the full left navigation visible while the administrator works */
+body.account-view #publicNav,
+body.account-view .public-nav{
+  display:flex!important;position:fixed!important;visibility:visible!important;opacity:1!important;
+  left:12px!important;top:88px!important;bottom:12px!important;width:245px!important;
+  height:auto!important;transform:translateX(0)!important;z-index:2500!important;
+  pointer-events:auto!important;
+}
+body.account-view #admin{
+  display:block!important;margin-left:270px!important;width:calc(100% - 282px)!important;
+  padding-top:8px!important;
+}
+body.account-view #admin>.wrap{width:100%!important;max-width:1200px!important;margin:0 auto!important}
+body.account-view .nav-open-btn{display:none!important}
+@media(max-width:850px){
+  body.account-view #publicNav,body.account-view .public-nav{
+    left:0!important;top:0!important;bottom:0!important;width:min(245px,78vw)!important;
+    border-radius:0 18px 18px 0!important;transform:translateX(0)!important;
+  }
+  body.account-view #admin{margin-left:min(255px,78vw)!important;width:calc(100% - min(255px,78vw))!important;padding:12px 8px!important}
+  body.account-view #admin>.wrap{width:100%!important}
+  body.account-view .nav-open-btn{display:none!important}
+}
+
 </style>
 </head>
 
