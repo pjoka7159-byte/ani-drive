@@ -290,11 +290,37 @@ a {color:inherit}
 <form id="contentForm">
 <input name="contentKey" required placeholder="Բաժնի բանալի (օր. hero_title)">
 <input name="contentLabel" required placeholder="Բաժնի անվանումը">
-<select name="contentType"><option value="text">Տեքստ</option><option value="image">Նկարի հղում</option></select>
-<input name="contentValue" required placeholder="Տեքստ կամ նկարի HTTPS հղում">
+<select name="contentType"><option value="text">Տեքստ</option><option value="image">Նկարի հղում</option><option value="video">Տեսանյութի հղում</option><option value="link">Արտաքին հղում</option></select>
+<input name="contentValue" required placeholder="Տեքստ, URL կամ մեդիայի հղում">
+<label><input type="checkbox" name="isPublished" checked style="width:auto"> Հրապարակված</label>
 <button class="blue">Պահպանել բաժինը</button>
 </form>
 <div id="contentList"></div>
+</div>
+<div class="panel">
+<h3>Նկարների և տեսանյութերի վերբեռնում</h3>
+<p class="muted">Ընտրեք առավելագույնը 20 նկար կամ տեսանյութ։ Ֆայլերը կպահվեն Supabase Storage-ում։</p>
+<form id="mediaForm">
+<input type="file" name="mediaFiles" accept="image/*,video/*" multiple required>
+<input name="mediaTitle" placeholder="Նկարների/տեսանյութերի ընդհանուր անվանումը">
+<button class="blue">Վերբեռնել ընտրված ֆայլերը</button>
+</form>
+<div id="mediaList"></div>
+<p id="mediaMsg" class="message"></p>
+</div>
+<div class="panel">
+<h3>Գրանցման և մուտքի կառավարում</h3>
+<p class="muted">Միացնել կամ անջատել կայքի գրանցման և մուտքի բաժինները։</p>
+<div class="row">
+<button id="toggleRegistration" class="gray">Գրանցման վիճակ՝ բեռնում...</button>
+<button id="toggleLogin" class="gray">Մուտքի վիճակ՝ բեռնում...</button>
+</div>
+<p class="muted">Կարգավորումները պահպանվում են կայքի բովանդակության բաժնում։</p>
+</div>
+<div class="panel">
+<h3>Ադմինների ցանկ</h3>
+<p class="muted">Երկու հաստատված ադմինների հաշիվները կառավարվում են Supabase Auth-ից և admins աղյուսակից։</p>
+<div id="adminsList">Բեռնում...</div>
 </div>
 <div class="panel">
 <h3>Հաղորդագրություններ աշակերտներին</h3>
@@ -596,6 +622,15 @@ function renderStudents() {
     const status = document.createElement('p');
     status.append('Կարգավիճակ՝ ',makeStatus(student.status));
 
+    const details = document.createElement('button');
+    details.textContent = 'Ամբողջական տվյալներ';
+    details.className = 'blue';
+    details.onclick = () => {
+      const rows = Object.entries(student).map(([k,v]) =>
+        k + ': ' + (v === null ? '' : String(v))
+      ).join('\\n');
+      alert('Աշակերտի ամբողջական տվյալներ\\n\\n' + rows);
+    };
     const date = document.createElement('p');
     date.className = 'muted';
     date.textContent = 'Գրանցում՝ ' +
@@ -626,7 +661,7 @@ function renderStudents() {
       addButton('Ապաշրջափակել','pending','good');
     }
 
-    item.append(title,email,phone,status,date,actions);
+    item.append(title,email,phone,status,details,date,actions);
     list.appendChild(item);
   });
 }
@@ -657,16 +692,19 @@ async function updateStatus(id,status) {
 
 async function loadContentTools(){
  if(!isAdmin)return;
+ await loadMediaFiles();
+ await loadAdminAccounts();
+ await loadSiteSwitches();
  const box=$('contentList'); box.textContent='Բեռնում...';
  const {data,error}=await db.from('site_content').select('*').order('content_key');
  if(error){box.textContent='Բովանդակության աղյուսակը հասանելի չէ։ Կիրառեք admin_setup.sql-ը։ '+error.message;return;}
  box.replaceChildren();
  (data||[]).forEach(row=>{
   const item=document.createElement('div');item.className='admin-item';
-  const h=document.createElement('strong');h.textContent=row.label+' ('+row.content_key+')';
+  const h=document.createElement('strong');h.textContent=row.label+' ('+row.content_key+')'+(row.is_published===false?' — ՍԵՎԱԳԻՐ':' — ՀՐԱՊԱՐԱԿՎԱԾ');
   const v=document.createElement('p');v.textContent=row.content_value;
   const edit=document.createElement('button');edit.textContent='Խմբագրել';edit.className='gray';
-  edit.onclick=()=>{ $('contentForm').elements.contentKey.value=row.content_key;$('contentForm').elements.contentLabel.value=row.label;$('contentForm').elements.contentType.value=row.content_type;$('contentForm').elements.contentValue.value=row.content_value; };
+  edit.onclick=()=>{ $('contentForm').elements.contentKey.value=row.content_key;$('contentForm').elements.contentLabel.value=row.label;$('contentForm').elements.contentType.value=row.content_type;$('contentForm').elements.contentValue.value=row.content_value;$('contentForm').elements.isPublished.checked=row.is_published!==false; };
   const del=document.createElement('button');del.textContent='Ջնջել';del.className='danger';
   del.onclick=async()=>{if(!confirm('Ջնջե՞լ այս բաժինը։'))return;const r=await db.from('site_content').delete().eq('id',row.id);if(r.error)message('adminMsg',r.error.message,true);else loadContentTools();};
   item.append(h,v,edit,del);box.append(item);
@@ -679,15 +717,17 @@ async function loadContentTools(){
   const item=document.createElement('div');item.className='admin-item';
   const h=document.createElement('strong');h.textContent=row.title;
   const p=document.createElement('p');p.textContent=row.body;
+  const edit=document.createElement('button');edit.className='gray';edit.textContent='Խմբագրել';
+  edit.onclick=async()=>{const title=prompt('Նոր վերնագիր',row.title);if(title===null)return;const body=prompt('Նոր հաղորդագրություն',row.body);if(body===null)return;const r=await db.from('admin_messages').update({title,body}).eq('id',row.id);if(r.error)message('adminMsg',r.error.message,true);else loadContentTools();};
   const del=document.createElement('button');del.className='danger';del.textContent='Ջնջել';
   del.onclick=async()=>{if(!confirm('Ջնջե՞լ հաղորդագրությունը։'))return;const r=await db.from('admin_messages').delete().eq('id',row.id);if(r.error)message('adminMsg',r.error.message,true);else loadContentTools();};
-  item.append(h,p,del);mb.append(item);
+  item.append(h,p,edit,del);mb.append(item);
  });
 }
 $('contentForm').onsubmit=async e=>{
  e.preventDefault();if(!isAdmin)return;
  const f=new FormData(e.target),key=String(f.get('contentKey')).trim();
- const payload={content_key:key,label:String(f.get('contentLabel')).trim(),content_type:String(f.get('contentType')),content_value:String(f.get('contentValue')).trim(),updated_at:new Date().toISOString()};
+ const payload={content_key:key,label:String(f.get('contentLabel')).trim(),content_type:String(f.get('contentType')),content_value:String(f.get('contentValue')).trim(),is_published:f.get('isPublished')==='on',updated_at:new Date().toISOString()};
  const {error}=await db.from('site_content').upsert(payload,{onConflict:'content_key'});
  if(error){message('adminMsg','Չհաջողվեց պահպանել։ '+error.message,true);return;}
  message('adminMsg','Բաժինը պահպանվեց տվյալների բազայում։');e.target.reset();loadContentTools();
@@ -699,6 +739,67 @@ $('messageForm').onsubmit=async e=>{
  if(error){message('adminMsg','Չհաջողվեց ավելացնել հաղորդագրությունը։ '+error.message,true);return;}
  message('adminMsg','Հաղորդագրությունը պահպանվեց։');e.target.reset();loadContentTools();
 };
+
+
+async function loadMediaFiles(){
+ const box=$('mediaList');if(!box)return;box.textContent='Բեռնում...';
+ const {data,error}=await db.from('media_assets').select('*').order('created_at',{ascending:false});
+ if(error){box.textContent='Մեդիայի ցանկը հասանելի չէ։ Կիրառեք թարմացված admin_setup.sql-ը։ '+error.message;return;}
+ box.replaceChildren();
+ (data||[]).forEach(row=>{
+  const item=document.createElement('div');item.className='admin-item';
+  const name=document.createElement('p');name.textContent=row.title||row.file_name;
+  const url=document.createElement('a');url.href=row.public_url;url.target='_blank';url.rel='noopener';url.textContent='Բացել ֆայլը';
+  const del=document.createElement('button');del.className='danger';del.textContent='Ջնջել';
+  del.onclick=async()=>{if(!confirm('Ջնջե՞լ ֆայլը։'))return;const path=row.storage_path;const rm=await db.storage.from('site-media').remove([path]);if(rm.error){message('mediaMsg',rm.error.message,true);return;}const dr=await db.from('media_assets').delete().eq('id',row.id);if(dr.error)message('mediaMsg',dr.error.message,true);else loadMediaFiles();};
+  item.append(name,url,del);box.append(item);
+ });
+}
+$('mediaForm').onsubmit=async e=>{
+ e.preventDefault();if(!isAdmin)return;
+ const files=Array.from(e.target.elements.mediaFiles.files||[]);
+ if(!files.length)return;
+ if(files.length>20){message('mediaMsg','Միաժամանակ կարելի է վերբեռնել առավելագույնը 20 ֆայլ։',true);return;}
+ const btn=e.target.querySelector('button');btn.disabled=true;
+ try{
+  for(const file of files){
+   if(!file.type.startsWith('image/')&&!file.type.startsWith('video/'))throw new Error('Թույլատրվում են միայն նկարներ և տեսանյութեր։');
+   const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+   const path=currentUser.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'_'+safe;
+   const up=await db.storage.from('site-media').upload(path,file,{upsert:false});
+   if(up.error)throw up.error;
+   const pub=db.storage.from('site-media').getPublicUrl(path).data.publicUrl;
+   const ins=await db.from('media_assets').insert({file_name:file.name,title:e.target.elements.mediaTitle.value.trim()||file.name,mime_type:file.type,storage_path:path,public_url:pub,uploaded_by:currentUser.id});
+   if(ins.error)throw ins.error;
+  }
+  message('mediaMsg','Ֆայլերը հաջողությամբ վերբեռնվեցին։');e.target.reset();await loadMediaFiles();
+ }catch(err){message('mediaMsg','Վերբեռնումը չհաջողվեց։ '+(err.message||''),true);}
+ finally{btn.disabled=false;}
+};
+async function loadAdminAccounts(){
+ const box=$('adminsList');if(!box)return;
+ const {data,error}=await db.from('admins').select('email,user_id');
+ if(error){box.textContent='Ադմինների ցանկը բեռնել չհաջողվեց։ '+error.message;return;}
+ box.replaceChildren();
+ (data||[]).forEach(a=>{const p=document.createElement('p');p.textContent=(a.email||a.user_id)+' — Ակտիվ ադմին';box.append(p);});
+}
+async function readSwitch(key,defaultValue){
+ const {data}=await db.from('site_content').select('content_value').eq('content_key',key).maybeSingle();
+ return data?data.content_value!=='false':defaultValue;
+}
+async function setSwitch(key,value,label){
+ const {error}=await db.from('site_content').upsert({content_key:key,label,content_type:'text',content_value:String(value),is_published:true,updated_at:new Date().toISOString()},{onConflict:'content_key'});
+ if(error){message('adminMsg',error.message,true);return;}
+ await loadSiteSwitches();
+}
+async function loadSiteSwitches(){
+ const reg=await readSwitch('registration_enabled',true),login=await readSwitch('login_enabled',true);
+ const rb=$('toggleRegistration'),lb=$('toggleLogin');
+ rb.textContent='Գրանցում՝ '+(reg?'միացված':'անջատված');rb.className=reg?'good':'gray';
+ lb.textContent='Մուտք՝ '+(login?'միացված':'անջատված');lb.className=login?'good':'gray';
+ rb.onclick=()=>setSwitch('registration_enabled',!reg,'Գրանցման բաժին');
+ lb.onclick=()=>setSwitch('login_enabled',!login,'Մուտքի բաժին');
+}
 
 document.querySelectorAll('.filterBtn').forEach(btn=>{
   btn.onclick=()=>{
