@@ -23,3 +23,6 @@ using (
 );
 
 -- Existing admin update policy already permits confirmation/rejection.
+
+-- Required registration choice: exam route or driving skills.
+alter table public.students add column if not exists driving_goal text;
