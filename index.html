@@ -603,6 +603,44 @@ body{min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#0b3150 0,tra
 @media(prefers-reduced-motion:reduce){.fx-main:before,.fx-main>.hero:after{animation:none!important}.fx-main button,.fx-main .btn,.fx-main .card,.fx-main .panel{transition:none!important}}
 @media(max-width:650px){.fx-main>.hero{height:260px!important}.fx-main .public-booking-heading h2{font-size:23px!important}.fx-main .public-booking-card{border-radius:17px!important}}
 
+
+/* NAVIGATION SAFETY — never cover page content */
+/* Desktop: reserve a dedicated column for navigation; content stays in its own column. */
+.fx-shell{grid-template-columns:minmax(215px,250px) minmax(0,1fr)!important;gap:20px!important}
+.fx-shell>.public-nav,.fx-shell #publicNav{position:sticky!important;inset:auto!important;top:14px!important;z-index:5!important;min-width:0!important;max-width:100%!important}
+.fx-main{min-width:0!important;width:100%!important;max-width:100%!important;overflow:visible!important}
+.fx-main>*{min-width:0;max-width:100%}
+.fx-main img,.fx-main video,.fx-main iframe{max-width:100%}
+.fx-main button,.fx-main a,.fx-main input,.fx-main select,.fx-main textarea{max-width:100%}
+.fx-main .row{flex-wrap:wrap}
+.fx-main table{display:block;max-width:100%;overflow-x:auto}
+.fx-shell .nav-open-btn{position:static!important;display:none!important}
+@media(max-width:900px) and (min-width:651px){
+ .fx-shell{grid-template-columns:175px minmax(0,1fr)!important;gap:10px!important;padding:8px!important}
+ .fx-shell>.public-nav,.fx-shell #publicNav{width:175px!important;max-width:175px!important}
+ .fx-main>header .wrap{padding:0 12px!important}
+}
+@media(max-width:650px){
+ .fx-shell{display:flex!important;flex-direction:column!important;gap:0!important;padding:0!important;width:100%!important;max-width:100%!important}
+ .fx-shell>.public-nav,.fx-shell #publicNav{
+  order:0!important;position:relative!important;inset:auto!important;top:auto!important;left:auto!important;
+  width:100%!important;max-width:100%!important;height:auto!important;max-height:0!important;
+  min-height:0!important;padding:0 12px!important;margin:0!important;overflow:hidden!important;
+  transform:none!important;display:flex!important;visibility:visible!important;opacity:1!important;
+  border-radius:0 0 18px 18px!important;z-index:10!important;transition:max-height .25s ease,padding .25s ease!important;
+ }
+ .fx-shell #publicNav.open{max-height:72vh!important;padding:12px!important;overflow-y:auto!important}
+ .fx-main{order:1!important;width:100%!important;max-width:100%!important;border-radius:0!important;border-left:0!important;border-right:0!important;overflow:visible!important}
+ .fx-main .nav-open-btn,.fx-shell .nav-open-btn{
+  display:inline-flex!important;position:relative!important;inset:auto!important;z-index:11!important;
+  margin:10px 12px!important;width:auto!important;max-width:calc(100% - 24px)!important;
+  border-radius:12px!important;box-shadow:none!important
+ }
+ .fx-main>header .wrap{padding:0 14px!important}
+ .fx-main>.hero{height:260px!important;min-height:220px!important}
+ .fx-main .row{flex-wrap:wrap}
+}
+
 </style>
 </head>
 
@@ -2035,7 +2073,7 @@ function initFuturisticLayout(){
  shell.append(nav,main);
  Array.from(document.body.children).forEach(node=>{
   if(node===shell||node.tagName==='SCRIPT')return;
-  if(node===opener){shell.append(node);return;}
+  if(node===opener){main.prepend(node);return;}
   if(node!==nav)main.append(node);
  });
 }
