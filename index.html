@@ -124,6 +124,7 @@ input,select {
   font-weight:bold;
 }
 .pending {background:#fff0c2;color:#805600}
+.cancelled-waiting{background:#fff1b8;border:1px solid #e6b422;border-radius:12px;padding:12px;margin:10px 0;color:#765400;}
 .approved {background:#d8f5e4;color:#116438}
 .rejected {background:#ffe0e0;color:#a31b1b}
 .blocked {background:#e2e5e9;color:#333}
@@ -788,7 +789,7 @@ async function loadStudentBookings(){
  const box=$('studentBookings');box.replaceChildren();
  const {data,error}=await db.from('lesson_bookings').select('id,status,created_at,slot_id,requested_slot_id,archived_at,lesson_slots(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)').eq('student_id',currentUser.id).is('archived_at',null).order('created_at',{ascending:false});
  if(error){box.textContent='Ամրագրումները հասանելի չեն։ '+error.message;return;}if(!data?.length){box.textContent='Դեռ ամրագրումներ չունեք։';return;}
- data.forEach(b=>{const row=document.createElement('div');row.className='admin-item';const p=document.createElement('p');p.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' — '+({pending:'Սպասում է հաստատման',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);row.append(p);
+ data.forEach(b=>{const row=document.createElement('div');row.className='admin-item';const p=document.createElement('p');p.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' — '+({pending:'Սպասում է հաստատման',approved:'Հաստատված',rejected:'Մերժված',cancelled:'Չեղարկված՝ սպասման ռեժիմում'}[b.status]||b.status);row.append(p);
  if(b.requested_slot){const req=document.createElement('p');req.className='booking-change-request';req.textContent='🕓 Փոփոխության հայտ՝ '+slotLabel(b.requested_slot)+' · սպասում է ադմինի հաստատմանը';row.append(req);}
  if(['pending','approved'].includes(b.status)){const wrap=document.createElement('div');wrap.className='reschedule-controls';const sel=document.createElement('select');sel.innerHTML='<option value="">Ընտրել նոր օր և ժամ</option>';studentAvailableSlots.filter(x=>x.id!==b.slot_id).forEach(sl=>sel.add(new Option(slotLabel(sl)+(sl.is_available?' · Ազատ':' · Զբաղված'),sl.id)));const change=document.createElement('button');change.type='button';change.className='blue';change.textContent='Փոխել ժամը';change.onclick=()=>changeStudentBookingTime(b.id,sel.value);wrap.append(sel,change);row.append(wrap);const c=document.createElement('button');c.type='button';c.className='danger';c.textContent='Չեղարկել դասաժամը';c.onclick=()=>cancelBooking(b.id,'student');row.append(c);}box.append(row);});
 }
@@ -800,7 +801,12 @@ async function changeStudentBookingTime(id,slotId){
  if(error){message('studentBookingMsg','Փոփոխությունը չհաջողվեց։ '+error.message,true);return;}
  playNotice();message('studentBookingMsg',target.is_available?'✅ Ազատ ժամը ավտոմատ ամրագրվեց։':'🔔 Ժամը զբաղված է․ փոփոխության հայտը ուղարկվեց ադմինին։');await loadStudentSlots();await loadStudentBookings();
 }
-async function cancelBooking(id,role){if(!confirm('Չեղարկե՞լ այս դասաժամը։'))return;const {error}=await db.from('lesson_bookings').delete().eq('id',id);if(error){message(role==='admin'?'slotMsg':'studentBookingMsg','Չեղարկել չհաջողվեց։ '+error.message,true);return;}if(role==='admin')await loadAdminBookingPanel();else{await loadStudentSlots();await loadStudentBookings();}}
+async function cancelBooking(id,role){
+ if(!confirm('Չեղարկե՞լ այս դասաժամը։ Այն 120 ժամ կմնա դեղին՝ սպասման ռեժիմում, ապա կտեղափոխվի արխիվ։'))return;
+ const {error}=await db.from('lesson_bookings').update({status:'cancelled',cancelled_at:new Date().toISOString(),requested_slot_id:null}).eq('id',id);
+ if(error){message(role==='admin'?'slotMsg':'studentBookingMsg','Չեղարկել չհաջողվեց։ '+error.message,true);return;}
+ playNotice();if(role==='admin')await loadAdminBookingPanel();else{await loadStudentSlots();await loadStudentBookings();}
+}
 $('studentBookingForm').onsubmit=async e=>{
  e.preventDefault();const slot_id=e.target.elements.slot.value;if(!slot_id){message('studentBookingMsg','Նախ ընտրեք ազատ օրը և ժամը։',true);return;}const chosen=studentAvailableSlots.find(x=>x.id===slot_id);if(!chosen||!chosen.is_available){message('studentBookingMsg','Այս ժամը զբաղված է։ Նոր ամրագրումը հնարավոր է միայն կանաչ՝ ազատ ժամի համար։ Փոփոխության հայտ ուղարկեք արդեն գրանցված դասաժամի կողքի ընտրացանկից։',true);return;}
  const {data:s}=await db.from('students').select('first_name,last_name,email,phone').eq('id',currentUser.id).maybeSingle();
@@ -858,15 +864,15 @@ async function loadAdminBookingPanel(){
  const {data,error}=await db.from('lesson_bookings').select('*,lesson_slots(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)').order('created_at',{ascending:false});
  if(error){list.textContent='Բեռնումը ձախողվեց։ '+error.message;return;}
  const visible=(data||[]).filter(x=>adminBookingArchiveView?!!x.archived_at:!x.archived_at);if(!visible.length)list.textContent=adminBookingArchiveView?'Արխիվում դասաժամեր դեռ չկան։':'Ակտիվ ամրագրումներ դեռ չկան։';
- visible.forEach(b=>{const item=document.createElement('div');item.className='admin-item';const student=students.find(x=>x.id===b.student_id)||{};
+ visible.forEach(b=>{const item=document.createElement('div');item.className='admin-item';if(b.status==='cancelled')item.classList.add('cancelled-waiting');const student=students.find(x=>x.id===b.student_id)||{};
  const p=document.createElement('p');p.textContent='👤 '+b.student_name+' · '+(student.phone||b.student_phone)+' · '+(student.email||b.student_email);
  const d=document.createElement('p');d.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' · '+({pending:'Սպասման մեջ',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);
  const details=document.createElement('p');details.className='muted';details.textContent='Տարիք՝ '+(student.age||'—')+' · Սեռ՝ '+(student.gender||'—')+' · Ուսուցում՝ '+(student.study_type||'—')+' · Բնակավայր՝ '+(student.residence||'—')+' · Քննական բաժին՝ '+(student.exam_location||'—');item.append(p,d,details);
  if(b.requested_slot){const req=document.createElement('p');req.className='booking-change-request';req.textContent='🔔 Նոր ժամի հայտ՝ '+slotLabel(b.requested_slot);item.append(req);const okReq=document.createElement('button');okReq.type='button';okReq.className='good';okReq.textContent='Հաստատել փոփոխությունը';okReq.onclick=()=>approveBookingTimeRequest(b);item.append(okReq);}
- if(!adminBookingArchiveView&&['pending','approved'].includes(b.status)){const wrap=document.createElement('div');wrap.className='reschedule-controls';const sel=document.createElement('select');sel.innerHTML='<option value="">Ընտրել նոր ազատ ժամ</option>';adminAllLessonSlots.filter(x=>x.id!==b.slot_id&&x.is_available).forEach(sl=>sel.add(new Option(slotLabel(sl),sl.id)));const move=document.createElement('button');move.type='button';move.className='blue';move.textContent='Փոխել անմիջապես';move.onclick=()=>adminMoveBooking(b.id,sel.value);wrap.append(sel,move);item.append(wrap);}
+ if(!adminBookingArchiveView&&['pending','approved'].includes(b.status)){const wrap=document.createElement('div');wrap.className='reschedule-controls';const sel=document.createElement('select');sel.innerHTML='<option value="">Ընտրել նոր ազատ ժամ</option>';adminAllLessonSlots.filter(x=>x.id!==b.slot_id&&x.is_available).forEach(sl=>sel.add(new Option(slotLabel(sl),sl.id)));const move=document.createElement('button');move.type='button';move.className='blue';move.textContent='✏️ Փոփոխել օրը և ժամը';move.onclick=()=>adminMoveBooking(b.id,sel.value);wrap.append(sel,move);item.append(wrap);}
  if(!adminBookingArchiveView&&b.status==='pending'){const ok=document.createElement('button');ok.className='good';ok.textContent='Հաստատել';ok.onclick=()=>changeBookingStatus(b.id,'approved');const no=document.createElement('button');no.className='danger';no.textContent='Մերժել';no.onclick=()=>changeBookingStatus(b.id,'rejected');item.append(ok,no);}
  const archive=document.createElement('button');archive.type='button';archive.className='gray';archive.textContent=adminBookingArchiveView?'Վերականգնել':'📦 Տեղափոխել արխիվ';archive.onclick=()=>archiveLessonBooking(b.id,!adminBookingArchiveView);item.append(archive);
- const cancel=document.createElement('button');cancel.className='danger';cancel.textContent='Չեղարկել դասաժամը';cancel.onclick=()=>cancelBooking(b.id,'admin');item.append(cancel);list.append(item);
+ const cancel=document.createElement('button');cancel.className='danger';cancel.textContent='🗑 Հեռացնել / չեղարկել';cancel.onclick=()=>cancelBooking(b.id,'admin');item.append(cancel);list.append(item);
  });
  const studentSel=$('adminBookingForm').elements.student,old=studentSel.value;studentSel.replaceChildren(new Option('Գրանցված աշակերտ (ըստ ցանկության)',''));(students||[]).forEach(st=>studentSel.add(new Option(st.first_name+' '+st.last_name+' — '+st.email,st.id)));if(old)studentSel.value=old;
 
@@ -1433,6 +1439,45 @@ function initPublicNavigation(){
  document.querySelectorAll('.public-back-home').forEach(b=>b.addEventListener('click',()=>go('home')));go('home');
 }
 
+
+async function runLessonAutoArchive(){
+ if(!isAdmin)return;
+ const {data,error}=await db.from('lesson_bookings').select('id,status,cancelled_at,lesson_slots(slot_date,slot_time)').is('archived_at',null).limit(1000);
+ if(error||!data)return;
+ const now=Date.now();
+ for(const b of data){
+  let archive=false;
+  if(b.status==='cancelled'&&b.cancelled_at)archive=now-new Date(b.cancelled_at).getTime()>=120*60*60*1000;
+  if(['approved','pending'].includes(b.status)&&b.lesson_slots){
+   const starts=new Date(b.lesson_slots.slot_date+'T'+String(b.lesson_slots.slot_time).slice(0,8));
+   if(!Number.isNaN(starts.getTime())&&starts.getTime()<now)archive=true;
+  }
+  if(archive)await db.from('lesson_bookings').update({archived_at:new Date().toISOString()}).eq('id',b.id);
+ }
+}
+async function checkStudentLessonReminder(){
+ if(!currentUser||isAdmin)return;
+ const {data,error}=await db.from('lesson_bookings').select('id,status,lesson_slots(slot_date,slot_time)').eq('student_id',currentUser.id).eq('status','approved').is('archived_at',null);
+ if(error||!data)return;
+ const now=Date.now();
+ for(const b of data){
+  if(!b.lesson_slots)continue;
+  const start=new Date(b.lesson_slots.slot_date+'T'+String(b.lesson_slots.slot_time).slice(0,8));
+  const mins=(start.getTime()-now)/60000;
+  const key='ani-drive-lesson-reminder-'+b.id+'-'+b.lesson_slots.slot_date+'-'+b.lesson_slots.slot_time;
+  if(mins>0&&mins<=60&&!localStorage.getItem(key)){
+   localStorage.setItem(key,'1');playNotice();
+   const title='🚘 Այսօր ձեր ավտովարման դասն է';
+   const body='Ձեր դասն սկսվում է ժամը '+String(b.lesson_slots.slot_time).slice(0,5)+'։';
+   if('Notification' in window){
+    if(Notification.permission==='granted')new Notification(title,{body});
+    else if(Notification.permission==='default')Notification.requestPermission().then(p=>{if(p==='granted')new Notification(title,{body});});
+   }
+   const n=document.createElement('div');n.className='cancelled-waiting';n.style.position='fixed';n.style.zIndex='99999';n.style.bottom='18px';n.style.left='18px';n.style.right='18px';n.textContent=title+' '+body;document.body.append(n);setTimeout(()=>n.remove(),12000);
+  }
+ }
+}
+
 await loadPublicBlocks();
 await loadPublicMedia();
 loadExamOffices();
@@ -1441,6 +1486,8 @@ await loadPublicAccessSettings();
 initPublicNavigation();
 const {data:{session}} = await db.auth.getSession();
 if (session) await loadUser();
+if(isAdmin){runLessonAutoArchive();setInterval(runLessonAutoArchive,60000);}
+if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentLessonReminder,60000);}
 
 })();
 </script>
