@@ -239,7 +239,7 @@ a {color:inherit}
 <form id="login">
   <input required type="email" name="email" placeholder="Էլ․ փոստ">
   <input required type="password" name="password" placeholder="Գաղտնաբառ">
-  <button class="blue">Մուտք գործել</button>
+  <button type="submit" class="blue">Մուտք գործել</button>
 </form>
 <button class="gray" id="forgotBtn" style="margin-top:12px">
   Վերականգնել գաղտնաբառը
@@ -520,24 +520,27 @@ $('signup').onsubmit = async e => {
 
 $('login').onsubmit = async e => {
   e.preventDefault();
-
   const form = new FormData(e.target);
-  const email = String(form.get('email')).trim().toLowerCase();
-  const password = String(form.get('password'));
-
-  message('loginMsg','Մուտքը ստուգվում է...');
-
-  const {data,error} = await db.auth.signInWithPassword({
-    email,password
-  });
-
-  if (error) {
-    message('loginMsg','Սխալ էլ․ փոստ կամ գաղտնաբառ։',true);
+  const email = String(form.get('email') || '').trim().toLowerCase();
+  const password = String(form.get('password') || '');
+  const btn = e.target.querySelector('button[type="submit"]');
+  if (!email || !password) {
+    message('loginMsg','Լրացրեք էլեկտրոնային փոստը և գաղտնաբառը։',true);
     return;
   }
-
-  currentUser = data.user;
-  await loadUser();
+  if (btn) btn.disabled = true;
+  message('loginMsg','Մուտքը ստուգվում է...');
+  try {
+    const {data,error} = await db.auth.signInWithPassword({email,password});
+    if (error) throw error;
+    currentUser = data.user;
+    await loadUser();
+  } catch (err) {
+    console.error('Login failed:',err);
+    message('loginMsg','Մուտքը չհաջողվեց։ '+(err.message || 'Ստուգեք տվյալները և կրկին փորձեք։'),true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 };
 
 $('forgotBtn').onclick = async () => {
