@@ -807,7 +807,7 @@ $('studentBookingForm').onsubmit=async e=>{
  if(!s){message('studentBookingMsg','Աշակերտի տվյալները չգտնվեցին։',true);return;}
  const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:currentUser.id,student_name:s.first_name+' '+s.last_name,student_email:s.email,student_phone:s.phone,status:'pending'});
  if(error){message('studentBookingMsg','Ամրագրումը չհաջողվեց․ հնարավոր է ժամը արդեն զբաղված է։ '+error.message,true);return;}
- message('studentBookingMsg','Հայտն ուղարկվեց ադմինին։ Սպասեք հաստատմանը։');await loadStudentSlots();await loadStudentBookings();
+ playNotice();message('studentBookingMsg','Հայտն ուղարկվեց ադմինին։ Սպասեք հաստատմանը։');await loadStudentSlots();await loadStudentBookings();
 };
 
 let adminCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);\nlet adminBookingArchiveView=false;\nlet adminAllLessonSlots=[];
@@ -850,6 +850,7 @@ function renderAdminAvailabilityCalendar(slots){
 }
 async function loadAdminBookingPanel(){
  if(!isAdmin)return;const list=$('adminBookings');list.replaceChildren();
+
  const {data,error}=await db.from('lesson_bookings').select('*,lesson_slots(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)').order('created_at',{ascending:false});
  if(error){list.textContent='Բեռնումը ձախողվեց։ '+error.message;return;}
  const visible=(data||[]).filter(x=>adminBookingArchiveView?!!x.archived_at:!x.archived_at);if(!visible.length)list.textContent=adminBookingArchiveView?'Արխիվում դասաժամեր դեռ չկան։':'Ակտիվ ամրագրումներ դեռ չկան։';
@@ -875,7 +876,7 @@ $('showArchivedBookings').onclick=()=>{adminBookingArchiveView=true;loadAdminBoo
 async function changeBookingStatus(id,status){
  const {error}=await db.from('lesson_bookings').update({status}).eq('id',id);
  if(error){message('slotMsg','Կարգավիճակը փոխել չհաջողվեց։ '+error.message,true);return;}
- await loadAdminBookingPanel();message('slotMsg',status==='approved'?'Ամրագրումը հաստատվեց։':'Ամրագրումը մերժվեց։');
+ playNotice();await loadAdminBookingPanel();message('slotMsg',status==='approved'?'Ամրագրումը հաստատվեց։':'Ամրագրումը մերժվեց։');
 }
 $('slotForm').onsubmit=async e=>{
  e.preventDefault();const f=new FormData(e.target);
@@ -925,7 +926,7 @@ $('adminBookingForm').onsubmit=async e=>{
  if(!name){message('adminBookingMsg','Այս հեռախոսահամարով գրանցված աշակերտ չի գտնվել։ Լրացրեք անունն ու ազգանունը։',true);return;}
  const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:s?s.id:null,student_name:name,student_email:s?.email||'',student_phone:s?.phone||phone,status:'approved'});
  if(error){message('adminBookingMsg','Ամրագրումը չհաջողվեց։ '+error.message,true);return;}
- message('adminBookingMsg',s?'Ամրագրումը հաստատվեց և կերևա աշակերտի անձնական էջում։':'Ամրագրումը հաստատվեց։ Նշված հեռախոսահամարը գրանցված հաշվի հետ չհամընկավ, ուստի անձնական էջում չի ցուցադրվի։');
+ playNotice();message('adminBookingMsg',s?'Ամրագրումը հաստատվեց և կերևա աշակերտի անձնական էջում։':'Ամրագրումը հաստատվեց։ Նշված հեռախոսահամարը գրանցված հաշվի հետ չհամընկավ, ուստի անձնական էջում չի ցուցադրվի։');
  e.target.elements.manualName.value='';e.target.elements.manualPhone.value='';e.target.elements.student.value='';e.target.elements.slot.value='';$('bookingPhoneSearch').value='';$('bookingStudentSearchInfo').textContent='Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։';
  await loadAdminBookingPanel();
 };
