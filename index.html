@@ -946,6 +946,36 @@ html,body{max-width:100%;overflow-x:hidden!important}
  .fx-shell .fx-main .nav-open-btn{display:inline-flex!important;margin:10px 12px!important}
 }
 
+
+/* MENU AT THE FAR RIGHT EDGE — desktop */
+@media(min-width:651px){
+ .fx-shell.nav-is-open{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:14px!important;
+  grid-template-columns:minmax(0,1fr) 250px!important;
+  column-gap:18px!important;
+ }
+ .fx-shell.nav-is-open>#publicNav{
+  grid-column:2!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  width:250px!important;
+  max-width:250px!important;
+  margin:0!important;
+  left:auto!important;
+  right:0!important;
+ }
+ .fx-shell.nav-is-open>.fx-main{
+  grid-column:1!important;
+  grid-row:1!important;
+  justify-self:stretch!important;
+  width:100%!important;
+  min-width:0!important;
+ }
+}
+
 </style>
 </head>
 
