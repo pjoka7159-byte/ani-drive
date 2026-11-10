@@ -312,6 +312,25 @@ body.account-view #studentArea {
   }
 }
 
+/* Գլխավոր էջի օնլայն օրացույց */
+.public-booking-section{padding:30px 0 42px;background:linear-gradient(145deg,#eef5ff,#f8fbff 55%,#fff8e8)}
+.public-booking-heading{text-align:center;margin:0 auto 18px;max-width:760px}
+.public-booking-heading>span{display:inline-block;padding:6px 14px;border-radius:30px;background:#dbeafe;color:#174b88;font-weight:800;letter-spacing:1px}
+.public-booking-heading h2{margin:10px 0 8px;color:#082c59;font-size:clamp(23px,3vw,34px)}
+.public-booking-heading p{color:#52647b;line-height:1.6;margin:0}
+.public-booking-card{max-width:850px;margin:auto;padding:clamp(14px,2.5vw,25px);border:1px solid #d4e2f3;border-radius:22px;background:#fff;box-shadow:0 14px 36px #0b315018}
+.public-booking-card .calendar-grid{gap:8px}
+.public-booking-card .calendar-day{min-height:52px;font-size:14px}
+.public-calendar-legend{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0;color:#53647a;font-size:13px}
+.public-calendar-legend span{display:flex;align-items:center;gap:7px}
+.free-dot,.busy-dot{width:10px;height:10px;border-radius:50%;display:inline-block;background:#22c55e}
+.busy-dot{background:#ef4444}
+.public-booking-card h3{margin:18px 0 8px;color:#173b65}
+.public-booking-card .admin-time-list{min-height:42px}
+.public-booking-card .admin-time-list button:disabled{opacity:.65;cursor:not-allowed}
+.public-book-button{margin-top:16px;width:100%;font-size:16px;padding:15px}
+@media(max-width:600px){.public-booking-card .calendar-day{min-height:42px;padding:5px 1px}.public-booking-card .calendar-grid{gap:4px}.public-booking-section{padding:22px 0}}
+
 /* ANI DRIVE: մշտական ձախ մենյու՝ բոլոր էկրանների և հաշիվների համար */
 .public-nav,
 body.account-view #publicNav,
@@ -459,6 +478,26 @@ body.account-view #studentArea {
   </div>
 </div>
 </header>
+
+<!-- Գլխավոր էջի օնլայն դասաժամերի օրացույց -->
+<section class="section public-booking-section" id="publicBookingCalendar">
+ <div class="wrap">
+  <div class="public-booking-heading">
+   <span>🚘 ANI DRIVE</span>
+   <h2>🗓️ Օնլայն դասաժամերի գրանցում</h2>
+   <p>Ընտրեք կանաչով նշված ազատ օրը, ապա՝ ազատ ժամը։ Ամրագրումը հաստատվում է ադմինիստրատորի կողմից։</p>
+  </div>
+  <div class="public-booking-card">
+   <div class="calendar-head"><button type="button" class="gray" id="publicCalPrev">‹</button><strong id="publicCalTitle">Օրացույց</strong><button type="button" class="gray" id="publicCalNext">›</button></div>
+   <div class="calendar-grid" id="publicCalendar"></div>
+   <div class="public-calendar-legend"><span><i class="free-dot"></i> Ազատ օր</span><span><i class="busy-dot"></i> Զբաղված օր</span></div>
+   <h3>🕒 Ընտրված օրվա ժամերը</h3>
+   <div id="publicSlotChoices" class="admin-time-list"><span class="muted">Ընտրեք օրացույցի կանաչ օրերից մեկը։</span></div>
+   <button type="button" class="blue public-book-button" id="publicBookSelected">Ամրագրել ընտրված ժամը →</button>
+   <p id="publicBookingStatus" class="message muted" aria-live="polite">Ամրագրելու համար ընտրեք ազատ օրը և ժամը։</p>
+  </div>
+ </div>
+</section>
 <aside class="public-nav" id="publicNav">
 <div class="public-nav-head"><strong>🚘 ANI DRIVE</strong><button type="button" id="closePublicNav">×</button></div>
 <button type="button" data-page="home" class="active">🏠 Գլխավոր էջ</button>
@@ -1688,8 +1727,8 @@ document.querySelectorAll('#courseSection .grid .card').forEach((card,index)=>{
 
 function initPublicNavigation(){
  const nav=$('publicNav');if(!nav)return;
- const pages={home:['hero','courseSection','weatherSection'],registration:['register'],about:['aboutPage'],ani:['aniPage'],instructors:['instructorsPage'],licenses:['licensesPage'],reviews:['reviewsPage'],grounds:['groundsPage'],routes:['routesPage'],offices:['examOffices'],documents:['documentsPage'],links:['linksPage'],content:['publishedBlocks'],media:['publishedMedia']};
- const all=['hero','courseSection','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
+ const pages={home:['hero','publicBookingCalendar','courseSection','weatherSection'],registration:['publicBookingCalendar','register'],about:['aboutPage'],ani:['aniPage'],instructors:['instructorsPage'],licenses:['licensesPage'],reviews:['reviewsPage'],grounds:['groundsPage'],routes:['routesPage'],offices:['examOffices'],documents:['documentsPage'],links:['linksPage'],content:['publishedBlocks'],media:['publishedMedia']};
+ const all=['hero','publicBookingCalendar','courseSection','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
  function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});}
  nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
  $('openPublicNav').onclick=()=>nav.classList.add('open');$('closePublicNav').onclick=()=>nav.classList.remove('open');
@@ -1736,9 +1775,73 @@ async function checkStudentLessonReminder(){
  }
 }
 
+
+/* Հանրային օրացույց․ այցելուները տեսնում են ազատ և զբաղված ժամերը */
+let publicCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let publicCalendarSlots=[];
+let publicSelectedDate='';
+let publicSelectedSlot='';
+function renderPublicCalendar(){
+ const grid=$('publicCalendar');if(!grid)return;grid.replaceChildren();
+ $('publicCalTitle').textContent=publicCalendarMonth.toLocaleDateString('hy-AM',{month:'long',year:'numeric'});
+ ['Երկ','Երք','Չոր','Հնգ','Ուրբ','Շաբ','Կիր'].forEach(x=>{const h=document.createElement('div');h.className='calendar-weekday';h.textContent=x;grid.append(h);});
+ const offset=(new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth(),1).getDay()+6)%7;
+ for(let i=0;i<offset;i++){const blank=document.createElement('div');blank.className='calendar-day empty';grid.append(blank);}
+ const total=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()+1,0).getDate();
+ const free=new Set(publicCalendarSlots.filter(x=>x.is_available).map(x=>x.slot_date));
+ const busy=new Set(publicCalendarSlots.filter(x=>!x.is_available).map(x=>x.slot_date));
+ for(let n=1;n<=total;n++){
+  const key=dateKey(new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth(),n));
+  const b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':busy.has(key)?' busy':'')+(publicSelectedDate===key?' selected':'');b.textContent=n;
+  b.disabled=!free.has(key)&&!busy.has(key);
+  if(!b.disabled)b.onclick=()=>{publicSelectedDate=key;publicSelectedSlot='';renderPublicCalendar();renderPublicSlotChoices();};
+  grid.append(b);
+ }
+}
+function renderPublicSlotChoices(){
+ const box=$('publicSlotChoices');if(!box)return;box.replaceChildren();publicSelectedSlot='';
+ const slots=publicCalendarSlots.filter(x=>x.slot_date===publicSelectedDate);
+ if(!slots.length){box.textContent='Ընտրեք օրացույցի կանաչ օրերից մեկը։';return;}
+ slots.forEach(slot=>{
+  const b=document.createElement('button');b.type='button';b.className=slot.is_available?'available-time':'busy-time';b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.disabled=!slot.is_available;
+  if(slot.is_available)b.onclick=()=>{publicSelectedSlot=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};
+  box.append(b);
+ });
+}
+async function loadPublicBookingSlots(){
+ const box=$('publicSlotChoices');
+ try{
+  const {data,error}=await db.from('lesson_slots').select('id,slot_date,slot_time,is_available').gte('slot_date',dateKey(new Date())).order('slot_date').order('slot_time');
+  if(error)throw error;
+  publicCalendarSlots=data||[];
+  if(!publicCalendarSlots.some(x=>x.slot_date===publicSelectedDate))publicSelectedDate='';
+  renderPublicCalendar();renderPublicSlotChoices();
+  if(!publicCalendarSlots.length)$('publicBookingStatus').textContent='Այս պահին ազատ դասաժամեր չկան։ Խնդրում ենք ավելի ուշ կրկին ստուգել։';
+ }catch(err){
+  if(box)box.textContent='Օրացույցը բեռնել չհաջողվեց։ '+(err.message||'');
+  $('publicBookingStatus').textContent='Օրացույցի հրապարակային դիտման թույլտվությունը պետք է միացնել Supabase-ում։';
+ }
+}
+$('publicCalPrev').onclick=()=>{publicCalendarMonth=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()-1,1);renderPublicCalendar();};
+$('publicCalNext').onclick=()=>{publicCalendarMonth=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()+1,1);renderPublicCalendar();};
+$('publicBookSelected').onclick=async()=>{
+ if(!publicSelectedSlot){$('publicBookingStatus').textContent='Նախ ընտրեք կանաչ օրն ու ազատ ժամը։';return;}
+ if(!currentUser){$('publicBookingStatus').textContent='Ամրագրելու համար նախ մուտք գործեք կամ գրանցվեք։';openTopAuthSection('auth');return;}
+ if(isAdmin){$('publicBookingStatus').textContent='Ադմինիստրատորի ամրագրումը կատարեք ադմինիստրատորի վահանակից։';return;}
+ const chosen=publicCalendarSlots.find(x=>x.id===publicSelectedSlot);
+ if(!chosen||!chosen.is_available){$('publicBookingStatus').textContent='Ընտրված ժամը արդեն զբաղված է։ Թարմացնում ենք օրացույցը։';await loadPublicBookingSlots();return;}
+ const {data:student,error:studentError}=await db.from('students').select('first_name,last_name,email,phone').eq('id',currentUser.id).maybeSingle();
+ if(studentError||!student){$('publicBookingStatus').textContent='Աշակերտի տվյալները չգտնվեցին։ Խնդրում ենք լրացնել գրանցումը։';return;}
+ const {error}=await db.from('lesson_bookings').insert({slot_id:chosen.id,student_id:currentUser.id,student_name:student.first_name+' '+student.last_name,student_email:student.email,student_phone:student.phone,status:'pending'});
+ if(error){$('publicBookingStatus').textContent='Ամրագրումը չհաջողվեց․ '+error.message;await loadPublicBookingSlots();return;}
+ $('publicBookingStatus').textContent='Հայտն ուղարկվեց ադմինին։ Սպասեք հաստատմանը։';
+ publicSelectedSlot='';await loadPublicBookingSlots();
+};
+
 // Սկզբում միացնում ենք ձախ մենյուն, որպեսզի այլ բաժինների բեռնումը չուշացնի այն։
 initPublicNavigation();
 loadExamOffices();
+loadPublicBookingSlots();
 loadWeather();
 loadPublicBlocks().catch(err=>console.error('Public blocks load failed:',err));
 loadPublicMedia().catch(err=>console.error('Public media load failed:',err));
