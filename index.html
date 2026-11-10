@@ -654,6 +654,74 @@ body{min-height:100vh;background:radial-gradient(ellipse at 80% 0%,#0b3150 0,tra
  .fx-main{order:1!important}
 }
 
+
+
+/* FINAL LAYOUT REPAIR — right menu, full-width content */
+@media (min-width:651px){
+  .fx-shell{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(215px,250px)!important;
+    gap:18px!important;
+    width:100%!important;
+    max-width:1680px!important;
+    margin:0 auto!important;
+    padding:14px!important;
+    align-items:start!important;
+  }
+  .fx-shell>#publicNav,
+  .fx-shell>.public-nav{
+    position:sticky!important;
+    grid-column:2!important;
+    grid-row:1!important;
+    inset:auto!important;
+    top:14px!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:100%!important;
+    max-width:250px!important;
+    min-width:0!important;
+    height:calc(100vh - 28px)!important;
+    max-height:calc(100vh - 28px)!important;
+    margin:0!important;
+    transform:none!important;
+    z-index:20!important;
+  }
+  .fx-shell>.fx-main{
+    grid-column:1!important;
+    grid-row:1!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    margin:0!important;
+  }
+  body.account-view #admin,
+  body.account-view #studentArea,
+  body.public-nav-active .fx-main>.hero,
+  body.public-nav-active .fx-main>#courseSection,
+  body.public-nav-active .fx-main>#examOffices,
+  body.public-nav-active .fx-main>#weatherSection,
+  body.public-nav-active .fx-main>#publishedBlocks,
+  body.public-nav-active .fx-main>#publishedMedia,
+  body.public-nav-active .fx-main>#register,
+  body.public-nav-active .fx-main>#auth,
+  body.public-nav-active .fx-main>.public-extra-page{
+    margin-left:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    padding-left:0!important;
+  }
+}
+@media (max-width:650px){
+  .fx-shell{display:flex!important;flex-direction:column!important;width:100%!important;padding:0!important}
+  .fx-shell>#publicNav,.fx-shell>.public-nav{
+    position:relative!important;inset:auto!important;left:auto!important;right:auto!important;
+    width:100%!important;max-width:100%!important;height:auto!important;
+    grid-column:auto!important;grid-row:auto!important;
+  }
+  .fx-shell>.fx-main{width:100%!important;max-width:100%!important;margin:0!important}
+}
+
 </style>
 </head>
 
