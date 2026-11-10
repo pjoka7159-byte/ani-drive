@@ -191,6 +191,9 @@ a {color:inherit}
 </div>
 </section>
 
+<section class="section hidden" id="publishedBlocks"><div class="wrap" id="publishedBlocksInner"></div></section>
+<section class="section hidden" id="publishedMedia"><div class="wrap"><h2>Մեր լուսանկարներն ու տեսանյութերը</h2><div class="grid" id="publishedMediaGrid"></div></div></section>
+
 <!-- Գրանցում -->
 <section class="section" id="register" style="background:var(--bg)">
 <div class="wrap">
@@ -741,6 +744,43 @@ $('messageForm').onsubmit=async e=>{
 };
 
 
+async function loadPublicBlocks(){
+ const section=$('publishedBlocks'),inner=$('publishedBlocksInner');
+ const {data,error}=await db.from('site_content').select('content_key,label,content_type,content_value').eq('is_published',true).order('updated_at',{ascending:true});
+ if(error||!data||!data.length)return;
+ inner.replaceChildren();section.classList.remove('hidden');
+ data.forEach(row=>{
+  if(['registration_enabled','login_enabled'].includes(row.content_key))return;
+  const card=document.createElement('div');card.className='card';card.style.marginBottom='14px';
+  const heading=document.createElement('h2');heading.textContent=row.label;card.append(heading);
+  if(row.content_type==='image'){
+   const img=document.createElement('img');img.src=row.content_value;img.alt=row.label;img.loading='lazy';img.style.maxWidth='100%';img.style.borderRadius='12px';card.append(img);
+  }else if(row.content_type==='video'){
+   const video=document.createElement('video');video.src=row.content_value;video.controls=true;video.preload='metadata';video.style.width='100%';card.append(video);
+  }else if(row.content_type==='link'){
+   const a=document.createElement('a');a.href=row.content_value;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Բացել հղումը';card.append(a);
+  }else{
+   const p=document.createElement('p');p.textContent=row.content_value;card.append(p);
+  }
+  inner.append(card);
+ });
+}
+async function loadPublicMedia(){
+ const section=$('publishedMedia'),grid=$('publishedMediaGrid');
+ const {data,error}=await db.from('media_assets').select('file_name,title,mime_type,public_url').order('created_at',{ascending:false});
+ if(error||!data||!data.length)return;
+ grid.replaceChildren();section.classList.remove('hidden');
+ data.forEach(row=>{
+  const card=document.createElement('div');card.className='card';
+  const title=document.createElement('h3');title.textContent=row.title||row.file_name;card.append(title);
+  if(row.mime_type.startsWith('image/')){
+   const img=document.createElement('img');img.src=row.public_url;img.alt=title.textContent;img.loading='lazy';img.style.width='100%';img.style.borderRadius='10px';card.append(img);
+  }else if(row.mime_type.startsWith('video/')){
+   const video=document.createElement('video');video.src=row.public_url;video.controls=true;video.preload='metadata';video.style.width='100%';card.append(video);
+  }
+  grid.append(card);
+ });
+}
 async function loadMediaFiles(){
  const box=$('mediaList');if(!box)return;box.textContent='Բեռնում...';
  const {data,error}=await db.from('media_assets').select('*').order('created_at',{ascending:false});
@@ -832,6 +872,8 @@ db.auth.onAuthStateChange((event,session)=>{
   }
 });
 
+await loadPublicBlocks();
+await loadPublicMedia();
 const {data:{session}} = await db.auth.getSession();
 if (session) await loadUser();
 
