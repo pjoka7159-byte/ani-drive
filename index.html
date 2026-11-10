@@ -332,7 +332,7 @@ a {color:inherit}
 <button type="button" class="blue" id="openRegisteredStudents" style="margin:12px 0">👥 Բացել գրանցված անձանց ցանկը և արխիվը</button>
 <div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
 
-<div class="panel"><h3>📅 Դասաժամերի կառավարում</h3><p class="muted">Ստեղծեք ազատ օրերն ու ժամերը, հաստատեք կամ մերժեք ամրագրումները։ Զբաղված ժամերը ինքնաշխատ փակվում են աշակերտների օրացույցից։</p><div id="adminCalendar" class="calendar-shell" style="margin-bottom:14px">Օրացույցի ազատ ժամերը կցուցադրվեն այստեղ։</div><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p><h4>Ամրագրումների հայտեր</h4><div id="adminBookings">Բեռնում...</div><h4>Ադմինի կողմից աշակերտի ամրագրում</h4><form id="adminBookingForm"><select name="student" required><option value="">Ընտրեք աշակերտին</option></select><select name="slot" required><option value="">Ընտրեք ազատ ժամ</option></select><button class="good">Ամրագրել աշակերտի համար</button></form><p id="adminBookingMsg" class="message"></p></div>
+<button type="button" class="blue" id="openBookingAdmin" style="margin:12px 0">📅 Բացել դասաժամերի բաժինը</button><div class="panel hidden" id="adminBookingSection"><h3>📅 Դասաժամերի կառավարում</h3><p class="muted">Ստեղծեք ազատ օրերն ու ժամերը, հաստատեք կամ մերժեք ամրագրումները։ Զբաղված ժամերը ինքնաշխատ փակվում են աշակերտների օրացույցից։</p><div id="adminCalendar" class="calendar-shell" style="margin-bottom:14px">Օրացույցի ազատ ժամերը կցուցադրվեն այստեղ։</div><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p><h4>Ամրագրումների հայտեր</h4><div id="adminBookings">Բեռնում...</div><h4>Ադմինի կողմից աշակերտի ամրագրում</h4><form id="adminBookingForm"><select name="student"><option value="">Գրանցված աշակերտ (ըստ ցանկության)</option></select><input name="manualName" placeholder="Եթե գրանցված չէ՝ անուն, ազգանուն"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><select name="slot" required><option value="">Ընտրեք ազատ ժամ</option></select><button class="good">Ամրագրել աշակերտի համար</button></form><p id="adminBookingMsg" class="message"></p></div></div>
 <div class="panel">
 <h3>💬 Աշակերտների նամակագրություն և օնլայն չատ</h3>
 <select id="adminChatStudent"><option value="">Ընտրեք աշակերտին</option></select>
@@ -701,8 +701,9 @@ async function loadStudentBookings(){
  const {data,error}=await db.from('lesson_bookings').select('id,status,created_at,lesson_slots(slot_date,slot_time)').eq('student_id',currentUser.id).order('created_at',{ascending:false});
  if(error){box.textContent='Ամրագրումները հասանելի չեն։ '+error.message;return;}
  if(!data?.length){box.textContent='Դեռ ամրագրումներ չունեք։';return;}
- data.forEach(b=>{const p=document.createElement('p');p.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' — '+({pending:'Սպասում է հաստատման',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);box.append(p);});
+ data.forEach(b=>{const row=document.createElement('div');row.className='admin-item';const p=document.createElement('p');p.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' — '+({pending:'Սպասում է հաստատման',approved:'Հաստատված',rejected:'Մերժված'}[b.status]||b.status);row.append(p);if(['pending','approved'].includes(b.status)){const c=document.createElement('button');c.type='button';c.className='danger';c.textContent='Չեղարկել դասաժամը';c.onclick=()=>cancelBooking(b.id,'student');row.append(c);}box.append(row);});
 }
+async function cancelBooking(id,role){if(!confirm('Չեղարկե՞լ այս դասաժամը։'))return;const {error}=await db.from('lesson_bookings').delete().eq('id',id);if(error){message(role==='admin'?'slotMsg':'studentBookingMsg','Չեղարկել չհաջողվեց։ '+error.message,true);return;}if(role==='admin')await loadAdminBookingPanel();else{await loadStudentSlots();await loadStudentBookings();}}
 $('studentBookingForm').onsubmit=async e=>{
  e.preventDefault();const slot_id=e.target.elements.slot.value;if(!slot_id){message('studentBookingMsg','Նախ ընտրեք ազատ օրը և ժամը։',true);return;}
  const {data:s}=await db.from('students').select('first_name,last_name,email,phone').eq('id',currentUser.id).maybeSingle();
@@ -728,9 +729,10 @@ async function loadAdminBookingPanel(){
    const ok=document.createElement('button');ok.className='good';ok.textContent='Հաստատել';ok.onclick=()=>changeBookingStatus(b.id,'approved');
    const no=document.createElement('button');no.className='danger';no.textContent='Մերժել';no.style.marginLeft='8px';no.onclick=()=>changeBookingStatus(b.id,'rejected');item.append(ok,no);
   }
+  const cancel=document.createElement('button');cancel.className='danger';cancel.style.marginLeft='8px';cancel.textContent='Չեղարկել դասաժամը';cancel.onclick=()=>cancelBooking(b.id,'admin');item.append(cancel);
   list.append(item);
  });
- const studentSel=$('adminBookingForm').elements.student,old=studentSel.value;studentSel.replaceChildren(new Option('Ընտրեք աշակերտին',''));
+ const studentSel=$('adminBookingForm').elements.student,old=studentSel.value;studentSel.replaceChildren(new Option('Գրանցված աշակերտ (ըստ ցանկության)',''));
  (students||[]).forEach(s=>studentSel.add(new Option(s.first_name+' '+s.last_name+' — '+s.email,s.id)));
  if(old)studentSel.value=old;
  const slotSel=$('adminBookingForm').elements.slot,oldSlot=slotSel.value;slotSel.replaceChildren(new Option('Ընտրեք ազատ ժամ',''));
@@ -754,8 +756,11 @@ $('slotForm').onsubmit=async e=>{
 };
 $('adminBookingForm').onsubmit=async e=>{
  e.preventDefault();const f=new FormData(e.target),sid=f.get('student'),slot_id=f.get('slot'),s=students.find(x=>x.id===sid);
- if(!s||!slot_id)return;
- const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:s.id,student_name:s.first_name+' '+s.last_name,student_email:s.email,student_phone:s.phone,status:'approved'});
+ if(!slot_id)return;
+ const name=s?(s.first_name+' '+s.last_name):String(f.get('manualName')||'').trim();
+ const phone=s?(s.phone||''):String(f.get('manualPhone')||'').trim();
+ if(!name||!phone){message('adminBookingMsg','Ընտրեք գրանցված աշակերտին կամ լրացրեք անունն ու հեռախոսահամարը։',true);return;}
+ const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:s?s.id:null,student_name:name,student_email:s?.email||'',student_phone:phone,status:'approved'});
  if(error){message('adminBookingMsg','Ամրագրումը չհաջողվեց։ '+error.message,true);return;}
  message('adminBookingMsg','Ամրագրումը հաստատված է, և այդ ժամը ավտոմատ փակվեց աշակերտների օրացույցից։');e.target.reset();await loadAdminBookingPanel();
 };
@@ -1160,7 +1165,8 @@ document.querySelectorAll('.filterBtn').forEach(btn=>{
   };
 });
 
-$('refreshBtn').onclick = loadStudents;
+$('refreshBtn').onclick = async()=>{await loadStudents();await loadAdminBookingPanel();};
+$('openBookingAdmin').onclick=()=>{$('adminBookingSection').classList.toggle('hidden');if(!$('adminBookingSection').classList.contains('hidden'))loadAdminBookingPanel();};
 $('refreshBtn').addEventListener('click',loadAdminBookingPanel);
 
 $('adminBtn').onclick = () => show('admin');
