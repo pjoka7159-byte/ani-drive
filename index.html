@@ -283,6 +283,29 @@ a {color:inherit}
 </div>
 <p id="adminMsg" class="message"></p>
 </div>
+
+<div class="panel">
+<h3>Կայքի բովանդակության կառավարում</h3>
+<p class="muted">Ավելացրեք կամ խմբագրեք կայքի տեքստային բաժինները և պատկերների հղումները։</p>
+<form id="contentForm">
+<input name="contentKey" required placeholder="Բաժնի բանալի (օր. hero_title)">
+<input name="contentLabel" required placeholder="Բաժնի անվանումը">
+<select name="contentType"><option value="text">Տեքստ</option><option value="image">Նկարի հղում</option></select>
+<input name="contentValue" required placeholder="Տեքստ կամ նկարի HTTPS հղում">
+<button class="blue">Պահպանել բաժինը</button>
+</form>
+<div id="contentList"></div>
+</div>
+<div class="panel">
+<h3>Հաղորդագրություններ աշակերտներին</h3>
+<form id="messageForm">
+<input name="messageTitle" required placeholder="Վերնագիր">
+<input name="messageBody" required placeholder="Հաղորդագրության տեքստը">
+<button class="blue">Ավելացնել հաղորդագրություն</button>
+</form>
+<div id="messageList"></div>
+<p class="muted">Էլեկտրոնային նամակների ավտոմատ ուղարկումը պահանջում է առանձին անվտանգ սերվերային ֆունկցիա։</p>
+</div>
 </div>
 </section>
 
@@ -478,6 +501,7 @@ async function loadUser() {
   if (isAdmin) {
     $('adminBtn').classList.remove('hidden');
     await loadStudents();
+    await loadContentTools();
     show('admin');
   } else {
     $('adminBtn').classList.add('hidden');
@@ -629,6 +653,52 @@ async function updateStatus(id,status) {
   message('adminMsg','Կարգավիճակը հաջողությամբ փոխվեց։');
   await loadStudents();
 }
+
+
+async function loadContentTools(){
+ if(!isAdmin)return;
+ const box=$('contentList'); box.textContent='Բեռնում...';
+ const {data,error}=await db.from('site_content').select('*').order('content_key');
+ if(error){box.textContent='Բովանդակության աղյուսակը հասանելի չէ։ Կիրառեք admin_setup.sql-ը։ '+error.message;return;}
+ box.replaceChildren();
+ (data||[]).forEach(row=>{
+  const item=document.createElement('div');item.className='admin-item';
+  const h=document.createElement('strong');h.textContent=row.label+' ('+row.content_key+')';
+  const v=document.createElement('p');v.textContent=row.content_value;
+  const edit=document.createElement('button');edit.textContent='Խմբագրել';edit.className='gray';
+  edit.onclick=()=>{ $('contentForm').elements.contentKey.value=row.content_key;$('contentForm').elements.contentLabel.value=row.label;$('contentForm').elements.contentType.value=row.content_type;$('contentForm').elements.contentValue.value=row.content_value; };
+  const del=document.createElement('button');del.textContent='Ջնջել';del.className='danger';
+  del.onclick=async()=>{if(!confirm('Ջնջե՞լ այս բաժինը։'))return;const r=await db.from('site_content').delete().eq('id',row.id);if(r.error)message('adminMsg',r.error.message,true);else loadContentTools();};
+  item.append(h,v,edit,del);box.append(item);
+ });
+ const mb=$('messageList');mb.textContent='Բեռնում...';
+ const mr=await db.from('admin_messages').select('*').order('created_at',{ascending:false});
+ if(mr.error){mb.textContent='Հաղորդագրությունների աղյուսակը հասանելի չէ։ '+mr.error.message;return;}
+ mb.replaceChildren();
+ (mr.data||[]).forEach(row=>{
+  const item=document.createElement('div');item.className='admin-item';
+  const h=document.createElement('strong');h.textContent=row.title;
+  const p=document.createElement('p');p.textContent=row.body;
+  const del=document.createElement('button');del.className='danger';del.textContent='Ջնջել';
+  del.onclick=async()=>{if(!confirm('Ջնջե՞լ հաղորդագրությունը։'))return;const r=await db.from('admin_messages').delete().eq('id',row.id);if(r.error)message('adminMsg',r.error.message,true);else loadContentTools();};
+  item.append(h,p,del);mb.append(item);
+ });
+}
+$('contentForm').onsubmit=async e=>{
+ e.preventDefault();if(!isAdmin)return;
+ const f=new FormData(e.target),key=String(f.get('contentKey')).trim();
+ const payload={content_key:key,label:String(f.get('contentLabel')).trim(),content_type:String(f.get('contentType')),content_value:String(f.get('contentValue')).trim(),updated_at:new Date().toISOString()};
+ const {error}=await db.from('site_content').upsert(payload,{onConflict:'content_key'});
+ if(error){message('adminMsg','Չհաջողվեց պահպանել։ '+error.message,true);return;}
+ message('adminMsg','Բաժինը պահպանվեց տվյալների բազայում։');e.target.reset();loadContentTools();
+};
+$('messageForm').onsubmit=async e=>{
+ e.preventDefault();if(!isAdmin)return;
+ const f=new FormData(e.target);
+ const {error}=await db.from('admin_messages').insert({title:String(f.get('messageTitle')).trim(),body:String(f.get('messageBody')).trim(),created_by:currentUser.id});
+ if(error){message('adminMsg','Չհաջողվեց ավելացնել հաղորդագրությունը։ '+error.message,true);return;}
+ message('adminMsg','Հաղորդագրությունը պահպանվեց։');e.target.reset();loadContentTools();
+};
 
 document.querySelectorAll('.filterBtn').forEach(btn=>{
   btn.onclick=()=>{
