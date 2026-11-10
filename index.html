@@ -245,7 +245,7 @@ a {color:inherit}
 </div>
 </section>
 
-<section class="section">
+<section class="section" id="courseSection">
 <div class="wrap">
 <h2>Մեր դասընթացները</h2>
 <div class="grid">
@@ -1013,7 +1013,7 @@ function loadExamOffices(){
  const colors=['#dbeafe','#dcfce7','#fef3c7','#ede9fe','#ffe4e6','#cffafe','#fce7f3'];
  examOffices.forEach((name,i)=>{
   const card=document.createElement('button');card.type='button';card.style.cssText='text-align:left;background:linear-gradient(135deg,'+colors[i]+',#fff);border:1px solid #dbe4f0;border-radius:16px;padding:22px;min-height:115px;color:#17243a';
-  card.innerHTML='<div style="font-size:28px">🏢</div><strong>'+name+'</strong><div style="font-size:12px;margin-top:6px">Բացել տեղեկությունը →</div>';
+  card.innerHTML='<div class="emoji-orbit">🏢✨</div><strong>'+name+'</strong><div style="font-size:12px;margin-top:6px">Բացել տեղեկությունը →</div>';
   card.onclick=()=>{detail.classList.remove('hidden');detail.className='card feature-detail';detail.innerHTML='<div class="emoji-orbit">📍✨</div><h3>'+name+' քննական բաժին</h3><p>Քննական վայրի հասցեն և աշխատանքային ժամերը կարող եք ճշտել ANI DRIVE-ի ադմինիստրատորից։</p><button type="button" class="feature-back" id="closeExamOffice">← Վերադառնալ բաժինների ցանկին</button>';$('closeExamOffice').onclick=()=>{detail.classList.add('hidden');detail.className='card hidden';};detail.scrollIntoView({behavior:'smooth',block:'center'});};
   grid.append(card);
  });
@@ -1025,8 +1025,8 @@ async function loadWeather(){
   const res=await fetch(url);if(!res.ok)throw Error('weather unavailable');
   const w=await res.json(),labels={0:'☀️ Պարզ',1:'🌤️ Հիմնականում պարզ',2:'⛅ Մասամբ ամպամած',3:'☁️ Ամպամած',45:'🌫️ Մառախուղ',48:'🌫️ Մառախուղ',51:'🌦️ Թեթև անձրև',61:'🌧️ Անձրև',71:'🌨️ Ձյուն',80:'🌦️ Անձրևային տեղումներ',95:'⛈️ Ամպրոպ'};
   box.replaceChildren();
-  const now=document.createElement('div');now.className='card';now.innerHTML='<h3>📍 Երևան՝ այժմ</h3><div style="font-size:30px;font-weight:bold">'+Math.round(w.current.temperature_2m)+'°C</div><p>'+(labels[w.current.weather_code]||'🌡️ Եղանակ')+'</p><p>💧 Խոնավություն՝ '+w.current.relative_humidity_2m+'%</p><p>💨 Քամի՝ '+w.current.wind_speed_10m+' կմ/ժ</p>';box.append(now);
-  w.daily.time.forEach((day,i)=>{const d=document.createElement('div');d.className='card';d.innerHTML='<h3>📅 '+new Date(day+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long'})+'</h3><p>'+(labels[w.daily.weather_code[i]]||'🌡️ Կանխատեսում')+'</p><strong>'+Math.round(w.daily.temperature_2m_min[i])+'° / '+Math.round(w.daily.temperature_2m_max[i])+'°C</strong>';box.append(d);});
+  const now=document.createElement('div');now.className='card feature-card';now.innerHTML='<h3>📍 Երևան՝ այժմ</h3><div style="font-size:30px;font-weight:bold">'+Math.round(w.current.temperature_2m)+'°C</div><p>'+(labels[w.current.weather_code]||'🌡️ Եղանակ')+'</p><p>💧 Խոնավություն՝ '+w.current.relative_humidity_2m+'%</p><p>💨 Քամի՝ '+w.current.wind_speed_10m+' կմ/ժ</p>';box.append(now);
+  w.daily.time.forEach((day,i)=>{const d=document.createElement('div');d.className='card feature-card';d.innerHTML='<h3>📅 '+new Date(day+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long'})+'</h3><p>'+(labels[w.daily.weather_code[i]]||'🌡️ Կանխատեսում')+'</p><strong>'+Math.round(w.daily.temperature_2m_min[i])+'° / '+Math.round(w.daily.temperature_2m_max[i])+'°C</strong>';box.append(d);});
  }catch(e){box.textContent='Եղանակի տվյալները այս պահին հասանելի չեն։';}
 }
 
@@ -1166,6 +1166,18 @@ db.auth.onAuthStateChange((event,session)=>{
   }
 });
 
+// Դասընթացների քարտերը բացվում են առանձին գեղեցիկ մանրամասների տեսքով։
+document.querySelectorAll('#courseSection .grid .card').forEach((card,index)=>{
+ const original=card.innerHTML;card.classList.add('feature-card');card.style.cursor='pointer';
+ const emoji=['🚘','📘','🛡️'][index]||'✨';
+ card.insertAdjacentHTML('afterbegin','<div class="emoji-orbit">'+emoji+'</div>');
+ card.addEventListener('click',()=>{
+  const detail=document.createElement('div');detail.className='feature-detail';detail.innerHTML=original;
+  const back=document.createElement('button');back.type='button';back.className='feature-back';back.textContent='← Վերադառնալ դասընթացներին';
+  back.onclick=e=>{e.stopPropagation();card.innerHTML='<div class="emoji-orbit">'+emoji+'</div>'+original;};
+  detail.append(back);card.replaceChildren(detail);
+ });
+});
 await loadPublicBlocks();
 await loadPublicMedia();
 loadExamOffices();
