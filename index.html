@@ -100,6 +100,15 @@ input,select {
   width:100%;
 }
 .hidden {display:none!important}
+.student-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;align-items:start}
+.student-sidebar{background:linear-gradient(145deg,#071a36,#1769d2);padding:12px;border-radius:14px;position:sticky;top:12px}
+.student-sidebar button{display:block;width:100%;text-align:left;margin:5px 0;background:transparent;color:white;border:1px solid #ffffff30}
+.student-sidebar button.active{background:linear-gradient(90deg,#f4b942,#ffe39a);color:#14233b}
+.student-main .card{border-top:4px solid #f4b942;box-shadow:0 8px 22px #071a3610}
+.chat-box{height:280px;overflow:auto;background:#f4f7fb;border:1px solid #dce4ef;border-radius:12px;padding:12px;margin:12px 0}
+.chat-msg{padding:9px 12px;border-radius:12px;margin:7px 0;background:white;border:1px solid #dce4ef;max-width:85%;overflow-wrap:anywhere}
+.chat-msg.mine{margin-left:auto;background:#dcecff}.chat-msg small{display:block;color:#65748b;margin-top:4px}
+@media(max-width:650px){.student-layout{grid-template-columns:1fr}.student-sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.student-sidebar button{margin:0;padding:9px 6px}}
 .panel {
   background:var(--bg);
   border-radius:14px;
@@ -202,6 +211,9 @@ a {color:inherit}
 <form id="signup">
   <input required name="first" placeholder="Անուն" maxlength="60">
   <input required name="last" placeholder="Ազգանուն" maxlength="60">
+  <select required name="gender"><option value="">Սեռը ընտրեք</option><option>Արական</option><option>Իգական</option><option>Չնշել</option></select>
+  <select required name="study_type"><option value="">Ուսուցման տեսակը ընտրեք</option><option>Տեսական</option><option>Գործնական</option><option>Տեսական և գործնական</option></select>
+  <input required name="residence" placeholder="Բնակության վայրը" maxlength="160">
   <input required type="email" name="email" placeholder="Էլ․ փոստ">
   <input required type="tel" name="phone" placeholder="Հեռախոսահամար" maxlength="20">
   <input required type="password" name="password" minlength="8" placeholder="Գաղտնաբառ (առնվազն 8 նիշ)">
@@ -232,16 +244,18 @@ a {color:inherit}
 </section>
 
 <!-- Աշակերտի էջ -->
-<section class="section hidden" id="studentArea">
-<div class="wrap">
-<h2>Իմ հայտը</h2>
-<div class="card">
-<p id="studentName"></p>
-<p>Հայտի կարգավիճակ՝ <strong id="studentStatus"></strong></p>
-<p id="studentInfo" class="muted"></p>
-</div>
-</div>
-</section>
+<section class="section hidden" id="studentArea"><div class="wrap">
+<h2>🚘 Աշակերտի անձնական վահանակ</h2><div class="student-layout">
+<nav class="student-sidebar">
+<button class="active" data-stab="home">🚗 Գլխավոր</button><button data-stab="lessons">📚 Իմ դասերը</button><button data-stab="mail">✉️ Նամակագրություն</button><button data-stab="chat">💬 Օնլայն չատ</button><button data-stab="contact">☎️ Կապ ադմինի հետ</button>
+</nav><div class="student-main">
+<div class="card student-pane" id="pane-home"><h3>👤 Իմ անձնական պրոֆիլը</h3><p id="studentName"></p><p>Հայտի կարգավիճակ՝ <strong id="studentStatus"></strong></p><p id="studentInfo" class="muted"></p>
+<form id="studentProfileForm"><input required name="first_name" placeholder="Անուն"><input required name="last_name" placeholder="Ազգանուն"><select required name="gender"><option value="">Սեռը ընտրեք</option><option>Արական</option><option>Իգական</option><option>Չնշել</option></select><select required name="study_type"><option value="">Ուսուցման տեսակը ընտրեք</option><option>Տեսական</option><option>Գործնական</option><option>Տեսական և գործնական</option></select><input required name="residence" placeholder="Բնակության վայրը"><input required name="phone" type="tel" placeholder="Հեռախոսահամար"><button class="blue">Պահպանել փոփոխությունները</button></form><p id="profileMsg" class="message"></p></div>
+<div class="card student-pane hidden" id="pane-lessons"><h3>📚 Իմ դասերը և նյութերը</h3><div id="studentBlocks"></div></div>
+<div class="card student-pane hidden" id="pane-mail"><h3>✉️ Նամակագրություն</h3><div id="studentMailList"></div></div>
+<div class="card student-pane hidden" id="pane-chat"><h3>💬 Օնլայն չատ — Ադմին</h3><div class="chat-box" id="studentChatBox"></div><form id="studentChatForm"><input name="chatBody" required maxlength="2000" placeholder="Գրեք հաղորդագրությունը"><button class="blue">Ուղարկել</button></form><p id="studentChatMsg" class="message"></p></div>
+<div class="card student-pane hidden" id="pane-contact"><h3>☎️ Կապ ադմինի հետ</h3><form id="studentContactForm"><input name="contactTitle" required placeholder="Թեմա"><input name="contactBody" required placeholder="Հաղորդագրություն"><button class="blue">Ուղարկել ադմինին</button></form><p id="studentContactMsg" class="message"></p></div>
+</div></div></div></section>
 
 <!-- Ադմին -->
 <section class="section hidden" id="admin">
@@ -410,6 +424,9 @@ $('signup').onsubmit = async e => {
   const last = String(form.get('last')).trim();
   const email = String(form.get('email')).trim().toLowerCase();
   const phone = String(form.get('phone')).trim();
+  const gender = String(form.get('gender')).trim();
+  const study_type = String(form.get('study_type')).trim();
+  const residence = String(form.get('residence')).trim();
   const password = String(form.get('password'));
   const confirm = String(form.get('confirm'));
 
@@ -435,7 +452,8 @@ $('signup').onsubmit = async e => {
         data: {
           first_name:first,
           last_name:last,
-          phone:phone
+          phone:phone,
+          gender,study_type,residence
         }
       }
     });
@@ -449,7 +467,7 @@ $('signup').onsubmit = async e => {
         first_name: first,
         last_name: last,
         email,
-        phone,
+        phone,gender,study_type,residence,
         status: 'pending'
       }, {onConflict: 'id'});
       if (studentError) {
@@ -554,10 +572,45 @@ async function loadUser() {
   }
 }
 
+document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.student-pane').forEach(p=>p.classList.add('hidden'));
+ $('pane-'+b.dataset.stab).classList.remove('hidden');
+ document.querySelectorAll('[data-stab]').forEach(x=>x.classList.toggle('active',x===b));
+ if(b.dataset.stab==='chat'||b.dataset.stab==='mail')loadStudentMessages();
+});
+$('studentProfileForm').onsubmit=async e=>{
+ e.preventDefault();const f=new FormData(e.target);
+ const payload={first_name:String(f.get('first_name')).trim(),last_name:String(f.get('last_name')).trim(),gender:String(f.get('gender')),study_type:String(f.get('study_type')),residence:String(f.get('residence')).trim(),phone:String(f.get('phone')).trim()};
+ const {error}=await db.from('students').update(payload).eq('id',currentUser.id);
+ if(error){message('profileMsg','Պահպանել չհաջողվեց։ '+error.message,true);return;}
+ message('profileMsg','Պրոֆիլը թարմացվեց։');await loadStudent();
+};
+async function loadStudentBlocks(){
+ const box=$('studentBlocks');const {data,error}=await db.from('site_content').select('content_key,label,content_type,content_value').eq('is_published',true).order('updated_at');
+ if(error){box.textContent=error.message;return;}box.replaceChildren();
+ (data||[]).filter(r=>!['registration_enabled','login_enabled'].includes(r.content_key)).forEach(r=>{
+  const d=document.createElement('div');d.className='admin-item';const h=document.createElement('h3');h.textContent='🚦 '+r.label;d.append(h);
+  if(r.content_type==='link'){const a=document.createElement('a');a.href=r.content_value;a.target='_blank';a.rel='noopener';a.textContent='Բացել նյութը';d.append(a);}
+  else{const p=document.createElement('p');p.textContent=r.content_value;d.append(p);}box.append(d);
+ });if(!box.children.length)box.textContent='Նյութեր դեռ չկան։';
+}
+function drawStudentMessage(box,row){
+ const d=document.createElement('div');d.className='chat-msg'+(row.sender_id===currentUser.id?' mine':'');const p=document.createElement('div');p.textContent=row.body;const sm=document.createElement('small');sm.textContent=(row.sender_role==='admin'?'Ադմին':'Դուք')+' · '+new Date(row.created_at).toLocaleString('hy-AM');d.append(p,sm);box.append(d);
+}
+async function loadStudentMessages(){
+ const {data,error}=await db.from('student_messages').select('*').eq('student_id',currentUser.id).order('created_at');
+ if(error){$('studentChatBox').textContent='Չատը հասանելի չէ։ Կիրառեք student_profile_chat.sql ֆայլը։';$('studentMailList').textContent=error.message;return;}
+ const chat=$('studentChatBox'),mail=$('studentMailList');chat.replaceChildren();mail.replaceChildren();
+ (data||[]).forEach(r=>{drawStudentMessage(chat,r);const d=document.createElement('div');d.className='admin-item';d.textContent=(r.sender_role==='admin'?'Ադմին՝ ':'Դուք՝ ')+r.body;mail.append(d);});
+ if(!data||!data.length)mail.textContent='Նամակներ դեռ չկան։';chat.scrollTop=chat.scrollHeight;
+}
+async function postStudentMessage(body){const {error}=await db.from('student_messages').insert({student_id:currentUser.id,sender_id:currentUser.id,sender_role:'student',body});if(error)throw error;await loadStudentMessages();}
+$('studentChatForm').onsubmit=async e=>{e.preventDefault();const inp=e.target.elements.chatBody;try{await postStudentMessage(inp.value.trim());inp.value='';message('studentChatMsg','Ուղարկվեց։');}catch(err){message('studentChatMsg','Սխալ՝ '+err.message,true);}};
+$('studentContactForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{await postStudentMessage('Թեմա՝ '+f.get('contactTitle')+'\n'+f.get('contactBody'));e.target.reset();message('studentContactMsg','Ուղարկվեց ադմինին։');}catch(err){message('studentContactMsg','Սխալ՝ '+err.message,true);}};
 async function loadStudent() {
   const {data,error} = await db
     .from('students')
-    .select('first_name,last_name,email,phone,status')
+    .select('first_name,last_name,email,phone,status,gender,study_type,residence)
     .eq('id',currentUser.id)
     .maybeSingle();
 
@@ -569,6 +622,10 @@ async function loadStudent() {
   show('studentArea');
   $('studentName').textContent =
     'Բարի գալուստ, ' + data.first_name + ' ' + data.last_name;
+  const pf=$('studentProfileForm');
+  ['first_name','last_name','gender','study_type','residence','phone'].forEach(k=>{pf.elements[k].value=data[k]||'';});
+  await loadStudentBlocks();
+  await loadStudentMessages();
 
   $('studentStatus').replaceChildren(makeStatus(data.status));
 
@@ -629,14 +686,16 @@ function renderStudents() {
     const item = document.createElement('div');
     item.className = 'admin-item';
 
+    item.style.padding='10px 14px';item.style.margin='7px 0';item.style.borderLeft='5px solid '+(student.status==='approved'?'#16804a':student.status==='blocked'?'#64748b':student.status==='rejected'?'#b42318':'#f4b942');
     const title = document.createElement('h3');
-    title.textContent = student.first_name + ' ' + student.last_name;
+    title.style.margin='0 0 5px';title.textContent = '🚘 '+student.first_name + ' ' + student.last_name;
 
     const email = document.createElement('p');
     email.textContent = 'Էլ․ փոստ՝ ' + student.email;
 
-    const phone = document.createElement('p');
-    phone.textContent = 'Հեռախոս՝ ' + student.phone;
+    const phone = document.createElement('p');phone.style.margin='3px 0';
+    phone.textContent = '☎️ ' + student.phone+' · '+(student.study_type||'Ուսուցման տեսակը նշված չէ');
+    const extra=document.createElement('p');extra.style.margin='3px 0';extra.className='muted';extra.textContent='👤 '+(student.gender||'—')+' · 📍 '+(student.residence||'—');
 
     const status = document.createElement('p');
     status.append('Կարգավիճակ՝ ',makeStatus(student.status));
@@ -680,7 +739,7 @@ function renderStudents() {
       addButton('Ապաշրջափակել','pending','good');
     }
 
-    item.append(title,email,phone,status,details,date,actions);
+    email.style.margin='3px 0';status.style.margin='3px 0';item.append(title,email,phone,extra,status,details,date,actions);
     list.appendChild(item);
   });
 }
