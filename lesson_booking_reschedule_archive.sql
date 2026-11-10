@@ -13,6 +13,12 @@ create policy "Read lesson slots for signed-in users" on public.lesson_slots
 for select to authenticated
 using (true);
 
+-- Public homepage calendar may display available and busy dates/times without exposing student data.
+drop policy if exists "Public read lesson slots calendar" on public.lesson_slots;
+create policy "Public read lesson slots calendar" on public.lesson_slots
+for select to anon, authenticated
+using (true);
+
 -- Students may change only their own booking row (the app updates slot_id or requested_slot_id).
 drop policy if exists "Students request own booking changes" on public.lesson_bookings;
 create policy "Students request own booking changes"
