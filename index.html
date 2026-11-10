@@ -976,6 +976,41 @@ html,body{max-width:100%;overflow-x:hidden!important}
  }
 }
 
+
+/* PLACE THE ENTIRE SECTIONS SIDEBAR FLUSH AGAINST THE VIEWPORT RIGHT EDGE */
+@media(min-width:651px){
+ .fx-shell.nav-is-open{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+ }
+ .fx-shell.nav-is-open>#publicNav{
+  display:flex!important;
+  position:fixed!important;
+  top:14px!important;
+  right:0!important;
+  left:auto!important;
+  bottom:14px!important;
+  width:250px!important;
+  max-width:250px!important;
+  height:auto!important;
+  max-height:none!important;
+  margin:0!important;
+  grid-column:auto!important;
+  grid-row:auto!important;
+  transform:none!important;
+  z-index:100000!important;
+  border-radius:16px 0 0 16px!important;
+ }
+ .fx-shell.nav-is-open>.fx-main{
+  width:calc(100% - 268px)!important;
+  max-width:calc(100% - 268px)!important;
+  margin:0!important;
+ }
+}
+
 </style>
 </head>
 
