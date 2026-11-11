@@ -2253,7 +2253,13 @@ async function loadPublicBlocks(){
  data.filter(row=>row.content_key.startsWith('page_')).forEach(row=>{
   const target=$(row.content_key.slice(5));if(!target)return;
   const heading=target.querySelector('h1,h2,h3');if(heading)heading.textContent=row.label;
-  const paragraph=target.querySelector('.wrap p, p');if(paragraph){paragraph.textContent=row.content_value||'';paragraph.style.whiteSpace='pre-wrap';}
+  const paragraph=target.querySelector('.wrap p, p');
+  if(paragraph){
+   if(row.content_type==='image'&&row.content_value){const media=document.createElement('img');media.src=row.content_value;media.alt=row.label;media.loading='lazy';media.style.cssText='display:block;max-width:100%;max-height:520px;object-fit:contain;border-radius:14px;margin:12px 0';paragraph.replaceWith(media);}
+   else if(row.content_type==='video'&&row.content_value){const media=document.createElement('video');media.src=row.content_value;media.controls=true;media.preload='metadata';media.style.cssText='display:block;width:100%;max-height:520px;border-radius:14px;margin:12px 0';paragraph.replaceWith(media);}
+   else if(row.content_type==='link'&&row.content_value){const media=document.createElement('a');media.href=row.content_value;media.target='_blank';media.rel='noopener noreferrer';media.textContent='Բացել հղումը';paragraph.replaceWith(media);}
+   else{paragraph.textContent=row.content_value||'';paragraph.style.whiteSpace='pre-wrap';}
+  }
  });
  const newRows=data.filter(row=>!['registration_enabled','login_enabled'].includes(row.content_key)&&!row.content_key.startsWith('page_'));
  if(!newRows.length){section.classList.add('hidden');return;}
