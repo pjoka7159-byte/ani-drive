@@ -1300,6 +1300,18 @@ body.account-view #publicBookingCalendar,body.account-view #admin #publicBooking
 .admin-schedule-editor select{flex:1 1 220px;min-width:180px}
 .admin-schedule-booking .muted{color:#c3d4e7!important}
 </style>
+
+<style id="ani-drive-admin-booking-calendar-compact">
+#adminBookingSection #adminCalendar{max-width:760px;width:100%;margin:0 auto 14px;padding:10px;border-radius:14px}
+#adminBookingSection #adminCalendar .calendar-day{min-height:42px;padding:5px 3px}
+#adminBookingSection #adminCalendar .calendar-day strong{font-size:14px}
+#adminBookingSection #adminCalendar .day-count{font-size:9px;line-height:1.15}
+#adminBookingSection #adminCalendar .calendar-weekday{font-size:11px;padding:4px 1px}
+#adminBookingSection #adminCalendar .admin-time-list{gap:6px}
+#adminBookingSection #adminCalendar .admin-time-list button{padding:7px 9px;font-size:12px}
+@media(max-width:600px){#adminBookingSection #adminCalendar{padding:7px}#adminBookingSection #adminCalendar .calendar-day{min-height:36px}#adminBookingSection #adminCalendar .day-count{font-size:8px}}
+</style>
+
 </head>
 
 <body>
@@ -1418,9 +1430,9 @@ body.account-view #publicBookingCalendar,body.account-view #admin #publicBooking
 </div>
 <div class="panel hidden admin-workspace-panel" id="adminDailySchedulePanel"><div class="row"><h3 style="margin-right:auto">🗓️ Դասերի ժամանակացույց</h3><button type="button" class="gray" id="refreshDailySchedule">↻ Թարմացնել</button></div><p class="muted">Այսօրվա, վաղվա և հաջորդ օրերի ամրագրումները՝ ըստ ժամի։ Սեղմեք օրվա կոճակը՝ այդ օրվա դասերը տեսնելու համար։</p><div id="adminDailySchedule">Բեռնում...</div></div>
 <div class="panel hidden admin-workspace-panel" id="adminExistingBookingsPanel"><div class="row"><h3 style="margin-right:auto">📋 Գրանցված դասաժամերի ցանկ</h3><button type="button" class="gray" id="refreshExistingBookings">↻ Թարմացնել</button></div><div class="booking-archive-tabs"><button type="button" class="blue" id="showActiveBookings">Ակտիվ դասաժամեր</button><button type="button" class="gray" id="showArchivedBookings">📦 Արխիվ</button></div><div id="adminBookings">Բեռնում...</div></div>
-<div class="panel hidden admin-workspace-panel" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
+<div class="panel hidden admin-workspace-panel" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">🟢 Ընտրեք օրը, ապա ազատ ժամը։ Ընտրված դասաժամից հետո հաջորդ 30 րոպեն նախատեսվում է ընդմիջման համար։</p>
+<h4>🗓️ Օրացույց — ընտրեք օրը և ազատ ժամը</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
 <h4>👤 Աշակերտի տվյալներ</h4><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p>
-<h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
 <h4 style="display:none">➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm" style="display:none"><input type="date" name="slotDate" required><select name="slotTime" required><option value="">Ընտրել դասաժամը</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="blue">Ավելացնել ազատ ժամ</button></form>
 <h4 style="display:none">🕒 Ազատ ժամերի միջակայք</h4><form id="slotRangeForm" class="grid" style="display:none"><input type="date" name="rangeDate" required><select name="rangeStart" required><option value="">Սկսած</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><select name="rangeEnd" required><option value="">Մինչև</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="good">Սահմանել միջակայքը ազատ</button></form><p class="muted" style="display:none">Օրը ընտրեք, նշեք սկիզբն ու ավարտը։ Միջակայքի ժամերը կդառնան ազատ՝ բացառությամբ գործող ամրագրումների։</p><p id="slotMsg" class="message"></p></div>
 <div class="panel hidden admin-workspace-panel" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
@@ -2185,9 +2197,10 @@ function renderAdminAvailabilityCalendar(slots){
   const label=document.createElement('h4');label.textContent=new Date(adminSelectedDate+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long'})+' — ժամեր';times.append(label);
   const row=document.createElement('div');row.className='admin-time-list';
   daySlots.sort((a,b)=>String(a.slot_time).localeCompare(String(b.slot_time))).forEach(slot=>{
-   const b=document.createElement('button');b.type='button';b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.className=slot.is_available?'available-time':'busy-time';
-   b.title=slot.is_available?'Նշել զբաղված':'Նշել ազատ';
-   b.onclick=()=>setAdminSlotAvailability(slot,slot.is_available);
+   const b=document.createElement('button');b.type='button';b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':slot.breakBlocked?' · Ընդմիջում':' · Զբաղված');b.className=slot.is_available?'available-time':'busy-time';
+   b.title=slot.breakBlocked?'Այս 30 րոպեն պահված է ընդմիջման համար':slot.blockedByNext?'Հաջորդ 30 րոպեն զբաղված է':'Ժամի կարգավիճակ';
+   if(slot.breakBlocked||slot.blockedByNext)b.disabled=true;
+   else b.onclick=()=>setAdminSlotAvailability(slot,slot.is_available);
    row.append(b);
    if(slot.is_available){const choose=document.createElement('button');choose.type='button';choose.textContent='Ամրագրել';choose.className='gray';choose.onclick=()=>openAdminBookingModal(slot);row.append(choose);}
   });times.append(row);
@@ -2290,16 +2303,36 @@ async function loadAdminBookingPanel(){
    if(list)list.textContent='Դասաժամերի ցանկը չի բեռնվել, քանի որ ժամերի տվյալները հասանելի չեն։';
    return;
   }
-  adminAllLessonSlots=(slots||[]).filter(x=>isWorkingLessonTime(x.slot_time));
+  const rawSlots=(slots||[]).filter(x=>isWorkingLessonTime(x.slot_time));
+  const {data,error}=await db.from('lesson_bookings')
+   .select('*,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)')
+   .order('created_at',{ascending:false});
+  if(error){if(list)list.textContent='Ամրագրումները բեռնել չհաջողվեց։ '+error.message;return;}
+  // Ամրագրված դասից հետո հաջորդ 30 րոպեն պահում ենք որպես ընդմիջում։
+  const activeBookings=(data||[]).filter(b=>!b.archived_at&&['pending','approved'].includes(b.status));
+  const slotByDateTime=new Map(rawSlots.map(sl=>[sl.slot_date+' '+String(sl.slot_time).slice(0,5),sl]));
+  const breakBlockedIds=new Set();
+  activeBookings.forEach(b=>{
+   const start=b.lesson_slots;
+   if(!start?.slot_date||!start?.slot_time)return;
+   const mins=Number(String(start.slot_time).slice(0,2))*60+Number(String(start.slot_time).slice(3,5))+30;
+   const nextTime=String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0');
+   const next=slotByDateTime.get(start.slot_date+' '+nextTime);
+   if(next&&next.is_available)breakBlockedIds.add(next.id);
+  });
+  adminAllLessonSlots=rawSlots.map(sl=>{
+   const nextMins=Number(String(sl.slot_time).slice(0,2))*60+Number(String(sl.slot_time).slice(3,5))+30;
+   const nextTime=String(Math.floor(nextMins/60)).padStart(2,'0')+':'+String(nextMins%60).padStart(2,'0');
+   const next=slotByDateTime.get(sl.slot_date+' '+nextTime);
+   const blockedByNext=!!(sl.is_available&&next&&!next.is_available);
+   const breakBlocked=breakBlockedIds.has(sl.id);
+   return {...sl,is_available:sl.is_available&&!breakBlocked&&!blockedByNext,breakBlocked,blockedByNext};
+  });
   slotSel.value=adminAllLessonSlots.some(x=>x.id===oldSlot&&x.is_available)?oldSlot:'';
   renderAdminAvailabilityCalendar(adminAllLessonSlots);
   if(!adminAllLessonSlots.length){
    const empty=document.createElement('p');empty.className='muted';empty.textContent='Օրացույցը բեռնվեց, բայց ազատ կամ զբաղված ժամեր դեռ ավելացված չեն։';calendar.append(empty);
   }
-  const {data,error}=await db.from('lesson_bookings')
-   .select('*,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)')
-   .order('created_at',{ascending:false});
-  if(error){if(list)list.textContent='Ամրագրումները բեռնել չհաջողվեց։ '+error.message;return;}
   await markFinishedLessons(data||[]);
   renderAdminDailySchedule(data||[]);
   const visible=(data||[]).filter(x=>adminBookingArchiveView?!!x.archived_at:!x.archived_at);
