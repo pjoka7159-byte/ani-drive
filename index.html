@@ -1262,7 +1262,10 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 /* Admin dashboard: one focused workspace at a time, with responsive profile cards. */
 #admin .admin-account-dashboard{position:sticky;top:8px;z-index:30;margin-bottom:16px;padding:16px;border-radius:20px;background:linear-gradient(125deg,#082c59,#1769b4 58%,#2c83cb);box-shadow:0 14px 34px #092f5b35}
 #admin .admin-account-dashboard>strong{display:block;color:#fff;font-size:19px;margin-bottom:12px}
-#admin .admin-account-dashboard .account-dashboard-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+#admin .admin-view-site-row{display:flex;justify-content:flex-start;margin:0 0 12px}
+#admin .admin-view-site-button{min-height:42px;padding:9px 16px;border:1px solid #ffffff80;border-radius:12px;background:linear-gradient(135deg,#f3bd4d,#ffe39a);color:#102b49;font-weight:800;box-shadow:0 5px 16px #001a3340}
+#admin .admin-view-site-button:hover{filter:brightness(1.06);transform:translateY(-1px)}
+#admin .admin-account-dashboard .account-dashboard-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 #admin .admin-account-dashboard .account-dashboard-actions button{min-width:0;min-height:58px;padding:10px 8px;border:1px solid #ffffff70;border-radius:13px;background:#ffffff18;color:#fff;font-weight:750;white-space:normal;line-height:1.25}
 #admin .admin-account-dashboard .account-dashboard-actions button:hover,
 #admin .admin-account-dashboard .account-dashboard-actions button.active{background:#f4b942;color:#14233b;border-color:#ffe29b}
@@ -1390,8 +1393,8 @@ body.account-view #publicBookingCalendar{display:none!important;}
 <h2>ANI DRIVE — Ադմինիստրատորի վահանակ</h2>
 <div class="account-dashboard admin-account-dashboard" aria-label="Ադմինի արագ վահանակ">
  <strong>🛠️ Ադմինի վահանակ</strong>
+ <div class="admin-view-site-row"><button type="button" id="adminViewPublicSite" class="admin-view-site-button">🌐 Դիտել կայքը</button></div>
  <div class="account-dashboard-actions">
-  <button type="button" data-admin-jump="home">🏠 Գլխավոր</button>
   <button type="button" data-admin-jump="booking">📅 Օրացույց / նոր գրանցում</button>
   <button type="button" data-admin-jump="bookings">📋 Ամրագրումներ</button>
   <button type="button" data-admin-jump="students">👥 Աշակերտներ</button>
@@ -2065,12 +2068,18 @@ function openAdminBookingModal(slot){
 }
 function renderAdminAvailabilityCalendar(slots){
  const root=$('adminCalendar');root.replaceChildren();root.classList.add('admin-calendar');
- const byDate={};slots.forEach(x=>(byDate[x.slot_date]??=[]).push(x));
+ const now=new Date();now.setHours(0,0,0,0);
+ const todayKey=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+ const currentMonth=new Date(now.getFullYear(),now.getMonth(),1);
+ if(adminCalendarMonth<currentMonth)adminCalendarMonth=currentMonth;
+ if(adminSelectedDate&&adminSelectedDate<todayKey)adminSelectedDate='';
+ const futureSlots=(slots||[]).filter(x=>x.slot_date>=todayKey);
+ const byDate={};futureSlots.forEach(x=>(byDate[x.slot_date]??=[]).push(x));
  const head=document.createElement('div');head.className='calendar-head';
- const prev=document.createElement('button');prev.type='button';prev.className='gray';prev.textContent='‹';
+ const prev=document.createElement('button');prev.type='button';prev.className='gray';prev.textContent='‹';prev.disabled=adminCalendarMonth<=currentMonth;
  const title=document.createElement('strong');title.textContent=adminCalendarMonth.toLocaleDateString('hy-AM',{month:'long',year:'numeric'});
  const next=document.createElement('button');next.type='button';next.className='gray';next.textContent='›';
- prev.onclick=()=>{adminCalendarMonth=new Date(adminCalendarMonth.getFullYear(),adminCalendarMonth.getMonth()-1,1);renderAdminAvailabilityCalendar(slots);};
+ prev.onclick=()=>{if(adminCalendarMonth<=currentMonth)return;adminCalendarMonth=new Date(adminCalendarMonth.getFullYear(),adminCalendarMonth.getMonth()-1,1);renderAdminAvailabilityCalendar(slots);};
  next.onclick=()=>{adminCalendarMonth=new Date(adminCalendarMonth.getFullYear(),adminCalendarMonth.getMonth()+1,1);renderAdminAvailabilityCalendar(slots);};
  head.append(prev,title,next);root.append(head);
  const grid=document.createElement('div');grid.className='calendar-grid';
@@ -2078,7 +2087,9 @@ function renderAdminAvailabilityCalendar(slots){
  const year=adminCalendarMonth.getFullYear(),month=adminCalendarMonth.getMonth(),first=new Date(year,month,1),offset=(first.getDay()+6)%7,days=new Date(year,month+1,0).getDate();
  for(let i=0;i<offset;i++){const e=document.createElement('div');e.className='calendar-day empty';grid.append(e);}
  for(let day=1;day<=days;day++){
-  const date=year+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0'),daySlots=byDate[date]||[],available=daySlots.filter(x=>x.is_available),busy=daySlots.filter(x=>!x.is_available);
+  const date=year+'-'+String(month+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+  if(date<todayKey){const past=document.createElement('div');past.className='calendar-day empty';grid.append(past);continue;}
+  const daySlots=byDate[date]||[],available=daySlots.filter(x=>x.is_available),busy=daySlots.filter(x=>!x.is_available);
   const b=document.createElement('button');b.type='button';b.className='calendar-day'+(available.length?' available':'')+(busy.length&&!available.length?' busy':'')+(adminSelectedDate===date?' selected':'');b.disabled=!daySlots.length;
   const num=document.createElement('strong');num.textContent=day;b.append(num);
   if(daySlots.length){const count=document.createElement('span');count.className='day-count';count.textContent=available.length+' ազատ · '+busy.length+' զբաղված';b.append(count);b.onclick=()=>{adminSelectedDate=date;renderAdminAvailabilityCalendar(slots);};}
@@ -2434,10 +2445,12 @@ function showAdminWorkspace(key){
  if(key==='applications')loadStudents();
  if(key){setTimeout(()=>scrollPanelIntoView(ids[key]),60);}
 }
+$('adminViewPublicSite').addEventListener('click',()=>{
+ show('');
+ window.scrollTo({top:0,left:0,behavior:'smooth'});
+});
 document.querySelectorAll('[data-admin-jump]').forEach(btn=>btn.addEventListener('click',()=>{
- const key=btn.dataset.adminJump;
- if(key==='home'){show('');window.scrollTo({top:0,behavior:'smooth'});return;}
- showAdminWorkspace(key);
+ showAdminWorkspace(btn.dataset.adminJump);
 }));
 function renderStudents() {
   const list = $('studentsList');
