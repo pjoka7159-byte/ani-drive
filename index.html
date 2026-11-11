@@ -2695,7 +2695,7 @@ async function loadPublicBlocks(){
    else{paragraph.textContent=row.content_value||'';paragraph.style.whiteSpace='pre-wrap';}
   }
  });
- window.aniGalleries={};data.filter(x=>x.content_key.startsWith('gallery_')).forEach(x=>{try{window.aniGalleries[x.content_key.slice(8)]=JSON.parse(x.content_value||'[]');}catch(e){}});
+ window.aniGalleries={};data.filter(x=>x.content_key.startsWith('gallery_')).forEach(x=>{try{window.aniGalleries[x.content_key.slice(8)]=JSON.parse(x.content_value||'[]');}catch(e){}});data.filter(x=>x.content_key.startsWith('page_')).forEach(x=>{const target=$(x.content_key.slice(5));if(!target)return;const host=target.querySelector('.wrap')||target;host.querySelectorAll('.ani-page-gallery').forEach(n=>n.remove());const items=window.aniGalleries[x.content_key]||[];if(items.length){const box=document.createElement('div');box.className='ani-page-gallery';drawGallery(box,items);host.append(box);}});
  const newRows=data.filter(row=>!['registration_enabled','login_enabled'].includes(row.content_key)&&!row.content_key.startsWith('page_')&&!row.content_key.startsWith('gallery_'));
  // Every custom section also gets its own item in the main sections menu.
  const nav=$('publicNav');
