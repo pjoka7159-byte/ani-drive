@@ -2369,17 +2369,17 @@ function initPublicNavigation(){
  const nav=$('publicNav');if(!nav)return;
  const pages={home:['hero','publicBookingCalendar','courseSection','weatherSection'],registration:['publicBookingCalendar','register'],about:['aboutPage'],ani:['aniPage'],instructors:['instructorsPage'],licenses:['licensesPage'],reviews:['reviewsPage'],grounds:['groundsPage'],routes:['routesPage'],offices:['examOffices'],documents:['documentsPage'],links:['linksPage'],content:['publishedBlocks'],media:['publishedMedia']};
  const all=['hero','publicBookingCalendar','courseSection','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
- function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');window.scrollTo({top:0,behavior:'smooth'});}
+ function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');nav.classList.add('hidden');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');window.scrollTo({top:0,behavior:'smooth'});}
  nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
- $('openPublicNav').onclick=(e)=>{e.stopPropagation();const opened=nav.classList.toggle('open');document.querySelector('.fx-shell')?.classList.toggle('nav-is-open',opened);};
- $('closePublicNav').onclick=()=>{nav.classList.remove('open');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');};
+ $('openPublicNav').onclick=(e)=>{e.stopPropagation();const opened=!nav.classList.contains('open');nav.classList.remove('hidden');nav.classList.toggle('open',opened);document.querySelector('.fx-shell')?.classList.toggle('nav-is-open',opened);};
+ $('closePublicNav').onclick=()=>{nav.classList.remove('open');nav.classList.add('hidden');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');};
  // Փակել մենյուն միայն այն ժամանակ, երբ սեղմում են մենյուից դուրս։
  document.addEventListener('click',e=>{
   if(!nav.classList.contains('open'))return;
   if(nav.contains(e.target)||$('openPublicNav')?.contains(e.target))return;
-  nav.classList.remove('open');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');
+  nav.classList.remove('open');nav.classList.add('hidden');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');
  });
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){nav.classList.remove('open');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){nav.classList.remove('open');nav.classList.add('hidden');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');}});
  $('aniHomeLogo').onclick=()=>go('home');$('aniHomeLogo').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go('home');}};
  document.querySelectorAll('.public-back-home').forEach(b=>b.addEventListener('click',()=>go('home')));go('home');
 }
