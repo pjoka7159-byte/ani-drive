@@ -1672,7 +1672,7 @@ async function uploadGallery(files,type){const result=[];for(const file of files
 function initAdminToolTiles(){
  const host=$('adminToolTiles');if(!host||host.dataset.ready)return;
  host.dataset.ready='1';
- const panels=[...$('adminContentWorkspace').querySelectorAll('.admin-tool-panel')];
+ const panels=[...$('adminContentWorkspace').querySelectorAll('.admin-tool-panel')].filter(p=>p.id!=='adminContentFormPanel');
  const icons=['🖼️','🔐','🛡️','💬'];
  panels.forEach((p,i)=>{
   const b=document.createElement('button');b.type='button';b.className='admin-tool-tile';
