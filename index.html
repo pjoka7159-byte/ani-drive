@@ -1835,7 +1835,7 @@ async function loadStudentSlots(){
 }
 async function loadStudentBookings(){
  const box=$('studentBookings');box.replaceChildren();
- const {data,error}=await db.from('lesson_bookings').select('id,status,created_at,slot_id,requested_slot_id,archived_at,lesson_slots(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)').eq('student_id',currentUser.id).is('archived_at',null).order('created_at',{ascending:false});
+ const {data,error}=await db.from('lesson_bookings').select('id,status,created_at,slot_id,requested_slot_id,archived_at,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)').eq('student_id',currentUser.id).is('archived_at',null).order('created_at',{ascending:false});
  if(error){box.textContent='Ամրագրումները հասանելի չեն։ '+error.message;return;}if(!data?.length){box.textContent='Դեռ ամրագրումներ չունեք։';return;}
  data.forEach(b=>{const row=document.createElement('div');row.className='admin-item';const p=document.createElement('p');p.textContent='📅 '+(b.lesson_slots?slotLabel(b.lesson_slots):'Ժամը')+' — '+({pending:'Սպասում է հաստատման',approved:'Հաստատված',rejected:'Մերժված',cancelled:'Չեղարկված՝ սպասման ռեժիմում'}[b.status]||b.status);row.append(p);
  if(b.requested_slot){const req=document.createElement('p');req.className='booking-change-request';req.textContent='🕓 Փոփոխության հայտ՝ '+slotLabel(b.requested_slot)+' · սպասում է ադմինի հաստատմանը';row.append(req);}
@@ -1981,7 +1981,7 @@ async function loadAdminBookingPanel(){
    const empty=document.createElement('p');empty.className='muted';empty.textContent='Օրացույցը բեռնվեց, բայց ազատ կամ զբաղված ժամեր դեռ ավելացված չեն։ Ավելացրեք նոր ազատ օր և ժամ ներքևի ձևով։';calendar.append(empty);
   }
   const {data,error}=await db.from('lesson_bookings')
-   .select('*,lesson_slots(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)')
+   .select('*,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time),requested_slot:lesson_slots!lesson_bookings_requested_slot_id_fkey(slot_date,slot_time)')
    .order('created_at',{ascending:false});
   if(error){if(list)list.textContent='Ամրագրումները բեռնել չհաջողվեց։ '+error.message;return;}
   const visible=(data||[]).filter(x=>adminBookingArchiveView?!!x.archived_at:!x.archived_at);
@@ -2673,7 +2673,7 @@ function initPublicNavigation(){
 
 async function runLessonAutoArchive(){
  if(!isAdmin)return;
- const {data,error}=await db.from('lesson_bookings').select('id,status,cancelled_at,lesson_slots(slot_date,slot_time)').is('archived_at',null).limit(1000);
+ const {data,error}=await db.from('lesson_bookings').select('id,status,cancelled_at,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time)').is('archived_at',null).limit(1000);
  if(error||!data)return;
  const now=Date.now();
  for(const b of data){
@@ -2688,7 +2688,7 @@ async function runLessonAutoArchive(){
 }
 async function checkStudentLessonReminder(){
  if(!currentUser||isAdmin)return;
- const {data,error}=await db.from('lesson_bookings').select('id,status,lesson_slots(slot_date,slot_time)').eq('student_id',currentUser.id).eq('status','approved').is('archived_at',null);
+ const {data,error}=await db.from('lesson_bookings').select('id,status,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time)').eq('student_id',currentUser.id).eq('status','approved').is('archived_at',null);
  if(error||!data)return;
  const now=Date.now();
  for(const b of data){
