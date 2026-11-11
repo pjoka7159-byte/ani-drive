@@ -1913,8 +1913,11 @@ async function changeBookingStatus(id,status){
  playNotice();await loadAdminBookingPanel();message('slotMsg',status==='approved'?'Ամրագրումը հաստատվեց։':'Ամրագրումը մերժվեց։');
 }
 $('slotForm').onsubmit=async e=>{
- e.preventDefault();const f=new FormData(e.target);
- const {error}=await db.from('lesson_slots').insert({slot_date:f.get('slotDate'),slot_time:f.get('slotTime'),created_by:currentUser.id,is_available:true});
+ e.preventDefault();const f=new FormData(e.target),date=String(f.get('slotDate')),time=String(f.get('slotTime'));
+ const day=new Date(date+'T12:00:00').getDay(),parts=time.split(':').map(Number);
+ if(day===1){message('slotMsg','Երկուշաբթին հանգստյան օր է։ Ընտրեք երեքշաբթիից կիրակի։',true);return;}
+ if(parts.length<2||parts[1]!==0&&parts[1]!==30){message('slotMsg','Ժամերը պետք է լինեն 30 րոպեի քայլով։',true);return;}
+ const {error}=await db.from('lesson_slots').insert({slot_date:date,slot_time:time,created_by:currentUser.id,is_available:true});
  if(error){message('slotMsg','Ժամը չավելացվեց։ '+error.message,true);return;}
  e.target.reset();message('slotMsg','Ազատ ժամը ավելացվեց։');await loadAdminBookingPanel();
 };
