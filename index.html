@@ -1282,6 +1282,10 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
  #admin .admin-account-dashboard .account-dashboard-actions button:first-child{grid-column:1/-1}
 }
 </style>
+<style id="hide-public-calendar-in-account-views">
+/* The public booking calendar is redundant and takes space above private dashboards. */
+body.account-view #publicBookingCalendar{display:none!important;}
+</style>
 </head>
 
 <body>
