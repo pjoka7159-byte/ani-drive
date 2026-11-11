@@ -1108,6 +1108,17 @@ body:not(.admin-authenticated) #admin,body:not(.admin-authenticated) #adminBtn,
 body:not(.admin-authenticated) .admin-only,body:not(.admin-authenticated) [data-admin-only="true"]{display:none!important}
 body.admin-authenticated #admin:not(.hidden){display:block!important}
 
+/* Compact unified calendar styling */
+.public-booking-card,.calendar-shell{padding:12px!important;border-radius:14px!important}
+.calendar-grid{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:4px!important}
+.calendar-weekday{font-size:10px!important;padding:3px 0!important}
+.calendar-day{min-width:0!important;width:100%!important;aspect-ratio:1/1!important;max-width:42px!important;max-height:42px!important;margin:auto!important;border-radius:9px!important;font-size:12px!important;padding:2px!important}
+.calendar-head{gap:7px!important;margin-bottom:8px!important}.calendar-head button{min-width:30px!important;min-height:28px!important;padding:3px 8px!important}.calendar-head strong{font-size:13px!important}
+#publicSlotChoices,#studentSlotChoices,.admin-time-list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(76px,1fr))!important;gap:5px!important}
+#publicSlotChoices button,#studentSlotChoices button,.admin-time-list button{min-height:30px!important;padding:5px 7px!important;font-size:11px!important;border-radius:8px!important}
+.public-booking-heading h2{font-size:20px!important;margin:5px 0!important}.public-booking-heading p{font-size:12px!important;margin:4px 0 9px!important}
+.public-booking-card h3,.calendar-shell h3,.calendar-shell h4{font-size:13px!important;margin:9px 0 6px!important}.public-book-button{min-height:34px!important;padding:7px 12px!important;font-size:12px!important}
+@media(max-width:650px){.calendar-day{max-width:36px!important;max-height:36px!important;font-size:11px!important}.public-booking-card,.calendar-shell{padding:8px!important}}
 </style>
 </head>
 
@@ -1221,7 +1232,7 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 <div class="panel hidden" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
 <h4>👤 Աշակերտի տվյալներ</h4><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p>
 <h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
-<h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p></div>
+<h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" step="1800" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p></div>
 <div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
 
 <div class="panel admin-applications-panel">
@@ -1751,20 +1762,20 @@ function renderStudentCalendar(){
  ['Երկ','Երք','Չոր','Հնգ','Ուրբ','Շաբ','Կիր'].forEach(x=>{const h=document.createElement('div');h.className='calendar-weekday';h.textContent=x;grid.append(h);});
  const offset=(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),1).getDay()+6)%7;for(let i=0;i<offset;i++)grid.append(document.createElement('div'));
  const days=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()+1,0).getDate();
- const free=new Set(studentAvailableSlots.filter(x=>x.is_available).map(x=>x.slot_date)),busy=new Set(studentAvailableSlots.filter(x=>!x.is_available).map(x=>x.slot_date));
- for(let n=1;n<=days;n++){const key=dateKey(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),n)),b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':busy.has(key)?' busy':'')+(selectedStudentDate===key?' selected':'');b.textContent=n;b.disabled=!free.has(key)&&!busy.has(key);if(!b.disabled)b.onclick=()=>{selectedStudentDate=key;renderStudentCalendar();renderStudentSlotChoices();};grid.append(b);}
+ const free=new Set(studentAvailableSlots.map(x=>x.slot_date));
+ for(let n=1;n<=days;n++){const key=dateKey(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),n)),b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':'')+(selectedStudentDate===key?' selected':'');b.textContent=n;b.disabled=!free.has(key)||new Date(key+'T12:00:00').getDay()===1;if(!b.disabled)b.onclick=()=>{selectedStudentDate=key;renderStudentCalendar();renderStudentSlotChoices();};grid.append(b);}
 }
 function renderStudentSlotChoices(){
  const box=$('studentSlotChoices'),hidden=$('studentBookingForm').elements.slot;box.replaceChildren();hidden.value='';
  const slots=studentAvailableSlots.filter(x=>x.slot_date===selectedStudentDate);if(!slots.length){box.textContent='Ընտրեք օրացույցի նշված օրերից մեկը։';return;}
- slots.forEach(slot=>{const b=document.createElement('button');b.type='button';b.className='slot-choice '+(slot.is_available?'available-time':'busy-time');b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.onclick=()=>{hidden.value=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};box.append(b);});
+ slots.filter(slot=>slot.is_available).forEach(slot=>{const b=document.createElement('button');b.type='button';b.className='slot-choice available-time';b.textContent=String(slot.slot_time).slice(0,5);b.onclick=()=>{hidden.value=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};box.append(b);});
 }
 $('studentCalPrev').onclick=()=>{studentCalendarMonth=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()-1,1);renderStudentCalendar();};
 $('studentCalNext').onclick=()=>{studentCalendarMonth=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()+1,1);renderStudentCalendar();};
 async function loadStudentSlots(){
  const {data,error}=await db.from('lesson_slots').select('id,slot_date,slot_time,is_available').gte('slot_date',dateKey(new Date())).order('slot_date').order('slot_time');
  if(error){message('studentBookingMsg','Ժամերը բեռնել չհաջողվեց։ '+error.message,true);return;}
- studentAvailableSlots=data||[];if(!studentAvailableSlots.some(x=>x.slot_date===selectedStudentDate))selectedStudentDate='';
+ studentAvailableSlots=(data||[]).filter(x=>x.is_available&&new Date(x.slot_date+'T12:00:00').getDay()!==1);if(!studentAvailableSlots.some(x=>x.slot_date===selectedStudentDate))selectedStudentDate='';
  renderStudentCalendar();renderStudentSlotChoices();
 }
 async function loadStudentBookings(){
@@ -2570,23 +2581,23 @@ function renderPublicCalendar(){
  const offset=(new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth(),1).getDay()+6)%7;
  for(let i=0;i<offset;i++){const blank=document.createElement('div');blank.className='calendar-day empty';grid.append(blank);}
  const total=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()+1,0).getDate();
- const free=new Set(publicCalendarSlots.filter(x=>x.is_available).map(x=>x.slot_date));
- const busy=new Set(publicCalendarSlots.filter(x=>!x.is_available).map(x=>x.slot_date));
+ const workingDate=s=>new Date(s+'T12:00:00').getDay()!==1;
+ const free=new Set(publicCalendarSlots.filter(x=>x.is_available&&workingDate(x.slot_date)).map(x=>x.slot_date));
  for(let n=1;n<=total;n++){
   const key=dateKey(new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth(),n));
-  const b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':busy.has(key)?' busy':'')+(publicSelectedDate===key?' selected':'');b.textContent=n;
-  b.disabled=!free.has(key)&&!busy.has(key);
+  const b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':'')+(publicSelectedDate===key?' selected':'');b.textContent=n;
+  b.disabled=!free.has(key)||new Date(key+'T12:00:00').getDay()===1;
   if(!b.disabled)b.onclick=()=>{publicSelectedDate=key;publicSelectedSlot='';renderPublicCalendar();renderPublicSlotChoices();};
   grid.append(b);
  }
 }
 function renderPublicSlotChoices(){
  const box=$('publicSlotChoices');if(!box)return;box.replaceChildren();publicSelectedSlot='';
- const slots=publicCalendarSlots.filter(x=>x.slot_date===publicSelectedDate);
+ const slots=publicCalendarSlots.filter(x=>x.slot_date===publicSelectedDate&&x.is_available);
  if(!slots.length){box.textContent='Ընտրեք օրացույցի կանաչ օրերից մեկը։';return;}
  slots.forEach(slot=>{
-  const b=document.createElement('button');b.type='button';b.className=slot.is_available?'available-time':'busy-time';b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.disabled=!slot.is_available;
-  if(slot.is_available)b.onclick=()=>{publicSelectedSlot=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};
+  const b=document.createElement('button');b.type='button';b.className='available-time';b.textContent=String(slot.slot_time).slice(0,5);
+  b.onclick=()=>{publicSelectedSlot=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};
   box.append(b);
  });
 }
