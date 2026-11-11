@@ -1064,6 +1064,7 @@ body.account-view .fx-shell .nav-open-btn{position:fixed!important;top:12px!impo
  body.account-view .fx-main>#admin>.wrap,body.account-view .fx-main>#studentArea>.wrap{max-width:100%!important}
 }
 
+#contentForm{display:grid;grid-template-columns:1fr;gap:10px}#contentForm textarea{width:100%;min-height:130px;resize:vertical;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit}#contentForm label{font-weight:700}#contentForm select,#contentForm input{max-width:100%}#contentList .admin-item{margin:10px 0;padding:14px;border:1px solid #dbe4f0;border-radius:12px;background:#fff}#contentList .admin-item p{white-space:pre-wrap;overflow-wrap:anywhere}
 </style>
 </head>
 
@@ -1219,12 +1220,30 @@ body.account-view .fx-shell .nav-open-btn{position:fixed!important;top:12px!impo
 <h3>Կայքի բովանդակության կառավարում</h3>
 <p class="muted">Ավելացրեք կամ խմբագրեք կայքի տեքստային բաժինները և պատկերների հղումները։</p>
 <form id="contentForm">
-<input name="contentKey" required placeholder="Բաժնի բանալի (օր. hero_title)">
-<input name="contentLabel" required placeholder="Բաժնի անվանումը">
+<label>Ո՞ր բաժինն եք խմբագրում</label>
+<select name="contentTarget" id="contentTarget">
+<option value="">➕ Նոր բաժին ավելացնել</option>
+<option value="hero">Գլխավոր էջի վերնամաս</option>
+<option value="courseSection">Մեր դասընթացները</option>
+<option value="aboutPage">Մեր մասին</option>
+<option value="aniPage">Անի Դրայվի մասին</option>
+<option value="instructorsPage">Հրահանգիչներ</option>
+<option value="licensesPage">Լիցենզիաներ</option>
+<option value="reviewsPage">Կարծիքներ</option>
+<option value="groundsPage">Քննական տարածքներ</option>
+<option value="routesPage">Քննական երթուղիներ</option>
+<option value="examOffices">ՀՔԲ — քննական բաժիններ</option>
+<option value="documentsPage">Քննության փաստաթղթեր</option>
+<option value="linksPage">Կարևոր հղումներ</option>
+<option value="weatherSection">Եղանակի բաժին</option>
+</select>
+<input name="contentKey" id="contentKey" required placeholder="Նոր բաժնի բանալի (օր. my_new_section)">
+<input name="contentLabel" required placeholder="Բաժնի վերնագիր">
 <select name="contentType"><option value="text">Տեքստ</option><option value="image">Նկարի հղում</option><option value="video">Տեսանյութի հղում</option><option value="link">Արտաքին հղում</option></select>
-<input name="contentValue" placeholder="Տեքստ կամ URL (ըստ ցանկության)">
+<textarea name="contentValue" rows="5" placeholder="Բաժնի ամբողջական տեքստը կամ URL-ը"></textarea>
 <label><input type="checkbox" name="isPublished" checked style="width:auto"> Հրապարակված</label>
-<button class="blue">Պահպանել բաժինը</button>
+<button class="blue">Պահպանել փոփոխությունը</button>
+<button type="button" id="contentNewBtn" class="gray">Մաքրել / նոր բաժին</button>
 </form>
 <div id="contentList"></div>
 </div>
@@ -2140,7 +2159,7 @@ async function loadContentTools(){
   const h=document.createElement('strong');h.textContent=row.label+' ('+row.content_key+')'+(row.is_published===false?' — ՍԵՎԱԳԻՐ':' — ՀՐԱՊԱՐԱԿՎԱԾ');
   const v=document.createElement('p');v.textContent=row.content_value;
   const edit=document.createElement('button');edit.textContent='Խմբագրել';edit.className='gray';
-  edit.onclick=()=>{ $('contentForm').elements.contentKey.value=row.content_key;$('contentForm').elements.contentLabel.value=row.label;$('contentForm').elements.contentType.value=row.content_type;$('contentForm').elements.contentValue.value=row.content_value;$('contentForm').elements.isPublished.checked=row.is_published!==false; };
+  edit.onclick=()=>{ const f=$('contentForm').elements;const target=row.content_key.startsWith('page_')?row.content_key.slice(5):'';f.contentTarget.value=target;f.contentKey.value=target?'':row.content_key;f.contentKey.hidden=!!target;f.contentKey.required=!target;f.contentLabel.value=row.label;f.contentType.value=row.content_type;f.contentValue.value=row.content_value||'';f.isPublished.checked=row.is_published!==false;$('contentForm').scrollIntoView({behavior:'smooth',block:'center'}); };
   const del=document.createElement('button');del.textContent='Ջնջել';del.className='danger';
   del.onclick=async()=>{if(!confirm('Ջնջե՞լ այս բաժինը։'))return;const r=await db.from('site_content').delete().eq('id',row.id);if(r.error)message('adminMsg',r.error.message,true);else loadContentTools();};
   item.append(h,v,edit,del);box.append(item);
@@ -2168,11 +2187,27 @@ function updateContentValueRequirement(){
  contentValueField.placeholder=needsUrl?'Արտաքին հղման URL (պարտադիր)':'Տեքստ կամ URL (ըստ ցանկության)';
 }
 contentTypeField.addEventListener('change',updateContentValueRequirement);
+
+const contentTargetField=$('contentForm').elements.contentTarget;
+const contentKeyField=$('contentForm').elements.contentKey;
+contentTargetField.addEventListener('change',()=>{
+ const selected=contentTargetField.value;
+ contentKeyField.hidden=!!selected;contentKeyField.required=!selected;
+ contentKeyField.value=selected?'':'';
+ $('contentForm').elements.contentLabel.value='';
+ $('contentForm').elements.contentValue.value='';
+});
+$('contentNewBtn').onclick=()=>{
+ $('contentForm').reset();contentTargetField.value='';contentKeyField.hidden=false;contentKeyField.required=true;
+ updateContentValueRequirement();
+};
+
 updateContentValueRequirement();
 $('contentForm').onsubmit=async e=>{
  e.preventDefault();if(!isAdmin)return;
- const f=new FormData(e.target),key=String(f.get('contentKey')).trim();
- const payload={content_key:key,label:String(f.get('contentLabel')).trim(),content_type:String(f.get('contentType')),content_value:String(f.get('contentValue')).trim(),is_published:f.get('isPublished')==='on',updated_at:new Date().toISOString()};
+ const f=new FormData(e.target),target=String(f.get('contentTarget')||''),key=target?'page_'+target:String(f.get('contentKey')||'').trim();
+ if(!key){message('adminMsg','Նշեք նոր բաժնի բանալին։',true);return;}
+ const payload={content_key:key,label:String(f.get('contentLabel')).trim(),content_type:String(f.get('contentType')),content_value:String(f.get('contentValue')||'').trim(),is_published:f.get('isPublished')==='on',updated_at:new Date().toISOString()};
  const {error}=await db.from('site_content').upsert(payload,{onConflict:'content_key'});
  if(error){message('adminMsg','Չհաջողվեց պահպանել։ '+error.message,true);return;}
  message('adminMsg','Բաժինը պահպանվեց տվյալների բազայում։');e.target.reset();loadContentTools();
@@ -2213,10 +2248,18 @@ async function loadWeather(){
 async function loadPublicBlocks(){
  const section=$('publishedBlocks'),inner=$('publishedBlocksInner');
  const {data,error}=await db.from('site_content').select('content_key,label,content_type,content_value').eq('is_published',true).order('updated_at',{ascending:true});
- if(error||!data||!data.length)return;inner.replaceChildren();section.classList.remove('hidden');
+ if(error||!data)return;
+ // Existing fixed pages: update their visible heading and introductory text.
+ data.filter(row=>row.content_key.startsWith('page_')).forEach(row=>{
+  const target=$(row.content_key.slice(5));if(!target)return;
+  const heading=target.querySelector('h1,h2,h3');if(heading)heading.textContent=row.label;
+  const paragraph=target.querySelector('.wrap p, p');if(paragraph){paragraph.textContent=row.content_value||'';paragraph.style.whiteSpace='pre-wrap';}
+ });
+ const newRows=data.filter(row=>!['registration_enabled','login_enabled'].includes(row.content_key)&&!row.content_key.startsWith('page_'));
+ if(!newRows.length){section.classList.add('hidden');return;}
+ inner.replaceChildren();section.classList.remove('hidden');
  const grid=document.createElement('div');grid.className='grid';inner.append(grid);
- data.forEach((row,index)=>{
-  if(['registration_enabled','login_enabled'].includes(row.content_key))return;
+ newRows.forEach((row,index)=>{
   const card=document.createElement('button');card.type='button';card.className='card feature-card';card.style.textAlign='left';card.style.color='#17243a';
   const icon=document.createElement('div');icon.className='emoji-orbit';icon.textContent=['✨','🚘','📚','🎯','🌟','💡','🎨','🧭'][index%8];
   const title=document.createElement('h3');title.textContent=row.label;const hint=document.createElement('p');hint.textContent='Սեղմեք՝ մանրամասները բացելու համար ↗';card.append(icon,title,hint);grid.append(card);
