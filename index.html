@@ -1232,7 +1232,7 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 <div class="panel hidden" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
 <h4>👤 Աշակերտի տվյալներ</h4><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p>
 <h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
-<h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><input type="time" name="slotTime" step="1800" required><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p></div>
+<h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><select name="slotTime" required><option value="">Ընտրել դասաժամը</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p></div>
 <div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
 
 <div class="panel admin-applications-panel">
@@ -1751,6 +1751,7 @@ async function postStudentMessage(body){const {error}=await db.from('student_mes
 $('studentChatForm').onsubmit=async e=>{e.preventDefault();const inp=e.target.elements.chatBody;try{await postStudentMessage(inp.value.trim());inp.value='';message('studentChatMsg','Ուղարկվեց։');}catch(err){message('studentChatMsg','Սխալ՝ '+err.message,true);}};
 $('studentContactForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{await postStudentMessage('Թեմա՝ '+f.get('contactTitle')+'\n'+f.get('contactBody'));e.target.reset();message('studentContactMsg','Ուղարկվեց ադմինին։');}catch(err){message('studentContactMsg','Սխալ՝ '+err.message,true);}};
 
+function isWorkingLessonTime(value){const m=String(value||'').slice(0,5).split(':').map(Number);if(m.length!==2||!Number.isFinite(m[0])||!Number.isFinite(m[1]))return false;const total=m[0]*60+m[1];return total>=600&&total<=1050&&(total-600)%30===0;}
 function slotLabel(s){return new Date(s.slot_date+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'short',day:'numeric',month:'long'})+' · '+String(s.slot_time).slice(0,5);}
 let studentAvailableSlots=[];
 let studentCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
@@ -1762,12 +1763,12 @@ function renderStudentCalendar(){
  ['Երկ','Երք','Չոր','Հնգ','Ուրբ','Շաբ','Կիր'].forEach(x=>{const h=document.createElement('div');h.className='calendar-weekday';h.textContent=x;grid.append(h);});
  const offset=(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),1).getDay()+6)%7;for(let i=0;i<offset;i++)grid.append(document.createElement('div'));
  const days=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()+1,0).getDate();
- const free=new Set(studentAvailableSlots.map(x=>x.slot_date));
+ const free=new Set(studentAvailableSlots.filter(x=>isWorkingLessonTime(x.slot_time)).map(x=>x.slot_date));
  for(let n=1;n<=days;n++){const key=dateKey(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),n)),b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':'')+(selectedStudentDate===key?' selected':'');b.textContent=n;b.disabled=!free.has(key)||new Date(key+'T12:00:00').getDay()===1;if(!b.disabled)b.onclick=()=>{selectedStudentDate=key;renderStudentCalendar();renderStudentSlotChoices();};grid.append(b);}
 }
 function renderStudentSlotChoices(){
  const box=$('studentSlotChoices'),hidden=$('studentBookingForm').elements.slot;box.replaceChildren();hidden.value='';
- const slots=studentAvailableSlots.filter(x=>x.slot_date===selectedStudentDate);if(!slots.length){box.textContent='Ընտրեք օրացույցի նշված օրերից մեկը։';return;}
+ const slots=studentAvailableSlots.filter(x=>x.slot_date===selectedStudentDate&&isWorkingLessonTime(x.slot_time));if(!slots.length){box.textContent='Ընտրեք օրացույցի նշված օրերից մեկը։';return;}
  slots.filter(slot=>slot.is_available).forEach(slot=>{const b=document.createElement('button');b.type='button';b.className='slot-choice available-time';b.textContent=String(slot.slot_time).slice(0,5);b.onclick=()=>{hidden.value=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};box.append(b);});
 }
 $('studentCalPrev').onclick=()=>{studentCalendarMonth=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()-1,1);renderStudentCalendar();};
@@ -1775,7 +1776,7 @@ $('studentCalNext').onclick=()=>{studentCalendarMonth=new Date(studentCalendarMo
 async function loadStudentSlots(){
  const {data,error}=await db.from('lesson_slots').select('id,slot_date,slot_time,is_available').gte('slot_date',dateKey(new Date())).order('slot_date').order('slot_time');
  if(error){message('studentBookingMsg','Ժամերը բեռնել չհաջողվեց։ '+error.message,true);return;}
- studentAvailableSlots=(data||[]).filter(x=>x.is_available&&new Date(x.slot_date+'T12:00:00').getDay()!==1);if(!studentAvailableSlots.some(x=>x.slot_date===selectedStudentDate))selectedStudentDate='';
+ studentAvailableSlots=(data||[]).filter(x=>x.is_available&&isWorkingLessonTime(x.slot_time)&&new Date(x.slot_date+'T12:00:00').getDay()!==1);if(!studentAvailableSlots.some(x=>x.slot_date===selectedStudentDate))selectedStudentDate='';
  renderStudentCalendar();renderStudentSlotChoices();
 }
 async function loadStudentBookings(){
@@ -1871,7 +1872,7 @@ async function loadAdminBookingPanel(){
    if(list)list.textContent='Դասաժամերի ցանկը չի բեռնվել, քանի որ ժամերի տվյալները հասանելի չեն։';
    return;
   }
-  adminAllLessonSlots=slots||[];
+  adminAllLessonSlots=(slots||[]).filter(x=>isWorkingLessonTime(x.slot_time));
   slotSel.value=adminAllLessonSlots.some(x=>x.id===oldSlot&&x.is_available)?oldSlot:'';
   renderAdminAvailabilityCalendar(adminAllLessonSlots);
   if(!adminAllLessonSlots.length){
@@ -1916,7 +1917,7 @@ $('slotForm').onsubmit=async e=>{
  e.preventDefault();const f=new FormData(e.target),date=String(f.get('slotDate')),time=String(f.get('slotTime'));
  const day=new Date(date+'T12:00:00').getDay(),parts=time.split(':').map(Number);
  if(day===1){message('slotMsg','Երկուշաբթին հանգստյան օր է։ Ընտրեք երեքշաբթիից կիրակի։',true);return;}
- if(parts.length<2||parts[1]!==0&&parts[1]!==30){message('slotMsg','Ժամերը պետք է լինեն 30 րոպեի քայլով։',true);return;}
+ if(!isWorkingLessonTime(time)){message('slotMsg','Ընտրեք ժամը 10:00–17:30 միջակայքից՝ 30 րոպեի քայլով։',true);return;}
  const {error}=await db.from('lesson_slots').insert({slot_date:date,slot_time:time,created_by:currentUser.id,is_available:true});
  if(error){message('slotMsg','Ժամը չավելացվեց։ '+error.message,true);return;}
  e.target.reset();message('slotMsg','Ազատ ժամը ավելացվեց։');await loadAdminBookingPanel();
@@ -2585,7 +2586,7 @@ function renderPublicCalendar(){
  for(let i=0;i<offset;i++){const blank=document.createElement('div');blank.className='calendar-day empty';grid.append(blank);}
  const total=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()+1,0).getDate();
  const workingDate=s=>new Date(s+'T12:00:00').getDay()!==1;
- const free=new Set(publicCalendarSlots.filter(x=>x.is_available&&workingDate(x.slot_date)).map(x=>x.slot_date));
+ const free=new Set(publicCalendarSlots.filter(x=>x.is_available&&isWorkingLessonTime(x.slot_time)&&workingDate(x.slot_date)).map(x=>x.slot_date));
  for(let n=1;n<=total;n++){
   const key=dateKey(new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth(),n));
   const b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':'')+(publicSelectedDate===key?' selected':'');b.textContent=n;
@@ -2596,7 +2597,7 @@ function renderPublicCalendar(){
 }
 function renderPublicSlotChoices(){
  const box=$('publicSlotChoices');if(!box)return;box.replaceChildren();publicSelectedSlot='';
- const slots=publicCalendarSlots.filter(x=>x.slot_date===publicSelectedDate&&x.is_available);
+ const slots=publicCalendarSlots.filter(x=>x.slot_date===publicSelectedDate&&x.is_available&&isWorkingLessonTime(x.slot_time));
  if(!slots.length){box.textContent='Ընտրեք օրացույցի կանաչ օրերից մեկը։';return;}
  slots.forEach(slot=>{
   const b=document.createElement('button');b.type='button';b.className='available-time';b.textContent=String(slot.slot_time).slice(0,5);
