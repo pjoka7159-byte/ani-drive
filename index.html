@@ -1258,6 +1258,30 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
   }
 }
 </style>
+<style id="admin-panel-organizer">
+/* Admin dashboard: one focused workspace at a time, with responsive profile cards. */
+#admin .admin-account-dashboard{position:sticky;top:8px;z-index:30;margin-bottom:16px;padding:16px;border-radius:20px;background:linear-gradient(125deg,#082c59,#1769b4 58%,#2c83cb);box-shadow:0 14px 34px #092f5b35}
+#admin .admin-account-dashboard>strong{display:block;color:#fff;font-size:19px;margin-bottom:12px}
+#admin .admin-account-dashboard .account-dashboard-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+#admin .admin-account-dashboard .account-dashboard-actions button{min-width:0;min-height:58px;padding:10px 8px;border:1px solid #ffffff70;border-radius:13px;background:#ffffff18;color:#fff;font-weight:750;white-space:normal;line-height:1.25}
+#admin .admin-account-dashboard .account-dashboard-actions button:hover,
+#admin .admin-account-dashboard .account-dashboard-actions button.active{background:#f4b942;color:#14233b;border-color:#ffe29b}
+#admin .admin-shortcuts-blue{display:none!important}
+#admin .admin-workspace-panel{margin:12px 0 18px!important;padding:clamp(14px,2vw,22px)!important;border-radius:18px!important}
+#admin .admin-workspace-panel>h3,#admin .admin-workspace-panel .row h3{color:#f4faff}
+#admin .admin-item{display:block;margin:10px 0;padding:16px;border-radius:15px;background:linear-gradient(145deg,#102c46,#0b1d31);border:1px solid #2c6487;box-shadow:0 8px 22px #00142655;color:#f2f8ff}
+#admin .admin-item p{line-height:1.55;margin:7px 0}
+#admin .admin-item button{margin:6px 6px 0 0}
+#admin .admin-applications-panel .admin-item{border-left:4px solid #eab94e}
+#admin #registeredStudentsList .admin-item{border-left:4px solid #38bdf8}
+#admin #adminBookings .admin-item{border-left:4px solid #eab94e}
+@media(max-width:700px){
+ #admin .admin-account-dashboard{position:relative;top:auto;padding:12px}
+ #admin .admin-account-dashboard .account-dashboard-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ #admin .admin-account-dashboard .account-dashboard-actions button{min-height:48px;font-size:12px}
+ #admin .admin-account-dashboard .account-dashboard-actions button:first-child{grid-column:1/-1}
+}
+</style>
 </head>
 
 <body>
@@ -1370,20 +1394,20 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
   <button type="button" data-admin-jump="applications">📝 Հայտեր</button>
  </div>
 </div>
-<div class="admin-shortcuts admin-shortcuts-blue">
+<div class="admin-shortcuts admin-shortcuts-blue" aria-hidden="true">
   <button type="button" class="admin-shortcut existing-bookings-shortcut" id="openExistingBookings"><span>📋</span><strong>Գրանցված դասաժամերի ցանկ</strong><small>Դիտել և կառավարել ամրագրումները</small></button>
   <button type="button" class="admin-shortcut new-booking-shortcut" id="openBookingAdmin"><span>➕</span><strong>Նոր դասաժամի գրանցում</strong><small>Ընտրել օրն ու ազատ ժամը</small></button>
   <button type="button" class="admin-shortcut students-shortcut" id="openRegisteredStudents"><span>👥</span><strong>Աշակերտների ցանկ և արխիվ</strong><small>Գրանցված աշակերտների տվյալներ</small></button>
 </div>
-<div class="panel hidden" id="adminExistingBookingsPanel"><div class="row"><h3 style="margin-right:auto">📋 Գրանցված դասաժամերի ցանկ</h3><button type="button" class="gray" id="refreshExistingBookings">↻ Թարմացնել</button></div><div class="booking-archive-tabs"><button type="button" class="blue" id="showActiveBookings">Ակտիվ դասաժամեր</button><button type="button" class="gray" id="showArchivedBookings">📦 Արխիվ</button></div><div id="adminBookings">Բեռնում...</div></div>
-<div class="panel hidden" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
+<div class="panel hidden admin-workspace-panel" id="adminExistingBookingsPanel"><div class="row"><h3 style="margin-right:auto">📋 Գրանցված դասաժամերի ցանկ</h3><button type="button" class="gray" id="refreshExistingBookings">↻ Թարմացնել</button></div><div class="booking-archive-tabs"><button type="button" class="blue" id="showActiveBookings">Ակտիվ դասաժամեր</button><button type="button" class="gray" id="showArchivedBookings">📦 Արխիվ</button></div><div id="adminBookings">Բեռնում...</div></div>
+<div class="panel hidden admin-workspace-panel" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
 <h4>👤 Աշակերտի տվյալներ</h4><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p>
 <h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
 <h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><select name="slotTime" required><option value="">Ընտրել դասաժամը</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="blue">Ավելացնել ազատ ժամ</button></form>
 <h4>🕒 Ազատ ժամերի միջակայք</h4><form id="slotRangeForm" class="grid"><input type="date" name="rangeDate" required><select name="rangeStart" required><option value="">Սկսած</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><select name="rangeEnd" required><option value="">Մինչև</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="good">Սահմանել միջակայքը ազատ</button></form><p class="muted">Օրը ընտրեք, նշեք սկիզբն ու ավարտը։ Միջակայքի ժամերը կդառնան ազատ՝ բացառությամբ գործող ամրագրումների։</p><p id="slotMsg" class="message"></p></div>
-<div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
+<div class="panel hidden admin-workspace-panel" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
 
-<div class="panel admin-applications-panel" id="adminApplicationsPanel">
+<div class="panel hidden admin-applications-panel admin-workspace-panel" id="adminApplicationsPanel">
 <div class="row">
   <h3 style="margin-right:auto;margin-bottom:4px">🚘 Աշակերտների հայտեր</h3>
   <button class="gray admin-refresh" id="refreshBtn" title="Թարմացնել հայտերը">↻</button>
@@ -1409,7 +1433,7 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 </div>
 </div>
 
-<div class="panel">
+<div class="panel hidden admin-workspace-panel" id="adminChatPanel">
 <h3>💬 Աշակերտների նամակագրություն և օնլայն չատ</h3>
 <input id="adminChatPhoneSearch" type="search" inputmode="tel" placeholder="🔎 Արագ որոնում՝ աշակերտի հեռախոսահամարով" autocomplete="off">
 <p id="adminChatSearchInfo" class="muted">Մուտքագրեք հեռախոսահամարը՝ աշակերտին արագ գտնելու համար։</p>
@@ -2393,19 +2417,24 @@ async function loadRegisteredStudents(){
  if(error){box.textContent='Չհաջողվեց բեռնել ցանկը։ '+error.message;return;}
  const rows=(data||[]).filter(x=>registeredListMode==='archived'?!!x.archived_at:!x.archived_at);box.replaceChildren();
  if(!rows.length){box.textContent=registeredListMode==='archived'?'Արխիվը դատարկ է։':'Գրանցված անձինք դեռ չկան։';return;}
- rows.forEach(st=>{const item=document.createElement('div');item.className='admin-item';const h=document.createElement('strong');h.textContent='👤 '+st.first_name+' '+st.last_name;const p=document.createElement('p');p.textContent='☎️ '+(st.phone||'—')+' · '+(st.email||'—');const d=document.createElement('p');d.textContent='Տարիք՝ '+(st.age||'—')+' · Քննական բաժին՝ '+(st.exam_location||'—');const b=document.createElement('button');b.className=registeredListMode==='archived'?'good':'gray';b.textContent=registeredListMode==='archived'?'Վերականգնել':'Արխիվացնել';b.onclick=async()=>{if(!confirm('Շարունակե՞լ։'))return;const {error}=await db.from('students').update({archived_at:registeredListMode==='archived'?null:new Date().toISOString()}).eq('id',st.id);if(error){message('adminMsg',error.message,true);return;}loadRegisteredStudents();};item.append(h,p,d,b);box.append(item);});
+ rows.forEach(st=>{const item=document.createElement('div');item.className='admin-item';const h=document.createElement('strong');h.textContent='👤 '+st.first_name+' '+st.last_name;const p=document.createElement('p');p.textContent='☎️ '+(st.phone||'—')+' · '+(st.email||'—');const d=document.createElement('p');d.textContent='Էլ․ փոստ՝ '+(st.email||'—')+' · Տարիք՝ '+(st.age||'—')+' · Սեռ՝ '+(st.gender||'—')+' · Ուսուցման տեսակ՝ '+(st.study_type||'—')+' · Բնակավայր՝ '+(st.residence||'—')+' · Քննական բաժին՝ '+(st.exam_location||'—')+' · Կարգավիճակ՝ '+(st.status||'—');const b=document.createElement('button');b.className=registeredListMode==='archived'?'good':'gray';b.textContent=registeredListMode==='archived'?'Վերականգնել':'Արխիվացնել';b.onclick=async()=>{if(!confirm('Շարունակե՞լ։'))return;const {error}=await db.from('students').update({archived_at:registeredListMode==='archived'?null:new Date().toISOString()}).eq('id',st.id);if(error){message('adminMsg',error.message,true);return;}loadRegisteredStudents();};item.append(h,p,d,b);box.append(item);});
 }
-$('openRegisteredStudents').onclick=()=>{$('registeredStudentsSection').classList.toggle('hidden');if(!$('registeredStudentsSection').classList.contains('hidden'))loadRegisteredStudents();};
+$('openRegisteredStudents').onclick=()=>showAdminWorkspace('students');
+function showAdminWorkspace(key){
+ const ids={booking:'adminBookingSection',bookings:'adminExistingBookingsPanel',students:'registeredStudentsSection',applications:'adminApplicationsPanel',chat:'adminChatPanel'};
+ Object.entries(ids).forEach(([k,id])=>$(id)?.classList.toggle('hidden',k!==key));
+ document.querySelectorAll('[data-admin-jump]').forEach(b=>b.classList.toggle('active',b.dataset.adminJump===key));
+ if(key==='booking')loadAdminBookingPanel();
+ if(key==='bookings')loadAdminBookingPanel();
+ if(key==='students')loadRegisteredStudents();
+ if(key==='applications')loadStudents();
+ if(key){setTimeout(()=>scrollPanelIntoView(ids[key]),60);}
+}
 document.querySelectorAll('[data-admin-jump]').forEach(btn=>btn.addEventListener('click',()=>{
  const key=btn.dataset.adminJump;
- if(key==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
- if(key==='booking'){$('openBookingAdmin').click();return;}
- if(key==='bookings'){$('openExistingBookings').click();return;}
- if(key==='students'){$('openRegisteredStudents').click();setTimeout(()=>scrollPanelIntoView('registeredStudentsSection'),80);return;}
- if(key==='applications')scrollPanelIntoView('adminApplicationsPanel');
+ if(key==='home'){show('');window.scrollTo({top:0,behavior:'smooth'});return;}
+ showAdminWorkspace(key);
 }));
-$('showActiveStudents').onclick=()=>{registeredListMode='active';loadRegisteredStudents();};
-$('showArchivedStudents').onclick=()=>{registeredListMode='archived';loadRegisteredStudents();};
 function renderStudents() {
   const list = $('studentsList');
   list.replaceChildren();
@@ -2760,9 +2789,9 @@ document.querySelectorAll('.filterBtn').forEach(btn=>{
 
 $('toggleStudentApplications').onclick=async()=>{const box=$('studentApplicationsContent'),btn=$('toggleStudentApplications'),open=box.classList.toggle('hidden')===false;btn.innerHTML=open?'Փակել հայտերը <span>⌃</span>':'Բացել հայտերը <span>⌄</span>';btn.setAttribute('aria-expanded',String(open));if(open)await loadStudents();};
 $('refreshBtn').onclick = async()=>{await loadStudents();await loadAdminBookingPanel();};
-$('openBookingAdmin').onclick=async()=>{$('adminExistingBookingsPanel').classList.add('hidden');$('adminBookingSection').classList.remove('hidden');await loadAdminBookingPanel();scrollPanelIntoView('adminBookingSection');};
+$('openBookingAdmin').onclick=()=>showAdminWorkspace('booking');
 $('closeBookingAdmin').onclick=()=>$('adminBookingSection').classList.add('hidden');
-$('openExistingBookings').onclick=async()=>{$('adminBookingSection').classList.add('hidden');$('adminExistingBookingsPanel').classList.toggle('hidden');if(!$('adminExistingBookingsPanel').classList.contains('hidden')){await loadAdminBookingPanel();scrollPanelIntoView('adminExistingBookingsPanel');}};
+$('openExistingBookings').onclick=()=>showAdminWorkspace('bookings');
 $('refreshExistingBookings').onclick=loadAdminBookingPanel;
 $('openRegisteredStudents').onclick=()=>{$('registeredStudentsSection').classList.toggle('hidden');if(!$('registeredStudentsSection').classList.contains('hidden'))loadRegisteredStudents();};
 $('refreshBtn').addEventListener('click',loadAdminBookingPanel);
