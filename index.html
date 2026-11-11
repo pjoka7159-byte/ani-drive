@@ -3168,4 +3168,17 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 /* Զբաղված ժամերը տեսանելի են կարմիրով բոլոր օրացույցներում */
 .public-booking-card .busy-time,.slot-choice.busy-time{background:#fee2e2!important;border:1px solid #ef7777!important;color:#a51f1f!important;opacity:1!important;cursor:not-allowed!important;box-shadow:none!important}
 .fx-main .slot-choice.busy-time{background:#401e2b!important;border-color:#d45a72!important;color:#ff9bab!important}
+
+/* Keep public website sections out of private admin/student workspaces. */
+body.account-view #courseSection,
+body.account-view #examOffices,
+body.account-view #weatherSection,
+body.account-view #publishedBlocks,
+body.account-view #publishedMedia,
+body.account-view .public-extra-page,
+body.account-view #register,
+body.account-view #auth,
+body.account-view footer {
+  display:none !important;
+}
 </style>
