@@ -1380,6 +1380,16 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
   Վերականգնել գաղտնաբառը
 </button>
 <p id="loginMsg" class="message muted"></p>
+<div id="passwordRecoveryPanel" class="password-recovery-panel hidden">
+ <h3>🔐 Սահմանել նոր գաղտնաբառ</h3>
+ <p class="muted">Մուտքագրեք նոր գաղտնաբառը և կրկնեք այն՝ հաստատելու համար։</p>
+ <form id="passwordRecoveryForm">
+  <input required type="password" name="newPassword" minlength="8" autocomplete="new-password" placeholder="Նոր գաղտնաբառ (առնվազն 8 նիշ)">
+  <input required type="password" name="confirmPassword" minlength="8" autocomplete="new-password" placeholder="Կրկնել նոր գաղտնաբառը">
+  <button type="submit" class="blue">Պահպանել նոր գաղտնաբառը</button>
+ </form>
+ <p id="passwordRecoveryMsg" class="message muted"></p>
+</div>
 </div>
 </div>
 </section>
@@ -1662,6 +1672,39 @@ $('login').onsubmit = async e => {
   } finally {
     if (btn) btn.disabled = false;
   }
+};
+
+let passwordRecoveryMode=false;
+function showPasswordRecoveryForm(){
+ passwordRecoveryMode=true;
+ openTopAuthSection('auth');
+ $('passwordRecoveryPanel')?.classList.remove('hidden');
+ $('login')?.classList.add('hidden');
+ $('forgotBtn')?.classList.add('hidden');
+ message('loginMsg','Վերականգնման հղումը հաստատված է։ Սահմանեք նոր գաղտնաբառը։');
+ setTimeout(()=>$('passwordRecoveryForm')?.elements.newPassword?.focus(),100);
+}
+$('passwordRecoveryForm').onsubmit=async e=>{
+ e.preventDefault();
+ const f=new FormData(e.target),password=String(f.get('newPassword')||''),confirm=String(f.get('confirmPassword')||'');
+ if(password.length<8){message('passwordRecoveryMsg','Գաղտնաբառը պետք է պարունակի առնվազն 8 նիշ։',true);return;}
+ if(password!==confirm){message('passwordRecoveryMsg','Գաղտնաբառերը չեն համընկնում։ Կրկին ստուգեք։',true);return;}
+ const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;
+ message('passwordRecoveryMsg','Նոր գաղտնաբառը պահպանվում է…');
+ try{
+  const {error}=await db.auth.updateUser({password});
+  if(error)throw error;
+  message('passwordRecoveryMsg','✅ Գաղտնաբառը հաջողությամբ փոխվեց։ Այժմ կարող եք մուտք գործել նոր գաղտնաբառով։');
+  await db.auth.signOut();
+  $('passwordRecoveryPanel').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('forgotBtn').classList.remove('hidden');
+  $('login').elements.password.value='';
+  passwordRecoveryMode=false;
+  message('loginMsg','Գաղտնաբառը փոխված է։ Մուտք գործեք նոր գաղտնաբառով։');
+ }catch(err){
+  message('passwordRecoveryMsg','Գաղտնաբառը չփոխվեց։ '+(err.message||'Փորձեք կրկին։'),true);
+ }finally{btn.disabled=false;}
 };
 
 $('forgotBtn').onclick = async () => {
@@ -2577,7 +2620,12 @@ $('logoutBtn').onclick = async () => {
 };
 
 db.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    showPasswordRecoveryForm();
+    return;
+  }
   if (event === 'SIGNED_IN' && session) {
+    if(passwordRecoveryMode)return;
     currentUser = session.user;
     setTimeout(loadUser,0);
   }
@@ -2776,6 +2824,11 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 .admin-booking-modal-card input,.admin-booking-modal-card select{min-height:44px}
 .admin-booking-modal-card #adminBookingMsg{margin:10px 0 0}
 @media(max-width:600px){.admin-booking-modal{padding:9px}.admin-booking-modal-card{padding:15px;border-radius:16px}}
+</style><style>
+.password-recovery-panel{margin-top:18px;padding:20px;border-radius:18px;background:linear-gradient(145deg,#f4f8ff,#e7f0ff);border:1px solid #c8daf2;box-shadow:0 12px 30px #0a31501a}
+.password-recovery-panel h3{margin-top:0;color:#123b68}
+.password-recovery-panel form{display:grid;gap:11px}
+.password-recovery-panel input{min-height:46px}
 </style></body>
 </html>
 <style>
