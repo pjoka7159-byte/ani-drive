@@ -1407,9 +1407,11 @@ body.account-view #publicBookingCalendar{display:none!important;}
   <button type="button" class="admin-shortcut students-shortcut" id="openRegisteredStudents"><span>👥</span><strong>Աշակերտների ցանկ և արխիվ</strong><small>Գրանցված աշակերտների տվյալներ</small></button>
 </div>
 <div class="panel hidden admin-workspace-panel" id="adminExistingBookingsPanel"><div class="row"><h3 style="margin-right:auto">📋 Գրանցված դասաժամերի ցանկ</h3><button type="button" class="gray" id="refreshExistingBookings">↻ Թարմացնել</button></div><div class="booking-archive-tabs"><button type="button" class="blue" id="showActiveBookings">Ակտիվ դասաժամեր</button><button type="button" class="gray" id="showArchivedBookings">📦 Արխիվ</button></div><div id="adminBookings">Բեռնում...</div></div>
-<div class="panel hidden admin-workspace-panel" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
-<h4>👤 Աշակերտի տվյալներ</h4><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p>
-<h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
+<div class="panel hidden admin-workspace-panel" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Ձախից ընտրեք օրը և ազատ ժամը, աջից լրացրեք աշակերտի տվյալները։ Կանաչը՝ ազատ, կարմիրը՝ զբաղված։</p>
+<div class="admin-booking-layout">
+<section class="admin-booking-calendar-pane"><h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar"><div id="adminCalendarContent">Բեռնում...</div></div></section>
+<section class="admin-booking-form-pane"><h4>👤 Գրանցման մանրամասներ</h4><div id="adminSelectedSlotInfo" class="admin-selected-slot-info">Նախ ընտրեք օրացույցի կանաչ օրը և ազատ ժամը։</div><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p></section>
+</div>
 <h4 style="display:none">➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm" style="display:none"><input type="date" name="slotDate" required><select name="slotTime" required><option value="">Ընտրել դասաժամը</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="blue">Ավելացնել ազատ ժամ</button></form>
 <h4 style="display:none">🕒 Ազատ ժամերի միջակայք</h4><form id="slotRangeForm" class="grid" style="display:none"><input type="date" name="rangeDate" required><select name="rangeStart" required><option value="">Սկսած</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><select name="rangeEnd" required><option value="">Մինչև</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="good">Սահմանել միջակայքը ազատ</button></form><p class="muted" style="display:none">Օրը ընտրեք, նշեք սկիզբն ու ավարտը։ Միջակայքի ժամերը կդառնան ազատ՝ բացառությամբ գործող ամրագրումների։</p><p id="slotMsg" class="message"></p></div>
 <div class="panel hidden admin-workspace-panel" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
@@ -2068,12 +2070,15 @@ function ensureAdminBookingModal(){
  return modal;
 }
 function openAdminBookingModal(slot){
- const modal=ensureAdminBookingModal(),form=$('adminBookingForm');
+ const form=$('adminBookingForm'),info=$('adminSelectedSlotInfo');
  if(!slot||!slot.is_available){message('adminBookingMsg','Ընտրված ժամը զբաղված է։ Ընտրեք կանաչ ազատ ժամ։',true);return;}
  form.elements.slot.value=slot.id;
- $('adminBookingModalSlot').textContent=new Date(slot.slot_date+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long'})+' · '+String(slot.slot_time).slice(0,5);
- modal.classList.add('open');
- setTimeout(()=>$('bookingPhoneSearch')?.focus(),80);
+ const dateLabel=new Date(slot.slot_date+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ if(info)info.textContent='✅ Ընտրված դասաժամ՝ '+dateLabel+' · ժամը '+String(slot.slot_time).slice(0,5);
+ info?.classList.add('selected');
+ document.querySelectorAll('#adminCalendar .admin-time-list button').forEach(b=>b.classList.remove('selected'));
+ const chosen=[...document.querySelectorAll('#adminCalendar .admin-time-list button')].find(b=>b.textContent.startsWith(String(slot.slot_time).slice(0,5))&&b.textContent.includes('Ազատ'));
+ if(chosen)chosen.classList.add('selected');
 }
 function renderAdminAvailabilityCalendar(slots){
  const root=$('adminCalendar');root.replaceChildren();root.classList.add('admin-calendar');
@@ -3056,6 +3061,16 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 .student-avatar-editor img{width:105px;height:105px;border-radius:50%;object-fit:cover;border:4px solid white}
 .student-avatar-editor label{font-weight:bold}.student-avatar-editor input{display:block;max-width:240px}
 @media(max-width:600px){.admin-tool-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.admin-tool-tile{min-height:100px;padding:12px}}
+</style><style id="admin-booking-side-by-side">
+.admin-booking-layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(320px,.88fr);gap:20px;align-items:start;margin-top:14px}
+.admin-booking-calendar-pane,.admin-booking-form-pane{min-width:0;padding:16px;border:1px solid #dce6f4;border-radius:16px;background:linear-gradient(145deg,#fff,#f7faff);box-shadow:0 8px 22px #071a3610}
+.admin-booking-calendar-pane h4,.admin-booking-form-pane h4{margin:0 0 12px;color:#123b68}
+.admin-booking-calendar-pane .admin-calendar{padding:12px}
+.admin-booking-calendar-pane .admin-calendar .calendar-day{min-height:52px}
+.admin-booking-form-pane form{gap:13px}
+.admin-selected-slot-info{padding:13px;border-radius:12px;background:#fff4d6;border:1px solid #f2d28a;color:#765400;font-weight:700;line-height:1.6;margin-bottom:14px}
+.admin-selected-slot-info.selected{background:#dcfce7;border-color:#86d6a5;color:#166534}
+@media(max-width:900px){.admin-booking-layout{grid-template-columns:minmax(0,1fr)}}
 </style></body>
 </html>
 <style>
