@@ -1845,14 +1845,10 @@ function renderAdminAvailabilityCalendar(slots){
   const row=document.createElement('div');row.className='admin-time-list';
   daySlots.sort((a,b)=>String(a.slot_time).localeCompare(String(b.slot_time))).forEach(slot=>{
    const b=document.createElement('button');b.type='button';b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.className=slot.is_available?'available-time':'busy-time';
-   b.title=slot.is_available?'Սեղմեք՝ զբաղված նշելու կամ ամրագրման համար ընտրելու':'Սեղմեք՝ ազատելու համար';
-   b.onclick=async()=>{
-    if(!slot.is_available){await setAdminSlotAvailability(slot,false);return;}
-    const sel=$('adminBookingForm').elements.slot;sel.value=slot.id;row.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');
-    const action=confirm('Այս ժամը ամրագրման համար ընտրե՞լ։ Սեղմեք «Չեղարկել»՝ այն զբաղված նշելու համար։');
-    if(!action){await setAdminSlotAvailability(slot,true);}
-   };
+   b.title=slot.is_available?'Նշել զբաղված':'Նշել ազատ';
+   b.onclick=()=>setAdminSlotAvailability(slot,slot.is_available);
    row.append(b);
+   if(slot.is_available){const choose=document.createElement('button');choose.type='button';choose.textContent='Ամրագրել';choose.className='gray';choose.onclick=()=>{$('adminBookingForm').elements.slot.value=slot.id;row.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));choose.classList.add('selected');};row.append(choose);}
   });times.append(row);
  }else{const p=document.createElement('p');p.className='muted';p.textContent='Ընտրեք օրացույցում նշված օրը՝ ժամերը տեսնելու համար։';times.append(p);}
  root.append(times);
