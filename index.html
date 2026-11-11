@@ -2008,6 +2008,12 @@ async function loadUser() {
     await loadAdminBookingPanel();
     await checkAdminNotices();
     if(!window.aniAdminNoticeTimer)window.aniAdminNoticeTimer=setInterval(checkAdminNotices,20000);
+    if(!window.aniAdminLessonTimer)window.aniAdminLessonTimer=setInterval(async()=>{
+      if(!isAdmin)return;
+      const {data,error}=await db.from('lesson_bookings').select('id,status,archived_at,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time)').eq('status','approved').is('archived_at',null);
+      if(!error)await markFinishedLessons(data||[]);
+      if(!$('adminDailySchedulePanel')?.classList.contains('hidden'))await loadAdminBookingPanel();
+    },60000);
     show('admin');
   } else {
     $('adminBtn').classList.add('hidden');
