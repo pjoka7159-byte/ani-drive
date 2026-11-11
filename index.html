@@ -1034,6 +1034,36 @@ html,body{max-width:100%;overflow-x:hidden!important}
  .fx-shell>#publicNav>button{font-size:11px!important;min-height:30px!important;padding:6px 8px!important}
 }
 
+
+/* ADMIN FULL-WIDTH LAYOUT — right drawer must never push or cover dashboard */
+html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+.fx-shell,.fx-shell.nav-is-open{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important}
+.fx-shell>.fx-main,.fx-shell.nav-is-open>.fx-main{display:block!important;position:relative!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important;left:auto!important;right:auto!important;transform:none!important}
+body.account-view .fx-shell>.fx-main{width:100%!important;max-width:100%!important;margin:0!important;padding:0!important}
+body.account-view .fx-main>#admin,body.account-view .fx-main>#studentArea{
+ display:block!important;position:relative!important;left:auto!important;right:auto!important;transform:none!important;
+ float:none!important;width:100%!important;max-width:100%!important;min-width:0!important;
+ margin:0 auto!important;padding:24px clamp(14px,3vw,42px)!important;box-sizing:border-box!important;
+}
+body.account-view .fx-main>#admin>.wrap,body.account-view .fx-main>#studentArea>.wrap{
+ display:block!important;width:100%!important;max-width:1440px!important;min-width:0!important;
+ margin:0 auto!important;padding:0!important;box-sizing:border-box!important;
+}
+body.account-view .fx-shell>#publicNav,
+body.account-view .fx-shell>#publicNav.admin-nav-visible,
+body.account-view .fx-shell>#publicNav.open{
+ position:fixed!important;top:10px!important;right:8px!important;left:auto!important;bottom:10px!important;
+ width:clamp(190px,17vw,220px)!important;max-width:calc(100vw - 24px)!important;height:auto!important;
+ max-height:calc(100vh - 20px)!important;margin:0!important;z-index:100100!important;
+ transform:translateX(calc(100% + 20px))!important;
+}
+body.account-view .fx-shell>#publicNav.open{transform:translateX(0)!important}
+body.account-view .fx-shell .nav-open-btn{position:fixed!important;top:12px!important;right:12px!important;left:auto!important;z-index:100101!important}
+@media(max-width:650px){
+ body.account-view .fx-main>#admin,body.account-view .fx-main>#studentArea{padding:16px 9px!important}
+ body.account-view .fx-main>#admin>.wrap,body.account-view .fx-main>#studentArea>.wrap{max-width:100%!important}
+}
+
 </style>
 </head>
 
@@ -1390,25 +1420,19 @@ function show(id) {
   document.body.classList.toggle('account-view', accountView);
   const sideNav = $('publicNav');
   if (sideNav) {
-    sideNav.classList.remove('hidden');
-    if (accountView) {
-      sideNav.classList.add('admin-nav-visible');
-      sideNav.style.setProperty('display','flex','important');
-      sideNav.style.setProperty('visibility','visible','important');
-      sideNav.style.setProperty('opacity','1','important');
-      sideNav.style.setProperty('transform','translateX(0)','important');
-    } else {
-      sideNav.classList.remove('admin-nav-visible');
-      sideNav.style.removeProperty('display');
-      sideNav.style.removeProperty('visibility');
-      sideNav.style.removeProperty('opacity');
-      sideNav.style.removeProperty('transform');
-    }
+    // Navigation is always a closed right-side drawer, including on admin pages.
+    sideNav.classList.remove('admin-nav-visible','open');
+    sideNav.classList.add('hidden');
+    sideNav.style.removeProperty('display');
+    sideNav.style.removeProperty('visibility');
+    sideNav.style.removeProperty('opacity');
+    sideNav.style.removeProperty('transform');
+    document.querySelector('.fx-shell')?.classList.remove('nav-is-open');
   }
   ['auth','register','admin','studentArea'].forEach(x => {
     $(x).classList.toggle('hidden', x !== id);
   });
-  if (id) $(id).scrollIntoView({behavior:'smooth',block:'start'});
+  if (id) window.scrollTo({top:0,left:0,behavior:'auto'});
 }
 
 function message(id, text, error=false) {
