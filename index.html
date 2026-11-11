@@ -1163,6 +1163,73 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
  #studentArea .student-sidebar button{width:100%!important;white-space:normal}
 }
 </style>
+
+<style id="hero-auth-calendar-layout">
+/* Move contact and account controls into the blue 3D-car hero. */
+.fx-main>.hero.ani-car-hero{position:relative!important;padding-top:0!important;overflow:hidden!important}
+.fx-main>.hero.ani-car-hero>header{
+ position:absolute!important;z-index:20!important;top:0!important;left:0!important;
+ width:100%!important;margin:0!important;padding:8px 0!important;
+ background:linear-gradient(180deg,#041426d9,#06274770)!important;
+ border:0!important;box-shadow:0 1px 0 #70dfff22!important;
+}
+.fx-main>.hero.ani-car-hero>header .wrap{max-width:1180px!important;padding:0 18px!important}
+.fx-main>.hero.ani-car-hero>header .bar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;flex-wrap:wrap!important}
+.fx-main>.hero.ani-car-hero>header .logo{font-size:19px!important;color:#f2fbff!important;white-space:nowrap}
+.fx-main>.hero.ani-car-hero>header .row{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;flex-wrap:wrap!important;margin:0!important}
+.fx-main>.hero.ani-car-hero>header .row a,
+.fx-main>.hero.ani-car-hero>header .row button{
+ min-height:30px!important;padding:6px 10px!important;border-radius:8px!important;
+ font-size:12px!important;line-height:1.15!important;white-space:nowrap!important;
+}
+.fx-main>.hero.ani-car-hero>header .row button:not(.outline):not(.danger){background:#f4b942!important;color:#14233b!important}
+.fx-main>.hero.ani-car-hero>header .row .outline{background:#092c49cc!important;border-color:#83dfff!important;color:#eafaff!important}
+.fx-main>.hero.ani-car-hero>header .row .danger{background:#a92e3b!important;color:white!important}
+.fx-main>.hero.ani-car-hero .ani-car-wrap{height:100%!important;padding-top:44px!important}
+.fx-main>.hero.ani-car-hero .ani-car-scene{height:calc(100% - 38px)!important;min-height:0!important}
+.fx-main>.hero.ani-car-hero .ani-car-caption{top:48px!important}
+@media(max-width:650px){
+ .fx-main>.hero.ani-car-hero{height:225px!important;min-height:225px!important;max-height:225px!important}
+ .fx-main>.hero.ani-car-hero>header{padding:5px 0!important}
+ .fx-main>.hero.ani-car-hero>header .wrap{padding:0 8px!important}
+ .fx-main>.hero.ani-car-hero>header .bar{gap:4px!important}
+ .fx-main>.hero.ani-car-hero>header .logo{font-size:15px!important}
+ .fx-main>.hero.ani-car-hero>header .row{gap:4px!important}
+ .fx-main>.hero.ani-car-hero>header .row a,
+ .fx-main>.hero.ani-car-hero>header .row button{font-size:10px!important;padding:5px 7px!important;min-height:27px!important}
+ .fx-main>.hero.ani-car-hero .ani-car-wrap{padding-top:58px!important}
+ .fx-main>.hero.ani-car-hero .ani-car-scene{height:calc(100% - 48px)!important}
+ .fx-main>.hero.ani-car-hero .ani-car-caption{top:60px!important;right:3%!important;font-size:10px!important}
+}
+/* A shorter, landscape calendar that keeps the full seven-day layout. */
+.fx-main>#publicBookingCalendar{padding:20px 0 28px!important}
+.fx-main .public-booking-heading{max-width:700px!important;margin-bottom:12px!important}
+.fx-main .public-booking-heading>span{padding:4px 11px!important;font-size:12px!important}
+.fx-main .public-booking-heading h2{font-size:clamp(20px,2.4vw,28px)!important;margin:7px 0 5px!important}
+.fx-main .public-booking-heading p{font-size:13px!important;line-height:1.45!important}
+.fx-main .public-booking-card{
+ width:min(100%,740px)!important;max-width:740px!important;margin:0 auto!important;
+ padding:12px 16px!important;border-radius:16px!important;
+}
+.fx-main .public-booking-card .calendar-head{margin-bottom:7px!important}
+.fx-main .public-booking-card .calendar-head strong{font-size:14px!important}
+.fx-main .public-booking-card .calendar-grid{gap:5px!important}
+.fx-main .public-booking-card .calendar-weekday{padding:5px 2px!important;font-size:11px!important}
+.fx-main .public-booking-card .calendar-day{min-height:38px!important;padding:5px 2px!important;font-size:12px!important;border-radius:7px!important}
+.fx-main .public-booking-card .public-calendar-legend{margin:8px 0!important;font-size:11px!important;gap:13px!important}
+.fx-main .public-booking-card h3{font-size:14px!important;margin:9px 0 5px!important}
+.fx-main .public-booking-card .admin-time-list{gap:6px!important;margin-top:7px!important;min-height:30px!important}
+.fx-main .public-booking-card .admin-time-list button{padding:7px 11px!important;font-size:12px!important;border-radius:8px!important}
+.fx-main .public-booking-card .public-book-button{margin-top:9px!important;min-height:36px!important;padding:8px 12px!important;font-size:13px!important}
+.fx-main .public-booking-card #publicBookingStatus{font-size:11px!important;margin:6px 0 0!important}
+@media(max-width:650px){
+ .fx-main>#publicBookingCalendar{padding:14px 0 20px!important}
+ .fx-main .public-booking-card{width:calc(100% - 18px)!important;padding:9px!important}
+ .fx-main .public-booking-card .calendar-day{min-height:34px!important;padding:4px 1px!important;font-size:11px!important}
+ .fx-main .public-booking-card .calendar-weekday{font-size:10px!important}
+ .fx-main .public-booking-card .calendar-grid{gap:3px!important}
+}
+</style>
 </head>
 
 <body>
@@ -1208,8 +1275,6 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
    <div class="ani-car-caption">Անի Դրայվ</div>
   </div>
  </div>
-</section>
-
 <header>
 <div class="wrap bar">
   <div class="logo" id="aniHomeLogo" role="button" tabindex="0" title="Գլխավոր էջ" style="cursor:pointer">ANI <span>DRIVE</span></div>
@@ -1222,6 +1287,7 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
   </div>
 </div>
 </header>
+</section>
 
 <!-- Գլխավոր էջի օնլայն դասաժամերի օրացույց -->
 <section class="section public-booking-section" id="publicBookingCalendar">
