@@ -1092,6 +1092,22 @@ body.account-view .fx-shell .nav-open-btn{position:fixed!important;top:12px!impo
  .fx-main>header .logo{font-size:17px!important}
 }
 
+
+/* TOP AUTH POPOVER: show the selected form immediately under the header */
+.top-auth-panel{position:relative;z-index:9000;width:min(680px,calc(100% - 28px));max-height:calc(100vh - 100px);overflow:auto;margin:8px auto 14px;padding:14px;background:#102b49;border:1px solid #4b8fc9;border-radius:16px;box-shadow:0 14px 38px #0008}
+.top-auth-panel.hidden{display:none!important}
+.top-auth-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#fff;margin-bottom:10px}
+.top-auth-panel .section{display:block!important;padding:0!important;margin:0!important;background:transparent!important}
+.top-auth-panel .section.hidden{display:none!important}
+.top-auth-panel .wrap{width:100%!important;max-width:100%!important;padding:0!important;margin:0!important}
+.top-auth-panel h2{font-size:18px!important;margin:4px 0 10px!important;color:#fff}
+.top-auth-panel .card{padding:14px!important;margin:0!important}
+.top-auth-panel form{gap:9px!important}
+.top-auth-panel input,.top-auth-panel select{min-height:40px!important}
+body:not(.admin-authenticated) #admin,body:not(.admin-authenticated) #adminBtn,
+body:not(.admin-authenticated) .admin-only,body:not(.admin-authenticated) [data-admin-only="true"]{display:none!important}
+body.admin-authenticated #admin:not(.hidden){display:block!important}
+
 </style>
 </head>
 
@@ -1427,13 +1443,25 @@ const $ = id => document.getElementById(id);
 
 const cfg = window.ANI_DRIVE_CONFIG;
 
-// Մուտք/գրանցում բաժինները բացել էջի հենց վերևում՝ անկախ Supabase-ի բեռնումից։
+// Մուտքի և գրանցման դաշտերը բացվում են վերևի կոճակների տակ՝ առանց էջի երկար ներքև գնալու։
+(function setupTopAuthPanel(){
+ const header=document.querySelector('header');if(!header)return;
+ const panel=document.createElement('div');panel.id='topAuthPanel';panel.className='top-auth-panel hidden';
+ const head=document.createElement('div');head.className='top-auth-panel-head';
+ const title=document.createElement('strong');title.textContent='Մուտք / Գրանցում';
+ const close=document.createElement('button');close.type='button';close.className='gray';close.textContent='Փակել ×';close.onclick=()=>panel.classList.add('hidden');
+ head.append(title,close);panel.append(head);header.insertAdjacentElement('afterend',panel);
+ ['auth','register'].forEach(id=>{const section=document.getElementById(id);if(section){section.classList.add('hidden');panel.append(section);}});
+ document.addEventListener('click',e=>{if(panel.classList.contains('hidden'))return;if(panel.contains(e.target)||e.target.closest('#showAuth,#showRegister'))return;panel.classList.add('hidden');});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')panel.classList.add('hidden');});
+})();
 function openTopAuthSection(id) {
-  ['auth','register'].forEach(sectionId => {
-    const section = document.getElementById(sectionId);
-    if (section) section.classList.toggle('hidden', sectionId !== id);
-  });
-  window.scrollTo({top: 0, behavior: 'smooth'});
+ const panel=document.getElementById('topAuthPanel');if(!panel)return;
+ panel.classList.remove('hidden');
+ ['auth','register'].forEach(sectionId=>{
+  const section=document.getElementById(sectionId);if(section)section.classList.toggle('hidden',sectionId!==id);
+ });
+ window.scrollTo({top:0,behavior:'smooth'});
 }
 $('showAuth').type = 'button';
 $('showRegister').type = 'button';
@@ -1462,6 +1490,7 @@ async function checkAdminNotices(){if(!isAdmin)return;const [b,s,r]=await Promis
 async function checkStudentNotices(){if(!currentUser||isAdmin)return;const [b,s]=await Promise.all([db.from('lesson_bookings').select('id,status').eq('student_id',currentUser.id).order('created_at',{ascending:false}).limit(20),db.from('students').select('status').eq('id',currentUser.id).maybeSingle()]);if(b.error||s.error)return;const snap=(b.data||[]).map(x=>x.id+':'+x.status).join('|')+'|profile:'+s.data?.status;if(studentNoticeSnapshot&&snap!==studentNoticeSnapshot)playNotice();studentNoticeSnapshot=snap;}
 
 function show(id) {
+  if(id==='admin'&&!isAdmin){$('admin')?.classList.add('hidden');return;}
   const accountView = id === 'admin' || id === 'studentArea';
   document.body.classList.toggle('account-view', accountView);
   const sideNav = $('publicNav');
@@ -1651,6 +1680,8 @@ async function loadUser() {
     .maybeSingle();
 
   isAdmin = !adminError && !!admin;
+  document.body.classList.toggle('admin-authenticated',isAdmin);
+  $('admin').classList.add('hidden');
 
   $('logoutBtn').classList.remove('hidden');
   $('showAuth').classList.add('hidden');
@@ -2449,6 +2480,9 @@ db.auth.onAuthStateChange((event,session)=>{
   if (event === 'SIGNED_OUT') {
     currentUser = null;
     isAdmin = false;
+    document.body.classList.remove('admin-authenticated');
+    $('admin')?.classList.add('hidden');
+    $('adminBtn')?.classList.add('hidden');
   }
 });
 
