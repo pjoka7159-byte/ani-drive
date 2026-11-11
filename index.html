@@ -1390,13 +1390,13 @@ body.account-view #publicBookingCalendar,body.account-view #admin #publicBooking
 <section class="section hidden" id="admin">
 <div class="wrap">
 <div class="admin-view-site-zone"><button type="button" id="adminViewPublicSite" class="admin-view-site-button">🌐 ԱՅՑԵԼԵԼ ԿԱՅՔ</button></div>
-<div class="account-dashboard admin-account-dashboard" aria-label="Ադմինի արագ վահանակ">
- <div class="account-dashboard-actions">
-  <button type="button" data-admin-jump="booking">📅 Օրացույց / նոր գրանցում</button>
-  <button type="button" data-admin-jump="bookings">📋 Ամրագրումներ</button>
-  <button type="button" data-admin-jump="students">👥 Աշակերտներ</button>
-  <button type="button" data-admin-jump="applications">📝 Հայտեր</button>
- </div>
+<div class="admin-main-tiles" aria-label="Ադմինի գործիքներ">
+ <button type="button" class="admin-main-tile" data-admin-jump="booking">📅 <strong>Օրացույց / նոր գրանցում</strong></button>
+ <button type="button" class="admin-main-tile" data-admin-jump="bookings">📋 <strong>Ամրագրումներ</strong></button>
+ <button type="button" class="admin-main-tile" data-admin-jump="students">👥 <strong>Աշակերտներ</strong></button>
+ <button type="button" class="admin-main-tile" data-admin-jump="applications">📝 <strong>Հայտեր</strong></button>
+ <button type="button" class="admin-main-tile" data-admin-jump="chat">💬 <strong>Հաղորդագրություններ և չատ</strong></button>
+ <button type="button" class="admin-main-tile" id="openAdminContentWorkspace">🧩 <strong>Կայքի բովանդակության կառավարում</strong><small>Բացել կայքի խմբագրման գործիքները</small></button>
 </div>
 <div class="admin-shortcuts admin-shortcuts-blue" aria-hidden="true">
   <button type="button" class="admin-shortcut existing-bookings-shortcut" id="openExistingBookings"><span>📋</span><strong>Գրանցված դասաժամերի ցանկ</strong><small>Դիտել և կառավարել ամրագրումները</small></button>
@@ -1446,8 +1446,29 @@ body.account-view #publicBookingCalendar,body.account-view #admin #publicBooking
 <form id="adminStudentChatForm"><input name="reply" required maxlength="2000" placeholder="Գրել պատասխան աշակերտին"><button class="blue">Ուղարկել պատասխանը</button></form>
 <p id="adminStudentChatMsg" class="message"></p>
 </div>
-<div id="adminToolTiles" class="admin-tool-tiles"></div><div class="panel admin-tool-panel">
-<h3>Կայքի բովանդակության կառավարում</h3>
+<div id="adminContentWorkspace" class="admin-content-workspace hidden">
+ <div class="admin-content-head"><button type="button" class="gray" id="backAdminDashboard">← Վերադառնալ ադմինի վահանակ</button><h2>🧩 Կայքի բովանդակության կառավարում</h2><p class="muted">Այստեղից կարող եք խմբագրել կայքի բաժինները և կառավարել բոլոր հրապարակվող նյութերը։</p></div>
+ <div class="admin-content-sections" id="adminContentSections">
+  <h3>🌐 Կայքի բաժինների արագ ընտրություն</h3>
+  <div class="admin-section-tiles">
+   <button type="button" data-content-target="hero">🏠 Գլխավոր էջ</button>
+   <button type="button" data-content-target="courseSection">🚘 Դասընթացներ</button>
+   <button type="button" data-content-target="aboutPage">ℹ️ Մեր մասին</button>
+   <button type="button" data-content-target="aniPage">🚗 Անի Դրայվ</button>
+   <button type="button" data-content-target="instructorsPage">👨‍🏫 Հրահանգիչներ</button>
+   <button type="button" data-content-target="licensesPage">📜 Լիցենզիաներ</button>
+   <button type="button" data-content-target="reviewsPage">⭐ Կարծիքներ</button>
+   <button type="button" data-content-target="groundsPage">🅿️ Քննական տարածքներ</button>
+   <button type="button" data-content-target="routesPage">🛣️ Քննական երթուղիներ</button>
+   <button type="button" data-content-target="examOffices">🏢 Քննական բաժիններ</button>
+   <button type="button" data-content-target="documentsPage">📄 Փաստաթղթեր</button>
+   <button type="button" data-content-target="linksPage">🔗 Հղումներ</button>
+   <button type="button" data-content-target="weatherSection">🌤️ Եղանակ</button>
+  </div>
+ </div>
+ <button type="button" id="adminNewContentBlock" class="admin-new-block">➕ Ստեղծել նոր բլոկ</button>
+ <div id="adminToolTiles" class="admin-tool-tiles"></div><div class="panel admin-tool-panel" id="adminContentFormPanel">
+<h3>Կայքի բովանդակության խմբագրում</h3>
 <p class="muted">Ավելացրեք կամ խմբագրեք կայքի տեքստային բաժինները և պատկերների հղումները։</p>
 <form id="contentForm">
 <label>Ո՞ր բաժինն եք խմբագրում</label>
@@ -1501,6 +1522,12 @@ body.account-view #publicBookingCalendar,body.account-view #admin #publicBooking
 <div class="panel admin-tool-panel">
 <h3>Ադմինների ցանկ</h3>
 <p class="muted">Երկու հաստատված ադմինների հաշիվները կառավարվում են Supabase Auth-ից և admins աղյուսակից։</p>
+<form id="addAdminForm" class="admin-add-form">
+ <input name="adminEmail" type="email" required placeholder="Նոր ադմինի էլ․ փոստը">
+ <input name="adminUserId" required placeholder="Օգտատիրոջ Supabase ID-ն">
+ <button type="submit" class="good">➕ Ավելացնել ադմին</button>
+</form>
+<div id="adminManageMsg" class="message"></div>
 <div id="adminsList">Բեռնում...</div>
 </div>
 <div class="panel admin-tool-panel">
@@ -1512,6 +1539,7 @@ body.account-view #publicBookingCalendar,body.account-view #admin #publicBooking
 </form>
 <div id="messageList"></div>
 <p class="muted">Էլեկտրոնային նամակների ավտոմատ ուղարկումը պահանջում է առանձին անվտանգ սերվերային ֆունկցիա։</p>
+</div>
 </div>
 </div>
 </section>
@@ -1641,7 +1669,35 @@ const $ = id => document.getElementById(id);
 let editingGallery=[];
 function drawGallery(target,items){if(!target)return;target.replaceChildren();(items||[]).forEach(x=>{const el=document.createElement(x.type==='image'?'img':'video');el.src=x.url;if(el.tagName==='VIDEO')el.controls=true;el.style.cssText='width:100%;max-width:220px;max-height:180px;object-fit:cover;border-radius:12px;margin:5px';target.append(el);});}
 async function uploadGallery(files,type){const result=[];for(const file of files){const path=currentUser.id+'/sections/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const up=await db.storage.from('site-media').upload(path,file);if(up.error)throw up.error;result.push({type,url:db.storage.from('site-media').getPublicUrl(path).data.publicUrl,path});}return result;}
-function initAdminToolTiles(){const host=$('adminToolTiles');if(!host||host.dataset.ready)return;const panels=[...$('admin').querySelectorAll('.admin-tool-panel')];host.dataset.ready='1';const icons=['🧩','🖼️','🔐','🛡️','💬'];panels.forEach((p,i)=>{const b=document.createElement('button');b.type='button';b.className='admin-tool-tile';const icon=document.createElement('span');icon.textContent=icons[i%icons.length];const title=document.createElement('strong');title.textContent=p.querySelector('h3')?.textContent||'Գործիք';const sub=document.createElement('small');sub.textContent='Բացել գործիքը →';b.append(icon,title,sub);b.onclick=()=>{panels.forEach(x=>x.classList.add('hidden'));host.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');p.classList.remove('hidden');p.scrollIntoView({behavior:'smooth'});};host.append(b);p.classList.add('hidden');});}
+function initAdminToolTiles(){
+ const host=$('adminToolTiles');if(!host||host.dataset.ready)return;
+ host.dataset.ready='1';
+ const panels=[...$('adminContentWorkspace').querySelectorAll('.admin-tool-panel')];
+ const icons=['🖼️','🔐','🛡️','💬'];
+ panels.forEach((p,i)=>{
+  const b=document.createElement('button');b.type='button';b.className='admin-tool-tile';
+  const icon=document.createElement('span');icon.textContent=icons[i%icons.length];
+  const title=document.createElement('strong');title.textContent=p.querySelector('h3')?.textContent||'Գործիք';
+  const sub=document.createElement('small');sub.textContent='Բացել գործիքը →';
+  b.append(icon,title,sub);
+  b.onclick=()=>{panels.forEach(x=>x.classList.remove('is-open'));host.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');p.classList.add('is-open');p.scrollIntoView({behavior:'smooth',block:'start'});};
+  host.append(b);
+ });
+ $('adminNewContentBlock')?.addEventListener('click',()=>{
+  const p=$('adminContentFormPanel');const open=!p.classList.contains('is-open');
+  p.classList.toggle('is-open',open);
+  $('adminNewContentBlock').textContent=open?'✖ Փակել նոր բլոկի խմբագրումը':'➕ Ստեղծել նոր բլոկ';
+  if(open){$('contentForm').reset();$('contentKey').hidden=false;$('contentKey').required=true;editingGallery=[];drawGallery($('sectionMediaCurrent'),editingGallery);p.scrollIntoView({behavior:'smooth',block:'start'});}
+ });
+ document.querySelectorAll('[data-content-target]').forEach(b=>b.addEventListener('click',()=>{
+  const p=$('adminContentFormPanel');p.classList.add('is-open');
+  const f=$('contentForm').elements;f.contentTarget.value=b.dataset.contentTarget;
+  f.contentKey.value='';f.contentKey.hidden=true;f.contentKey.required=false;
+  f.contentLabel.value=b.textContent.trim();f.contentType.value='text';f.contentValue.value='';
+  $('adminNewContentBlock').textContent='✖ Փակել նոր բլոկի խմբագրումը';
+  p.scrollIntoView({behavior:'smooth',block:'start'});
+ }));
+}
 
 const cfg = window.ANI_DRIVE_CONFIG;
 
@@ -2442,6 +2498,7 @@ async function loadRegisteredStudents(){
 }
 $('openRegisteredStudents').onclick=()=>showAdminWorkspace('students');
 function showAdminWorkspace(key){
+ $('adminContentWorkspace')?.classList.add('hidden');
  const ids={booking:'adminBookingSection',bookings:'adminExistingBookingsPanel',students:'registeredStudentsSection',applications:'adminApplicationsPanel',chat:'adminChatPanel'};
  Object.entries(ids).forEach(([k,id])=>$(id)?.classList.toggle('hidden',k!==key));
  document.querySelectorAll('[data-admin-jump]').forEach(b=>b.classList.toggle('active',b.dataset.adminJump===key));
@@ -2451,6 +2508,16 @@ function showAdminWorkspace(key){
  if(key==='applications')loadStudents();
  if(key){setTimeout(()=>scrollPanelIntoView(ids[key]),60);}
 }
+$('openAdminContentWorkspace').addEventListener('click',()=>{
+ ['adminBookingSection','adminExistingBookingsPanel','registeredStudentsSection','adminApplicationsPanel','adminChatPanel'].forEach(id=>$(id)?.classList.add('hidden'));
+ $('adminContentWorkspace').classList.remove('hidden');
+ $('adminToolTiles').querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+ $('adminContentWorkspace').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('backAdminDashboard').addEventListener('click',()=>{
+ $('adminContentWorkspace').classList.add('hidden');
+ window.scrollTo({top:0,behavior:'smooth'});
+});
 $('adminViewPublicSite').addEventListener('click',()=>{
  show('');
  window.scrollTo({top:0,left:0,behavior:'smooth'});
@@ -2777,8 +2844,24 @@ async function loadAdminAccounts(){
  const {data,error}=await db.from('admins').select('email,user_id');
  if(error){box.textContent='Ադմինների ցանկը բեռնել չհաջողվեց։ '+error.message;return;}
  box.replaceChildren();
- (data||[]).forEach(a=>{const p=document.createElement('p');p.textContent=(a.email||a.user_id)+' — Ակտիվ ադմին';box.append(p);});
+ (data||[]).forEach(a=>{
+  const row=document.createElement('div');row.className='admin-item';
+  const p=document.createElement('p');p.textContent=(a.email||a.user_id)+' — Ակտիվ ադմին';
+  const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='Հեռացնել ադմիններից';
+  del.disabled=a.user_id===currentUser?.id;
+  del.onclick=async()=>{if(!confirm('Հեռացնե՞լ այս օգտատիրոջ ադմինի իրավունքները։'))return;const q=await db.from('admins').delete().eq('user_id',a.user_id);if(q.error){message('adminManageMsg','Հեռացնել չհաջողվեց։ '+q.error.message,true);return;}message('adminManageMsg','Ադմինի իրավունքը հեռացվեց։');await loadAdminAccounts();};
+  row.append(p,del);box.append(row);
+ });
 }
+$('addAdminForm').onsubmit=async e=>{
+ e.preventDefault();if(!isAdmin)return;
+ const email=e.target.elements.adminEmail.value.trim().toLowerCase();
+ const user_id=e.target.elements.adminUserId.value.trim();
+ if(!email||!user_id){message('adminManageMsg','Լրացրեք էլ․ փոստը և օգտատիրոջ ID-ն։',true);return;}
+ const {error}=await db.from('admins').insert({email,user_id});
+ if(error){message('adminManageMsg','Ադմին ավելացնել չհաջողվեց։ '+error.message,true);return;}
+ e.target.reset();message('adminManageMsg','Նոր ադմինը ավելացվեց։');await loadAdminAccounts();
+};
 async function readSwitch(key,defaultValue){
  const {data}=await db.from('site_content').select('content_value').eq('content_key',key).maybeSingle();
  return data?data.content_value!=='false':defaultValue;
@@ -3059,6 +3142,26 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 .student-avatar-editor img{width:105px;height:105px;border-radius:50%;object-fit:cover;border:4px solid white}
 .student-avatar-editor label{font-weight:bold}.student-avatar-editor input{display:block;max-width:240px}
 @media(max-width:600px){.admin-tool-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.admin-tool-tile{min-height:100px;padding:12px}}
+</style><style id="ani-drive-admin-content-workspace">
+#admin .admin-view-site-zone{margin:0 0 16px 0!important;justify-content:flex-start!important}
+#admin .admin-main-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin:12px 0 22px}
+#admin .admin-main-tile{min-height:82px;padding:12px;border-radius:14px;background:linear-gradient(145deg,#e8f2ff,#fff 70%,#fff3d8);border:1px solid #d1dfef;color:#153b61;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;text-align:left;box-shadow:0 5px 16px #071a3610}
+#admin .admin-main-tile strong{font-size:13px;line-height:1.3}#admin .admin-main-tile small{font-size:11px;font-weight:500}
+#admin .admin-content-workspace{padding:16px;border:1px solid #d5e2f1;border-radius:18px;background:linear-gradient(145deg,#f6faff,#fff)}
+#admin .admin-content-head h2{margin:14px 0 5px;color:#123b68}
+#admin .admin-content-sections{margin:16px 0}
+#admin .admin-section-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px}
+#admin .admin-section-tiles button{padding:10px 8px;min-height:48px;background:#e8f1fc;color:#174b80;border:1px solid #cbdcf0;border-radius:10px;font-size:12px}
+#admin .admin-new-block{background:linear-gradient(135deg,#1769d2,#0b3b70);color:#fff;padding:12px 18px;margin:6px 0 14px}
+#admin #adminContentFormPanel{display:none;margin:10px 0 18px}
+#admin #adminContentFormPanel.is-open{display:block}
+#admin #adminContentFormPanel h3{color:#174b80}
+#admin .admin-tool-tiles{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));margin-top:12px}
+#admin .admin-tool-tile{min-height:84px;padding:12px;border-radius:13px}
+#admin .admin-tool-panel{display:none;margin:10px 0}
+#admin .admin-tool-panel.is-open{display:block}
+#admin .admin-add-form{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin:12px 0}
+@media(max-width:650px){#admin .admin-content-workspace{padding:10px}#admin .admin-add-form{grid-template-columns:1fr}#admin .admin-main-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></body>
 </html>
 <style>
