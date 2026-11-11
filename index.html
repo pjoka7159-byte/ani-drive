@@ -3074,34 +3074,24 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 .admin-selected-slot-info.selected{background:#dcfce7;border-color:#86d6a5;color:#166534}
 @media(max-width:900px){.admin-booking-layout{grid-template-columns:minmax(0,1fr)}}
 
-/* Նոր դասաժամի գրանցում․ օրացույցը մշտապես ձախում, գրանցման դաշտերը՝ աջում */
-#adminBookingSection .admin-booking-layout{
-  display:grid!important;
-  grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr)!important;
-  gap:14px!important;align-items:start!important;margin-top:14px!important;
-}
-#adminBookingSection .admin-booking-calendar-pane,
-#adminBookingSection .admin-booking-form-pane{min-width:0!important;width:100%!important;box-sizing:border-box!important}
-#adminBookingSection .admin-booking-calendar-pane{padding:10px!important}
-#adminBookingSection .admin-booking-calendar-pane .admin-calendar{padding:7px!important;border-radius:13px}
+/* Նախորդ դասավորության վերականգնում */
+#adminBookingSection .admin-booking-layout{grid-template-columns:minmax(0,.88fr) minmax(360px,1.12fr);gap:14px;align-items:start}
+#adminBookingSection .admin-booking-calendar-pane{padding:11px}
+#adminBookingSection .admin-booking-calendar-pane .admin-calendar{padding:8px;border-radius:13px}
 #adminBookingSection .admin-booking-calendar-pane .calendar-grid{gap:4px}
 #adminBookingSection .admin-booking-calendar-pane .calendar-day,
 #adminBookingSection .admin-booking-calendar-pane .calendar-weekday{padding:5px 1px;font-size:11px;border-radius:7px}
-#adminBookingSection .admin-booking-calendar-pane .admin-calendar .calendar-day{min-height:38px;gap:2px}
+#adminBookingSection .admin-booking-calendar-pane .admin-calendar .calendar-day{min-height:39px;gap:2px}
 #adminBookingSection .admin-booking-calendar-pane .day-count{font-size:8px!important}
 #adminBookingSection .admin-booking-calendar-pane .admin-time-list{gap:5px}
-#adminBookingSection .admin-booking-calendar-pane .admin-time-list button{padding:7px 8px;font-size:11px;border-radius:8px}
-#adminBookingSection .admin-booking-form-pane{padding:18px!important}
-#adminBookingSection #adminBookingFields{width:100%;box-sizing:border-box}
+#adminBookingSection .admin-booking-calendar-pane .admin-time-list button{padding:7px 9px;font-size:11px;border-radius:8px}
+#adminBookingSection .admin-booking-form-pane{padding:18px}
+#adminBookingSection #adminBookingFields{width:100%}
 #adminBookingSection #adminBookingFields:disabled{opacity:.48;filter:grayscale(.2)}
 #adminBookingSection #adminBookingFields:disabled input,#adminBookingSection #adminBookingFields:disabled select{cursor:not-allowed;background:#edf1f6}
 #adminBookingSection #adminBookingFields:disabled button{cursor:not-allowed}
 #adminBookingSection #adminBookingFields:not(:disabled){opacity:1;filter:none}
-@media(max-width:760px){
-  #adminBookingSection .admin-booking-layout{grid-template-columns:minmax(0,1fr)!important}
-  #adminBookingSection .admin-booking-calendar-pane .admin-calendar .calendar-day{min-height:42px}
-}
-</style></body>
+@media(max-width:900px){#adminBookingSection .admin-booking-layout{grid-template-columns:minmax(0,1fr)}#adminBookingSection .admin-booking-calendar-pane .admin-calendar .calendar-day{min-height:42px}}</style></body>
 </html>
 <style>
 /* Զբաղված ժամերը տեսանելի են կարմիրով բոլոր օրացույցներում */
