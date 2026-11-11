@@ -1230,6 +1230,34 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
  .fx-main .public-booking-card .calendar-grid{gap:3px!important}
 }
 </style>
+
+<style id="mobile-floating-controls-spacing">
+/* Mobile: keep language selector and Telegram/WhatsApp contact shortcuts in separate rows. */
+@media(max-width:650px){
+  :is(#languageSwitcher,#language-switcher,#langSwitcher,#lang-switcher,.language-switcher,.language-switcher-wrap,.lang-switcher,.lang-switcher-wrap,.language-buttons,.lang-buttons,[data-language-switcher]){
+    position:fixed!important;right:10px!important;left:auto!important;
+    bottom:142px!important;top:auto!important;z-index:100090!important;
+    display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
+    justify-content:flex-end!important;align-items:center!important;
+    gap:5px!important;max-width:calc(100vw - 20px)!important;
+    transform:none!important;
+  }
+  :is(#languageSwitcher,#language-switcher,#langSwitcher,#lang-switcher,.language-switcher,.language-switcher-wrap,.lang-switcher,.lang-switcher-wrap,.language-buttons,.lang-buttons,[data-language-switcher]) button,
+  :is(#languageSwitcher,#language-switcher,#langSwitcher,#lang-switcher,.language-switcher,.language-switcher-wrap,.lang-switcher,.lang-switcher-wrap,.language-buttons,.lang-buttons,[data-language-switcher]) a{
+    min-height:30px!important;padding:5px 8px!important;font-size:11px!important;
+  }
+  a[href*="wa.me"],a[href*="whatsapp.com"],a[href*="api.whatsapp.com"]{
+    position:fixed!important;right:12px!important;left:auto!important;
+    bottom:14px!important;top:auto!important;z-index:100091!important;
+    transform:none!important;margin:0!important;
+  }
+  a[href*="t.me"],a[href*="telegram.me"],a[href*="telegram.org"]{
+    position:fixed!important;right:12px!important;left:auto!important;
+    bottom:66px!important;top:auto!important;z-index:100091!important;
+    transform:none!important;margin:0!important;
+  }
+}
+</style>
 </head>
 
 <body>
