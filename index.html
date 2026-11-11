@@ -1850,6 +1850,29 @@ function renderAdminAvailabilityCalendar(slots){
  }else{const p=document.createElement('p');p.className='muted';p.textContent='Ընտրեք օրացույցում նշված օրը՝ ժամերը տեսնելու համար։';times.append(p);}
  root.append(times);
 }
+// Ավտոմատ լրացնում ենք առաջիկա 90 օրվա աշխատանքային գրաֆիկը՝ երեքշաբթիից կիրակի։
+async function ensureLessonScheduleSlots(){
+ const start=new Date();start.setHours(0,0,0,0);
+ const end=new Date(start);end.setDate(end.getDate()+90);
+ const from=dateKey(start),to=dateKey(end);
+ const {data:existing,error:readError}=await db.from('lesson_slots').select('slot_date,slot_time').gte('slot_date',from).lte('slot_date',to);
+ if(readError)throw readError;
+ const known=new Set((existing||[]).map(x=>x.slot_date+'|'+String(x.slot_time).slice(0,5)));
+ const rows=[];
+ for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+  if(d.getDay()===1)continue;
+  const date=dateKey(d);
+  for(let minutes=600;minutes<=1050;minutes+=30){
+   const time=String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0');
+   if(!known.has(date+'|'+time))rows.push({slot_date:date,slot_time:time,created_by:currentUser.id,is_available:true});
+  }
+ }
+ for(let i=0;i<rows.length;i+=500){
+  const {error}=await db.from('lesson_slots').insert(rows.slice(i,i+500));
+  if(error)throw error;
+ }
+ return rows.length;
+}
 async function loadAdminBookingPanel(){
  const calendar=$('adminCalendar'),list=$('adminBookings');
  if(!isAdmin){
@@ -1859,6 +1882,8 @@ async function loadAdminBookingPanel(){
  if(list)list.textContent='Բեռնում...';
  if(calendar)calendar.innerHTML='<p class="muted">Օրացույցի տվյալները բեռնվում են…</p>';
  try{
+  const generatedCount=await ensureLessonScheduleSlots();
+  if(generatedCount)message('slotMsg','Ավտոմատ ավելացվեց '+generatedCount+' ազատ դասաժամ՝ առաջիկա 90 օրվա գրաֆիկով։');
   const form=$('adminBookingForm');
   const slotSel=form.elements.slot,oldSlot=slotSel.value;
   // Բեռնում ենք բոլոր ժամերը, որպեսզի օրացույցում երևան և՛ ազատ, և՛ զբաղված ժամերը։
