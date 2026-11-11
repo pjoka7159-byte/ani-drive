@@ -2140,6 +2140,7 @@ let adminCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1
 let adminBookingArchiveView=false;
 let adminAllLessonSlots=[];
 let adminSelectedDate='';
+let adminPreviewSlotId='';
 function ensureAdminBookingModal(){
  let modal=$('adminBookingModal');
  if(modal)return modal;
@@ -2148,13 +2149,18 @@ function ensureAdminBookingModal(){
  document.body.append(modal);
  const form=$('adminBookingForm'),heading=form?.previousElementSibling,msg=form?.nextElementSibling,body=$('adminBookingModalBody');
  if(form&&body){if(heading)body.append(heading);body.append(form);if(msg)body.append(msg);}
- $('closeAdminBookingModal').onclick=()=>modal.classList.remove('open');
- modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open');});
+ $('closeAdminBookingModal').onclick=()=>{modal.classList.remove('open');adminPreviewSlotId='';loadAdminBookingPanel();};
+ modal.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('open');adminPreviewSlotId='';loadAdminBookingPanel();}});
  return modal;
 }
 function openAdminBookingModal(slot){
  const modal=ensureAdminBookingModal(),form=$('adminBookingForm');
  if(!slot||!slot.is_available){message('adminBookingMsg','Ընտրված ժամը զբաղված է։ Ընտրեք կանաչ ազատ ժամ։',true);return;}
+ adminPreviewSlotId=slot.id;
+ const startMins=Number(String(slot.slot_time).slice(0,2))*60+Number(String(slot.slot_time).slice(3,5))+30;
+ const nextTime=String(Math.floor(startMins/60)).padStart(2,'0')+':'+String(startMins%60).padStart(2,'0');
+ const breakSlot=adminAllLessonSlots.find(x=>x.slot_date===slot.slot_date&&String(x.slot_time).slice(0,5)===nextTime);
+ if(breakSlot&&breakSlot.is_available){breakSlot.is_available=false;breakSlot.breakBlocked=true;renderAdminAvailabilityCalendar(adminAllLessonSlots);}
  form.elements.slot.value=slot.id;
  $('adminBookingModalSlot').textContent=new Date(slot.slot_date+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long'})+' · '+String(slot.slot_time).slice(0,5);
  modal.classList.add('open');
@@ -2447,7 +2453,7 @@ $('adminBookingForm').onsubmit=async e=>{
  const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:s?s.id:null,student_name:name,student_email:s?.email||'',student_phone:s?.phone||phone,status:'approved'});
  if(error){message('adminBookingMsg','Ամրագրումը չհաջողվեց։ '+error.message,true);return;}
  playNotice();message('adminBookingMsg',s?'Ամրագրումը հաստատվեց և կերևա աշակերտի անձնական էջում։':'Ամրագրումը հաստատվեց։ Նշված հեռախոսահամարը գրանցված հաշվի հետ չհամընկավ, ուստի անձնական էջում չի ցուցադրվի։');
- e.target.elements.manualName.value='';e.target.elements.manualPhone.value='';e.target.elements.student.value='';e.target.elements.slot.value='';$('bookingPhoneSearch').value='';$('bookingStudentSearchInfo').textContent='Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։';
+ adminPreviewSlotId='';e.target.elements.manualName.value='';e.target.elements.manualPhone.value='';e.target.elements.student.value='';e.target.elements.slot.value='';$('bookingPhoneSearch').value='';$('bookingStudentSearchInfo').textContent='Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։';
  $('adminBookingModal')?.classList.remove('open');
  await loadAdminBookingPanel();
 };
