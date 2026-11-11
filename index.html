@@ -3182,3 +3182,23 @@ body.account-view footer {
   display:none !important;
 }
 </style>
+
+
+<style id="ani-drive-nav-button-no-overlap">
+/* Բաժիններ կոճակը չի ծածկում վերևի Մուտք / Գրանցում կոճակները */
+@media(max-width:850px){
+  .nav-open-btn{
+    position:fixed!important;
+    top:auto!important;
+    bottom:calc(14px + env(safe-area-inset-bottom, 0px))!important;
+    left:auto!important;
+    right:14px!important;
+    z-index:100001!important;
+    display:block!important;
+    margin:0!important;
+    padding:10px 15px!important;
+    border-radius:999px!important;
+    box-shadow:0 8px 24px #071a3650!important;
+  }
+}
+</style>
