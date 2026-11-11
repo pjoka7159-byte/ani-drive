@@ -3098,3 +3098,55 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 .public-booking-card .busy-time,.slot-choice.busy-time{background:#fee2e2!important;border:1px solid #ef7777!important;color:#a51f1f!important;opacity:1!important;cursor:not-allowed!important;box-shadow:none!important}
 .fx-main .slot-choice.busy-time{background:#401e2b!important;border-color:#d45a72!important;color:#ff9bab!important}
 </style>
+
+
+<style id="ani-admin-executive-motion-theme">
+/* ANI DRIVE admin only — Luxury Minimal + Dynamic Motion. Calendar visuals intentionally untouched. */
+#admin{color:#24364b;background:linear-gradient(180deg,#f4f6fa 0%,#edf1f6 100%);padding-bottom:36px}
+#admin>.wrap{max-width:1420px!important;padding-left:clamp(12px,2vw,26px);padding-right:clamp(12px,2vw,26px)}
+#admin h2{font-size:clamp(24px,3vw,34px);font-weight:850;letter-spacing:-.7px;color:#102d50;margin:12px 0 20px}
+#admin h2:after{content:"";display:block;width:74px;height:3px;margin-top:10px;border-radius:5px;background:linear-gradient(90deg,#2463a5,#c5ced9)}
+#admin .admin-account-dashboard{position:relative;top:auto;margin:0 0 20px;padding:clamp(17px,2vw,24px);border:1px solid #ffffff35;border-radius:22px;background:linear-gradient(118deg,#102d50 0%,#174d7d 62%,#2463a5 100%);box-shadow:0 16px 36px #102d5025;overflow:hidden}
+#admin .admin-account-dashboard:after{content:"";position:absolute;right:-65px;top:-110px;width:260px;height:260px;border:1px solid #ffffff20;border-radius:50%;box-shadow:0 0 0 24px #ffffff08,0 0 0 50px #ffffff06;pointer-events:none}
+#admin .admin-account-dashboard>strong{position:relative;z-index:1;font-size:20px;letter-spacing:.15px}
+#admin .admin-view-site-button{border:1px solid #ffffff90;background:linear-gradient(135deg,#e3e8ef,#ffffff);color:#102d50;border-radius:12px;box-shadow:0 6px 16px #071a3630;transition:transform .2s,box-shadow .2s}
+#admin .admin-account-dashboard .account-dashboard-actions{position:relative;z-index:1;gap:10px}
+#admin .admin-account-dashboard .account-dashboard-actions button{min-height:58px;border:1px solid #ffffff45;background:#ffffff12;border-radius:14px;backdrop-filter:blur(8px);transition:background .2s,border-color .2s,transform .2s,box-shadow .2s}
+#admin .admin-account-dashboard .account-dashboard-actions button:hover,
+#admin .admin-account-dashboard .account-dashboard-actions button.active{background:linear-gradient(135deg,#e1e7ef,#ffffff);color:#102d50;border-color:#fff;box-shadow:0 8px 18px #061a3530;transform:translateY(-2px)}
+#admin .admin-view-site-button:hover{transform:translateY(-2px);box-shadow:0 10px 22px #061a3535}
+#admin .admin-shortcuts:not(.admin-shortcuts-blue){gap:15px}
+#admin .admin-shortcut{position:relative;overflow:hidden;border:1px solid #d9e0e9;border-radius:19px;background:linear-gradient(145deg,#fff,#f1f4f8);box-shadow:0 8px 22px #102d500d;transition:transform .22s,box-shadow .22s,border-color .22s}
+#admin .admin-shortcut:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#2463a5,#c5ced9);transform:scaleX(.18);transform-origin:left;transition:transform .25s}
+#admin .admin-shortcut:hover{transform:translateY(-4px);border-color:#9fb5ce;box-shadow:0 16px 30px #102d5020}
+#admin .admin-shortcut:hover:after{transform:scaleX(1)}
+#admin .panel:not(.calendar-shell){border:1px solid #dce3ec;border-radius:18px;background:linear-gradient(145deg,#fff,#f7f9fc);box-shadow:0 9px 26px #102d500d}
+#admin .admin-workspace-panel{border:1px solid #dce3ec!important;border-radius:20px!important;background:linear-gradient(145deg,#fff,#f4f7fb)!important;box-shadow:0 12px 30px #102d5010!important}
+#admin .admin-workspace-panel>h3,#admin .admin-workspace-panel .row h3{color:#102d50!important}
+#admin .admin-tool-panel h3,#admin .panel h3{color:#173e66}
+#admin .admin-item{border:1px solid #d7e0eb;border-left:4px solid #2463a5;border-radius:15px;background:linear-gradient(145deg,#fff,#f2f5f9);box-shadow:0 7px 20px #102d500d;color:#263b52;transition:transform .18s,box-shadow .18s}
+#admin .admin-item:hover{transform:translateY(-2px);box-shadow:0 12px 24px #102d5018}
+#admin .admin-item p{color:#40546a}
+#admin input:not([type=checkbox]):not([type=radio]):not([type=file]),
+#admin select,#admin textarea{border:1px solid #cbd5e1;border-radius:11px;background:#fff;color:#24364b;box-shadow:inset 0 1px 2px #102d5008;transition:border-color .18s,box-shadow .18s}
+#admin input:focus,#admin select:focus,#admin textarea:focus{outline:none;border-color:#4d83b8;box-shadow:0 0 0 3px #2463a51a}
+#admin button:not(#adminCalendar button){border-radius:11px;transition:transform .18s,box-shadow .18s,filter .18s}
+#admin button:not(#adminCalendar button):hover{filter:brightness(1.035)}
+#admin .blue,#admin button.blue{box-shadow:0 5px 13px #174d7d20}
+#admin .admin-tool-tiles{gap:13px}
+#admin .admin-tool-tile{border:1px solid #d9e1eb;border-radius:16px;background:linear-gradient(145deg,#fff,#f0f4f8);box-shadow:0 7px 20px #102d500d;transition:transform .2s,box-shadow .2s}
+#admin .admin-tool-tile:hover{transform:translateY(-3px);box-shadow:0 13px 26px #102d5018}
+#admin .message{border-radius:10px}
+@media(max-width:700px){
+ #admin h2{margin-top:8px}
+ #admin .admin-account-dashboard{padding:14px}
+ #admin .admin-account-dashboard .account-dashboard-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #admin .admin-account-dashboard .account-dashboard-actions button{min-height:48px}
+ #admin .admin-shortcuts:not(.admin-shortcuts-blue){grid-template-columns:1fr 1fr;gap:9px}
+ #admin .admin-shortcut{min-height:100px;padding:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ #admin .admin-shortcut,#admin .admin-item,#admin button,#admin .admin-tool-tile{transition:none!important}
+ #admin .admin-shortcut:hover,#admin .admin-item:hover,#admin .admin-tool-tile:hover{transform:none!important}
+}
+</style>
