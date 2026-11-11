@@ -2614,7 +2614,7 @@ contentTargetField.addEventListener('change',()=>{
  $('contentForm').elements.contentValue.value='';
 });
 $('contentNewBtn').onclick=()=>{
- $('contentForm').reset();contentTargetField.value='';contentKeyField.hidden=false;contentKeyField.required=true;
+ $('contentForm').reset();editingGallery=[];$('sectionMediaCurrent').replaceChildren();contentTargetField.value='';contentKeyField.hidden=false;contentKeyField.required=true;
  updateContentValueRequirement();
 };
 
@@ -2625,7 +2625,7 @@ $('contentForm').onsubmit=async e=>{
  if(!key){message('adminMsg','Նշեք նոր բաժնի բանալին։',true);return;}
  const imgs=[...e.target.elements.sectionImages.files],vids=[...e.target.elements.sectionVideos.files];
  if(imgs.length>20||vids.length>5){message('adminMsg','Մինչև 20 նկար և 5 հոլովակ կարող եք ավելացնել։',true);return;}
- try{const gallery=editingGallery.slice();if(imgs.length)gallery.push(...await uploadGallery(imgs,'image'));if(vids.length)gallery.push(...await uploadGallery(vids,'video'));
+ try{const gallery=editingGallery.slice();if(gallery.filter(x=>x.type==='image').length+imgs.length>20||gallery.filter(x=>x.type==='video').length+vids.length>5)throw Error('Այս բաժնում ընդհանուր առավելագույնը 20 նկար և 5 հոլովակ է թույլատրվում։');if(imgs.length)gallery.push(...await uploadGallery(imgs,'image'));if(vids.length)gallery.push(...await uploadGallery(vids,'video'));
  const payload={content_key:key,label:String(f.get('contentLabel')).trim(),content_type:String(f.get('contentType')),content_value:String(f.get('contentValue')||'').trim(),is_published:f.get('isPublished')==='on',updated_at:new Date().toISOString()};
  const {error}=await db.from('site_content').upsert(payload,{onConflict:'content_key'});if(error)throw error;
  if(imgs.length||vids.length){const g=await db.from('site_content').upsert({content_key:'gallery_'+key,label:'Մեդիա՝ '+payload.label,content_type:'text',content_value:JSON.stringify(gallery),is_published:payload.is_published,updated_at:new Date().toISOString()},{onConflict:'content_key'});if(g.error)throw g.error;}
@@ -2675,6 +2675,7 @@ function openPublicContentRow(row){
  else if(row.content_type==='video'&&row.content_value){const v=document.createElement('video');v.src=row.content_value;v.controls=true;v.preload='metadata';v.style.cssText='width:100%;max-height:600px;border-radius:14px';detail.append(v);}
  else if(row.content_type==='link'&&row.content_value){const a=document.createElement('a');a.href=row.content_value;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Բացել հղումը';detail.append(a);}
  else{const p=document.createElement('p');p.textContent=row.content_value||'';p.style.whiteSpace='pre-wrap';detail.append(p);}
+ drawGallery(detail,(window.aniGalleries||{})[row.content_key]||[]);
  const back=document.createElement('button');back.type='button';back.className='feature-back';back.textContent='← Վերադառնալ գլխավոր էջ';back.onclick=()=>{document.querySelectorAll('.fx-main>section').forEach(el=>el.classList.add('hidden'));$('hero')?.classList.remove('hidden');$('publicBookingCalendar')?.classList.remove('hidden');$('courseSection')?.classList.remove('hidden');$('weatherSection')?.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});};
  detail.append(back);inner.append(detail);window.scrollTo({top:section.offsetTop,behavior:'smooth'});
 }
