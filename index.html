@@ -1065,6 +1065,33 @@ body.account-view .fx-shell .nav-open-btn{position:fixed!important;top:12px!impo
 }
 
 #contentForm{display:grid;grid-template-columns:1fr;gap:10px}#contentForm textarea{width:100%;min-height:130px;resize:vertical;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit}#contentForm label{font-weight:700}#contentForm select,#contentForm input{max-width:100%}#contentList .admin-item{margin:10px 0;padding:14px;border:1px solid #dbe4f0;border-radius:12px;background:#fff}#contentList .admin-item p{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* COMPACT HERO AND NAV: more content visible in one screen */
+.fx-main>.hero.ani-car-hero{
+ height:clamp(145px,18vh,190px)!important;min-height:145px!important;max-height:190px!important;
+ padding:0!important;overflow:hidden!important;
+}
+.fx-main>.hero.ani-car-hero .ani-car-wrap{height:100%!important;min-height:0!important;padding:0 12px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.fx-main>.hero.ani-car-hero .ani-car-scene{height:100%!important;min-height:0!important;max-height:185px!important;width:min(560px,70vw)!important;margin:0 auto!important;transform:scale(.78)!important;transform-origin:center center!important}
+.fx-main>.hero.ani-car-hero .ani-car-3d{max-height:145px!important}
+.fx-main>.hero.ani-car-hero .ani-car-3d svg{height:145px!important;max-height:145px!important;width:auto!important;max-width:100%!important}
+.fx-main>.hero.ani-car-hero .ani-car-caption{font-size:11px!important;padding:4px 10px!important;margin-top:-5px!important}
+.fx-main>header{min-height:48px!important}
+.fx-main>header .bar{min-height:48px!important;padding-top:4px!important;padding-bottom:4px!important}
+.fx-main>header .logo{font-size:20px!important}
+.fx-main>header .wrap{padding-left:14px!important;padding-right:14px!important}
+.fx-shell>#publicNav,.fx-shell.nav-is-open>#publicNav{gap:4px!important;padding:8px!important}
+.fx-shell>#publicNav>button{min-height:27px!important;padding:5px 8px!important;margin:1px 0!important;font-size:10.5px!important;line-height:1.15!important}
+.fx-shell>#publicNav .public-nav-head{min-height:30px!important;padding:5px 7px!important;margin-bottom:4px!important}
+.fx-shell>#publicNav .public-nav-head strong{font-size:12px!important}
+.fx-shell .nav-open-btn{font-size:11px!important;padding:6px 9px!important;min-height:30px!important}
+@media(max-width:650px){
+ .fx-main>.hero.ani-car-hero{height:125px!important;min-height:125px!important;max-height:125px!important}
+ .fx-main>.hero.ani-car-hero .ani-car-scene{width:90vw!important;max-height:120px!important;transform:scale(.68)!important}
+ .fx-main>.hero.ani-car-hero .ani-car-3d svg{height:112px!important;max-height:112px!important}
+ .fx-main>header .logo{font-size:17px!important}
+}
+
 </style>
 </head>
 
@@ -2245,6 +2272,19 @@ async function loadWeather(){
  }catch(e){box.textContent='Եղանակի տվյալները այս պահին հասանելի չեն։';}
 }
 
+function openPublicContentRow(row){
+ const section=$('publishedBlocks'),inner=$('publishedBlocksInner');if(!section||!inner)return;
+ document.querySelectorAll('.fx-main>section').forEach(el=>el.classList.add('hidden'));
+ section.classList.remove('hidden');inner.replaceChildren();
+ const detail=document.createElement('div');detail.className='feature-detail';
+ const h=document.createElement('h2');h.textContent='📚 '+row.label;detail.append(h);
+ if(row.content_type==='image'&&row.content_value){const img=document.createElement('img');img.src=row.content_value;img.alt=row.label;img.loading='lazy';img.style.cssText='display:block;max-width:100%;max-height:600px;border-radius:14px;margin:14px auto';detail.append(img);}
+ else if(row.content_type==='video'&&row.content_value){const v=document.createElement('video');v.src=row.content_value;v.controls=true;v.preload='metadata';v.style.cssText='width:100%;max-height:600px;border-radius:14px';detail.append(v);}
+ else if(row.content_type==='link'&&row.content_value){const a=document.createElement('a');a.href=row.content_value;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Բացել հղումը';detail.append(a);}
+ else{const p=document.createElement('p');p.textContent=row.content_value||'';p.style.whiteSpace='pre-wrap';detail.append(p);}
+ const back=document.createElement('button');back.type='button';back.className='feature-back';back.textContent='← Վերադառնալ գլխավոր էջ';back.onclick=()=>{document.querySelectorAll('.fx-main>section').forEach(el=>el.classList.add('hidden'));$('hero')?.classList.remove('hidden');$('publicBookingCalendar')?.classList.remove('hidden');$('courseSection')?.classList.remove('hidden');$('weatherSection')?.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});};
+ detail.append(back);inner.append(detail);window.scrollTo({top:section.offsetTop,behavior:'smooth'});
+}
 async function loadPublicBlocks(){
  const section=$('publishedBlocks'),inner=$('publishedBlocksInner');
  const {data,error}=await db.from('site_content').select('content_key,label,content_type,content_value').eq('is_published',true).order('updated_at',{ascending:true});
@@ -2262,6 +2302,17 @@ async function loadPublicBlocks(){
   }
  });
  const newRows=data.filter(row=>!['registration_enabled','login_enabled'].includes(row.content_key)&&!row.content_key.startsWith('page_'));
+ // Every custom section also gets its own item in the main sections menu.
+ const nav=$('publicNav');
+ if(nav){
+  nav.querySelectorAll('[data-dynamic-content]').forEach(node=>node.remove());
+  newRows.forEach((row,index)=>{
+   const item=document.createElement('button');item.type='button';item.dataset.dynamicContent=row.content_key;
+   item.textContent=['✨','🚘','📚','🎯','🌟','💡','🎨','🧭'][index%8]+' '+row.label;
+   item.addEventListener('click',()=>openPublicContentRow(row));
+   nav.append(item);
+  });
+ }
  if(!newRows.length){section.classList.add('hidden');return;}
  inner.replaceChildren();section.classList.remove('hidden');
  const grid=document.createElement('div');grid.className='grid';inner.append(grid);
