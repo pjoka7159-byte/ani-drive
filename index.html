@@ -1261,9 +1261,8 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 <style id="admin-panel-organizer">
 /* Admin dashboard: one focused workspace at a time, with responsive profile cards. */
 #admin .admin-account-dashboard{position:sticky;top:8px;z-index:30;margin-bottom:16px;padding:16px;border-radius:20px;background:linear-gradient(125deg,#082c59,#1769b4 58%,#2c83cb);box-shadow:0 14px 34px #092f5b35}
-#admin .admin-account-dashboard>strong{display:block;color:#fff;font-size:19px;margin-bottom:12px}
-#admin .admin-view-site-row{display:flex;justify-content:flex-start;margin:0 0 12px}
-#admin .admin-view-site-button{min-height:42px;padding:9px 16px;border:1px solid #ffffff80;border-radius:12px;background:linear-gradient(135deg,#f3bd4d,#ffe39a);color:#102b49;font-weight:800;box-shadow:0 5px 16px #001a3340}
+#admin .admin-view-site-zone{display:flex;justify-content:flex-start;align-items:center;margin:0 0 12px;padding:0 0 0 2px}
+#admin .admin-view-site-button{min-height:42px;padding:9px 18px;border:1px solid #d7a83d;border-radius:12px;background:linear-gradient(135deg,#f3bd4d,#ffe39a);color:#102b49;font-weight:800;box-shadow:0 5px 16px #001a3325}
 #admin .admin-view-site-button:hover{filter:brightness(1.06);transform:translateY(-1px)}
 #admin .admin-account-dashboard .account-dashboard-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
 #admin .admin-account-dashboard .account-dashboard-actions button{min-width:0;min-height:58px;padding:10px 8px;border:1px solid #ffffff70;border-radius:13px;background:#ffffff18;color:#fff;font-weight:750;white-space:normal;line-height:1.25}
@@ -1390,10 +1389,8 @@ body.account-view #publicBookingCalendar,body.account-view #admin #publicBooking
 <!-- Ադմին -->
 <section class="section hidden" id="admin">
 <div class="wrap">
-<h2>ANI DRIVE — Ադմինիստրատորի վահանակ</h2>
+<div class="admin-view-site-zone"><button type="button" id="adminViewPublicSite" class="admin-view-site-button">🌐 ԱՅՑԵԼԵԼ ԿԱՅՔ</button></div>
 <div class="account-dashboard admin-account-dashboard" aria-label="Ադմինի արագ վահանակ">
- <strong>🛠️ Ադմինի վահանակ</strong>
- <div class="admin-view-site-row"><button type="button" id="adminViewPublicSite" class="admin-view-site-button">🌐 Դիտել կայքը</button></div>
  <div class="account-dashboard-actions">
   <button type="button" data-admin-jump="booking">📅 Օրացույց / նոր գրանցում</button>
   <button type="button" data-admin-jump="bookings">📋 Ամրագրումներ</button>
