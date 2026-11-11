@@ -1287,7 +1287,7 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 </style>
 <style id="hide-public-calendar-in-account-views">
 /* The public booking calendar is redundant and takes space above private dashboards. */
-body.account-view #publicBookingCalendar{display:none!important;}
+body.account-view #publicBookingCalendar,body.account-view #admin #publicBookingCalendar{display:none!important;}
 </style>
 </head>
 
@@ -2935,16 +2935,22 @@ let publicSelectedDate='';
 let publicSelectedSlot='';
 function renderPublicCalendar(){
  const grid=$('publicCalendar');if(!grid)return;grid.replaceChildren();
+ const now=new Date();now.setHours(0,0,0,0);
+ const todayKey=dateKey(now),currentMonth=new Date(now.getFullYear(),now.getMonth(),1);
+ if(publicCalendarMonth<currentMonth)publicCalendarMonth=currentMonth;
+ if(publicSelectedDate&&publicSelectedDate<todayKey){publicSelectedDate='';publicSelectedSlot='';}
+ const prev=$('publicCalPrev');if(prev)prev.disabled=publicCalendarMonth<=currentMonth;
  $('publicCalTitle').textContent=publicCalendarMonth.toLocaleDateString('hy-AM',{month:'long',year:'numeric'});
  ['Երկ','Երք','Չոր','Հնգ','Ուրբ','Շաբ','Կիր'].forEach(x=>{const h=document.createElement('div');h.className='calendar-weekday';h.textContent=x;grid.append(h);});
  const offset=(new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth(),1).getDay()+6)%7;
  for(let i=0;i<offset;i++){const blank=document.createElement('div');blank.className='calendar-day empty';grid.append(blank);}
  const total=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()+1,0).getDate();
  const workingDate=s=>new Date(s+'T12:00:00').getDay()!==1;
- const free=new Set(publicCalendarSlots.filter(x=>x.is_available&&isWorkingLessonTime(x.slot_time)&&workingDate(x.slot_date)).map(x=>x.slot_date));
- const busy=new Set(publicCalendarSlots.filter(x=>!x.is_available&&isWorkingLessonTime(x.slot_time)&&workingDate(x.slot_date)).map(x=>x.slot_date));
+ const free=new Set(publicCalendarSlots.filter(x=>x.slot_date>=todayKey&&x.is_available&&isWorkingLessonTime(x.slot_time)&&workingDate(x.slot_date)).map(x=>x.slot_date));
+ const busy=new Set(publicCalendarSlots.filter(x=>x.slot_date>=todayKey&&!x.is_available&&isWorkingLessonTime(x.slot_time)&&workingDate(x.slot_date)).map(x=>x.slot_date));
  for(let n=1;n<=total;n++){
   const key=dateKey(new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth(),n));
+  if(key<todayKey){const blank=document.createElement('div');blank.className='calendar-day empty past-date';grid.append(blank);continue;}
   const b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':busy.has(key)?' busy':'')+(publicSelectedDate===key?' selected':'');b.textContent=n;
   b.disabled=(!free.has(key)&&!busy.has(key))||new Date(key+'T12:00:00').getDay()===1;
   if(!b.disabled)b.onclick=()=>{publicSelectedDate=key;publicSelectedSlot='';renderPublicCalendar();renderPublicSlotChoices();};
@@ -2975,7 +2981,7 @@ async function loadPublicBookingSlots(){
   $('publicBookingStatus').textContent='Օրացույցի հրապարակային դիտման թույլտվությունը պետք է միացնել Supabase-ում։';
  }
 }
-$('publicCalPrev').onclick=()=>{publicCalendarMonth=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()-1,1);renderPublicCalendar();};
+$('publicCalPrev').onclick=()=>{const now=new Date();const first=new Date(now.getFullYear(),now.getMonth(),1);if(publicCalendarMonth<=first)return;publicCalendarMonth=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()-1,1);renderPublicCalendar();};
 $('publicCalNext').onclick=()=>{publicCalendarMonth=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()+1,1);renderPublicCalendar();};
 $('publicBookSelected').onclick=async()=>{
  if(!publicSelectedSlot){$('publicBookingStatus').textContent='Նախ ընտրեք կանաչ օրն ու ազատ ժամը։';return;}
