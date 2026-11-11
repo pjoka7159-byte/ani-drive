@@ -1755,6 +1755,7 @@ $('studentContactForm').onsubmit=async e=>{e.preventDefault();const f=new FormDa
 function isWorkingLessonTime(value){const m=String(value||'').slice(0,5).split(':').map(Number);if(m.length!==2||!Number.isFinite(m[0])||!Number.isFinite(m[1]))return false;const total=m[0]*60+m[1];return total>=600&&total<=1050&&(total-600)%30===0;}
 function slotLabel(s){return new Date(s.slot_date+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'short',day:'numeric',month:'long'})+' · '+String(s.slot_time).slice(0,5);}
 let studentAvailableSlots=[];
+let studentAllSlots=[];
 let studentCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let selectedStudentDate='';
 const dateKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -1764,20 +1765,21 @@ function renderStudentCalendar(){
  ['Երկ','Երք','Չոր','Հնգ','Ուրբ','Շաբ','Կիր'].forEach(x=>{const h=document.createElement('div');h.className='calendar-weekday';h.textContent=x;grid.append(h);});
  const offset=(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),1).getDay()+6)%7;for(let i=0;i<offset;i++)grid.append(document.createElement('div'));
  const days=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()+1,0).getDate();
- const free=new Set(studentAvailableSlots.filter(x=>isWorkingLessonTime(x.slot_time)).map(x=>x.slot_date));
- for(let n=1;n<=days;n++){const key=dateKey(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),n)),b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':'')+(selectedStudentDate===key?' selected':'');b.textContent=n;b.disabled=!free.has(key)||new Date(key+'T12:00:00').getDay()===1;if(!b.disabled)b.onclick=()=>{selectedStudentDate=key;renderStudentCalendar();renderStudentSlotChoices();};grid.append(b);}
+ const free=new Set(studentAllSlots.filter(x=>x.is_available&&isWorkingLessonTime(x.slot_time)).map(x=>x.slot_date));
+ const busy=new Set(studentAllSlots.filter(x=>!x.is_available&&isWorkingLessonTime(x.slot_time)).map(x=>x.slot_date));
+ for(let n=1;n<=days;n++){const key=dateKey(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),n)),b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':busy.has(key)?' busy':'')+(selectedStudentDate===key?' selected':'');b.textContent=n;b.disabled=(!free.has(key)&&!busy.has(key))||new Date(key+'T12:00:00').getDay()===1;if(!b.disabled)b.onclick=()=>{selectedStudentDate=key;renderStudentCalendar();renderStudentSlotChoices();};grid.append(b);}
 }
 function renderStudentSlotChoices(){
  const box=$('studentSlotChoices'),hidden=$('studentBookingForm').elements.slot;box.replaceChildren();hidden.value='';
- const slots=studentAvailableSlots.filter(x=>x.slot_date===selectedStudentDate&&isWorkingLessonTime(x.slot_time));if(!slots.length){box.textContent='Ընտրեք օրացույցի նշված օրերից մեկը։';return;}
- slots.filter(slot=>slot.is_available).forEach(slot=>{const b=document.createElement('button');b.type='button';b.className='slot-choice available-time';b.textContent=String(slot.slot_time).slice(0,5);b.onclick=()=>{hidden.value=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};box.append(b);});
+ const slots=studentAllSlots.filter(x=>x.slot_date===selectedStudentDate&&isWorkingLessonTime(x.slot_time));if(!slots.length){box.textContent='Ընտրեք օրացույցի նշված օրերից մեկը։';return;}
+ slots.forEach(slot=>{const b=document.createElement('button');b.type='button';b.className='slot-choice '+(slot.is_available?'available-time':'busy-time');b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.disabled=!slot.is_available;if(slot.is_available)b.onclick=()=>{hidden.value=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};box.append(b);});
 }
 $('studentCalPrev').onclick=()=>{studentCalendarMonth=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()-1,1);renderStudentCalendar();};
 $('studentCalNext').onclick=()=>{studentCalendarMonth=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()+1,1);renderStudentCalendar();};
 async function loadStudentSlots(){
  const {data,error}=await db.from('lesson_slots').select('id,slot_date,slot_time,is_available').gte('slot_date',dateKey(new Date())).order('slot_date').order('slot_time');
  if(error){message('studentBookingMsg','Ժամերը բեռնել չհաջողվեց։ '+error.message,true);return;}
- studentAvailableSlots=(data||[]).filter(x=>x.is_available&&isWorkingLessonTime(x.slot_time)&&new Date(x.slot_date+'T12:00:00').getDay()!==1);if(!studentAvailableSlots.some(x=>x.slot_date===selectedStudentDate))selectedStudentDate='';
+ studentAllSlots=(data||[]).filter(x=>isWorkingLessonTime(x.slot_time)&&new Date(x.slot_date+'T12:00:00').getDay()!==1);studentAvailableSlots=studentAllSlots.filter(x=>x.is_available);if(!studentAllSlots.some(x=>x.slot_date===selectedStudentDate))selectedStudentDate='';
  renderStudentCalendar();renderStudentSlotChoices();
 }
 async function loadStudentBookings(){
@@ -2644,21 +2646,22 @@ function renderPublicCalendar(){
  const total=new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth()+1,0).getDate();
  const workingDate=s=>new Date(s+'T12:00:00').getDay()!==1;
  const free=new Set(publicCalendarSlots.filter(x=>x.is_available&&isWorkingLessonTime(x.slot_time)&&workingDate(x.slot_date)).map(x=>x.slot_date));
+ const busy=new Set(publicCalendarSlots.filter(x=>!x.is_available&&isWorkingLessonTime(x.slot_time)&&workingDate(x.slot_date)).map(x=>x.slot_date));
  for(let n=1;n<=total;n++){
   const key=dateKey(new Date(publicCalendarMonth.getFullYear(),publicCalendarMonth.getMonth(),n));
-  const b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':'')+(publicSelectedDate===key?' selected':'');b.textContent=n;
-  b.disabled=!free.has(key)||new Date(key+'T12:00:00').getDay()===1;
+  const b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':busy.has(key)?' busy':'')+(publicSelectedDate===key?' selected':'');b.textContent=n;
+  b.disabled=(!free.has(key)&&!busy.has(key))||new Date(key+'T12:00:00').getDay()===1;
   if(!b.disabled)b.onclick=()=>{publicSelectedDate=key;publicSelectedSlot='';renderPublicCalendar();renderPublicSlotChoices();};
   grid.append(b);
  }
 }
 function renderPublicSlotChoices(){
  const box=$('publicSlotChoices');if(!box)return;box.replaceChildren();publicSelectedSlot='';
- const slots=publicCalendarSlots.filter(x=>x.slot_date===publicSelectedDate&&x.is_available&&isWorkingLessonTime(x.slot_time));
- if(!slots.length){box.textContent='Ընտրեք օրացույցի կանաչ օրերից մեկը։';return;}
+ const slots=publicCalendarSlots.filter(x=>x.slot_date===publicSelectedDate&&isWorkingLessonTime(x.slot_time));
+ if(!slots.length){box.textContent='Ընտրեք օրացույցի նշված օրերից մեկը։';return;}
  slots.forEach(slot=>{
-  const b=document.createElement('button');b.type='button';b.className='available-time';b.textContent=String(slot.slot_time).slice(0,5);
-  b.onclick=()=>{publicSelectedSlot=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};
+  const b=document.createElement('button');b.type='button';b.className=slot.is_available?'available-time':'busy-time';b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.disabled=!slot.is_available;
+  if(slot.is_available)b.onclick=()=>{publicSelectedSlot=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};
   box.append(b);
  });
 }
@@ -2737,3 +2740,8 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 
 </body>
 </html>
+<style>
+/* Զբաղված ժամերը տեսանելի են կարմիրով բոլոր օրացույցներում */
+.public-booking-card .busy-time,.slot-choice.busy-time{background:#fee2e2!important;border:1px solid #ef7777!important;color:#a51f1f!important;opacity:1!important;cursor:not-allowed!important;box-shadow:none!important}
+.fx-main .slot-choice.busy-time{background:#401e2b!important;border-color:#d45a72!important;color:#ff9bab!important}
+</style>
