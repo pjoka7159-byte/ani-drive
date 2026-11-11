@@ -1232,7 +1232,8 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 <div class="panel hidden" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Կանաչը՝ ազատ ժամ, կարմիրը՝ զբաղված ժամ։ Ընտրեք օրը և ժամը։</p>
 <h4>👤 Աշակերտի տվյալներ</h4><form id="adminBookingForm"><input id="bookingPhoneSearch" type="tel" inputmode="tel" placeholder="🔎 Փնտրել գրանցված աշակերտին հեռախոսահամարով" autocomplete="off"><p id="bookingStudentSearchInfo" class="muted" style="margin:0">Մուտքագրեք հեռախոսահամարը՝ գրանցված աշակերտին գտնելու համար։</p><select name="student"><option value="">Գրանցված աշակերտ — ընտրեք որոնման արդյունքից</option></select><input name="manualName" placeholder="Անուն, ազգանուն (եթե նոր աշակերտ է)"><input name="manualPhone" type="tel" placeholder="Հեռախոսահամար"><input type="hidden" name="slot"><button class="good" type="submit">Հաստատել դասաժամի գրանցումը</button></form><p id="adminBookingMsg" class="message"></p>
 <h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar" style="margin-bottom:14px"><div id="adminCalendarContent">Բեռնում...</div></div>
-<h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><select name="slotTime" required><option value="">Ընտրել դասաժամը</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="blue">Ավելացնել ազատ ժամ</button></form><p id="slotMsg" class="message"></p></div>
+<h4>➕ Ավելացնել նոր ազատ օր և ժամ</h4><form id="slotForm"><input type="date" name="slotDate" required><select name="slotTime" required><option value="">Ընտրել դասաժամը</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="blue">Ավելացնել ազատ ժամ</button></form>
+<h4>🕒 Ազատ ժամերի միջակայք</h4><form id="slotRangeForm" class="grid"><input type="date" name="rangeDate" required><select name="rangeStart" required><option value="">Սկսած</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><select name="rangeEnd" required><option value="">Մինչև</option><option value="10:00">10:00</option><option value="10:30">10:30</option><option value="11:00">11:00</option><option value="11:30">11:30</option><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option></select><button class="good">Սահմանել միջակայքը ազատ</button></form><p class="muted">Օրը ընտրեք, նշեք սկիզբն ու ավարտը։ Միջակայքի ժամերը կդառնան ազատ՝ բացառությամբ գործող ամրագրումների։</p><p id="slotMsg" class="message"></p></div>
 <div class="panel hidden" id="registeredStudentsSection"><div class="row"><h3 style="margin-right:auto">👥 Գրանցված անձինք</h3><button type="button" class="gray" id="showActiveStudents">Ակտիվ</button><button type="button" class="gray" id="showArchivedStudents">Արխիվ</button></div><div id="registeredStudentsList">Բեռնում...</div></div>
 
 <div class="panel admin-applications-panel">
@@ -1843,8 +1844,14 @@ function renderAdminAvailabilityCalendar(slots){
   const label=document.createElement('h4');label.textContent=new Date(adminSelectedDate+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long'})+' — ժամեր';times.append(label);
   const row=document.createElement('div');row.className='admin-time-list';
   daySlots.sort((a,b)=>String(a.slot_time).localeCompare(String(b.slot_time))).forEach(slot=>{
-   const b=document.createElement('button');b.type='button';b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.className=slot.is_available?'available-time':'busy-time';b.disabled=!slot.is_available;
-   if(slot.is_available)b.onclick=()=>{const sel=$('adminBookingForm').elements.slot;sel.value=slot.id;row.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};
+   const b=document.createElement('button');b.type='button';b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.className=slot.is_available?'available-time':'busy-time';
+   b.title=slot.is_available?'Սեղմեք՝ զբաղված նշելու կամ ամրագրման համար ընտրելու':'Սեղմեք՝ ազատելու համար';
+   b.onclick=async()=>{
+    if(!slot.is_available){await setAdminSlotAvailability(slot,false);return;}
+    const sel=$('adminBookingForm').elements.slot;sel.value=slot.id;row.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');
+    const action=confirm('Այս ժամը ամրագրման համար ընտրե՞լ։ Սեղմեք «Չեղարկել»՝ այն զբաղված նշելու համար։');
+    if(!action){await setAdminSlotAvailability(slot,true);}
+   };
    row.append(b);
   });times.append(row);
  }else{const p=document.createElement('p');p.className='muted';p.textContent='Ընտրեք օրացույցում նշված օրը՝ ժամերը տեսնելու համար։';times.append(p);}
@@ -1938,6 +1945,35 @@ async function changeBookingStatus(id,status){
  if(error){message('slotMsg','Կարգավիճակը փոխել չհաջողվեց։ '+error.message,true);return;}
  playNotice();await loadAdminBookingPanel();message('slotMsg',status==='approved'?'Ամրագրումը հաստատվեց։':'Ամրագրումը մերժվեց։');
 }
+async function setAdminSlotAvailability(slot,currentlyAvailable){
+ const {data:bookings,error:bookingError}=await db.from('lesson_bookings').select('id,status').eq('slot_id',slot.id).in('status',['pending','approved']).is('archived_at',null);
+ if(bookingError){message('slotMsg','Ամրագրման ստուգումը չհաջողվեց։ '+bookingError.message,true);return;}
+ if(bookings?.length){message('slotMsg','Այս ժամն ունի գործող ամրագրում և չի կարելի ձեռքով ազատել կամ զբաղված նշել։',true);return;}
+ const next=!currentlyAvailable;
+ const {error}=await db.from('lesson_slots').update({is_available:next}).eq('id',slot.id);
+ if(error){message('slotMsg','Ժամի կարգավիճակը չփոխվեց։ '+error.message,true);return;}
+ message('slotMsg',next?'Ժամը նշվեց ազատ։':'Ժամը նշվեց զբաղված։');
+ await loadAdminBookingPanel();
+}
+$('slotRangeForm').onsubmit=async e=>{
+ e.preventDefault();const f=new FormData(e.target),date=String(f.get('rangeDate')),start=String(f.get('rangeStart')),end=String(f.get('rangeEnd'));
+ if(new Date(date+'T12:00:00').getDay()===1){message('slotMsg','Երկուշաբթին հանգստյան օր է։',true);return;}
+ if(!isWorkingLessonTime(start)||!isWorkingLessonTime(end)||end<=start){message('slotMsg','Ընտրեք ճիշտ միջակայք՝ 10:00–17:30, ավարտը պետք է ուշ լինի մեկնարկից։',true);return;}
+ const {data:existing,error:readError}=await db.from('lesson_slots').select('id,slot_date,slot_time,is_available').eq('slot_date',date).gte('slot_time',start).lte('slot_time',end);
+ if(readError){message('slotMsg','Տվյալները չբեռնվեցին։ '+readError.message,true);return;}
+ const found=new Map((existing||[]).map(x=>[String(x.slot_time).slice(0,5),x]));
+ const rows=[];for(let m=Number(start.slice(0,2))*60+Number(start.slice(3))+0;m<=Number(end.slice(0,2))*60+Number(end.slice(3));m+=30){const t=String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');if(!found.has(t))rows.push({slot_date:date,slot_time:t,created_by:currentUser.id,is_available:true});}
+ if(rows.length){const {error}=await db.from('lesson_slots').insert(rows);if(error){message('slotMsg','Նոր ժամերը չավելացվեցին։ '+error.message,true);return;}}
+ const ids=(existing||[]).filter(x=>!x.is_available).map(x=>x.id);
+ if(ids.length){
+  const {data:busyBookings,error:busyError}=await db.from('lesson_bookings').select('slot_id').in('slot_id',ids).in('status',['pending','approved']).is('archived_at',null);
+  if(busyError){message('slotMsg','Ամրագրումները ստուգել չհաջողվեց։ '+busyError.message,true);return;}
+  const locked=new Set((busyBookings||[]).map(x=>x.slot_id)),freeIds=ids.filter(id=>!locked.has(id));
+  if(freeIds.length){const {error}=await db.from('lesson_slots').update({is_available:true}).in('id',freeIds);if(error){message('slotMsg','Ազատ ժամերը չթարմացվեցին։ '+error.message,true);return;}}
+  if(locked.size){message('slotMsg','Միջակայքը թարմացվեց, բայց '+locked.size+' գործող ամրագրված ժամ մնաց զբաղված։');await loadAdminBookingPanel();return;}
+ }
+ message('slotMsg','Ընտրված միջակայքը սահմանվեց ազատ։');await loadAdminBookingPanel();
+};
 $('slotForm').onsubmit=async e=>{
  e.preventDefault();const f=new FormData(e.target),date=String(f.get('slotDate')),time=String(f.get('slotTime'));
  const day=new Date(date+'T12:00:00').getDay(),parts=time.split(':').map(Number);
