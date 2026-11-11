@@ -1620,8 +1620,16 @@ $('signup').onsubmit = async e => {
 
   } catch(err) {
     const msg = err.message || '';
-    if (msg.toLowerCase().includes('duplicate') ||
-        msg.toLowerCase().includes('unique')) {
+    const lowerMsg = msg.toLowerCase();
+    if (lowerMsg.includes('user already registered') ||
+        lowerMsg.includes('already registered') ||
+        lowerMsg.includes('already exists')) {
+      message('signupMsg','Այս էլ․ փոստով հաշիվ արդեն կա։ Մուտք գործեք ձեր գործող գաղտնաբառով կամ ընտրեք «Վերականգնել գաղտնաբառը»։',true);
+      const loginEmail = $('login')?.elements?.email;
+      if (loginEmail) loginEmail.value = email;
+      openTopAuthSection('auth');
+      message('loginMsg','Այս էլ․ փոստով հաշիվ արդեն գրանցված է։ Մուտք գործեք կամ վերականգնեք գաղտնաբառը։',true);
+    } else if (lowerMsg.includes('duplicate') || lowerMsg.includes('unique')) {
       message('signupMsg','Այս հեռախոսահամարը կամ տվյալներն արդեն օգտագործվում են։',true);
     } else {
       message('signupMsg','Գրանցումը չհաջողվեց։ ' + msg,true);
