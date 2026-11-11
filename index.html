@@ -1591,7 +1591,7 @@ const cfg = window.ANI_DRIVE_CONFIG;
  const head=document.createElement('div');head.className='top-auth-panel-head';
  const title=document.createElement('strong');title.textContent='Մուտք / Գրանցում';
  const close=document.createElement('button');close.type='button';close.className='gray';close.textContent='Փակել ×';close.onclick=()=>panel.classList.add('hidden');
- head.append(title,close);panel.append(head);header.insertAdjacentElement('afterend',panel);
+ head.append(title,close);panel.append(head);const hero=header.closest('.ani-car-hero');(hero||header).insertAdjacentElement('afterend',panel);
  ['auth','register'].forEach(id=>{const section=document.getElementById(id);if(section){section.classList.add('hidden');panel.append(section);}});
  document.addEventListener('click',e=>{if(panel.classList.contains('hidden'))return;if(panel.contains(e.target)||e.target.closest('#showAuth,#showRegister'))return;panel.classList.add('hidden');});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')panel.classList.add('hidden');});
