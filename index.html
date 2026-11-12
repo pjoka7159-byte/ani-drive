@@ -2027,6 +2027,19 @@ async function loadUser() {
     await loadStudent();
     await checkStudentNotices();
     if(!window.aniStudentNoticeTimer)window.aniStudentNoticeTimer=setInterval(checkStudentNotices,20000);
+
+    // After customer login, automatically expand the complete public sections menu.
+    document.body.classList.add('account-view','public-nav-active');
+    const publicNav=$('publicNav');
+    if(publicNav){
+      publicNav.classList.remove('hidden');
+      publicNav.classList.add('open');
+      publicNav.style.removeProperty('display');
+      publicNav.style.removeProperty('visibility');
+      publicNav.style.removeProperty('opacity');
+      publicNav.style.removeProperty('transform');
+    }
+    document.querySelector('.fx-shell')?.classList.add('nav-is-open');
   }
 }
 
