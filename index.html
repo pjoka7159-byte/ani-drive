@@ -1305,6 +1305,36 @@ hr,.divider{border-color:#294660!important}
 @media(max-width:650px){.ani-global-header{position:relative!important}.ani-global-header .bar{align-items:flex-start}.ani-global-actions{gap:6px!important}.ani-global-actions button{padding:7px 9px!important;font-size:11px}.academy-detail-inner h2{font-size:15px!important}.academy-detail-close{padding:7px 9px!important}.academy-detail-close span{display:none}}
 </style>
 
+<style id="ani-admin-date-bookings-design">
+#admin .admin-shortcuts.admin-shortcuts-blue{grid-template-columns:repeat(4,minmax(0,1fr))}
+#admin .date-bookings-shortcut{background:linear-gradient(145deg,#e0e7ff,#f5f3ff 55%,#fff);border:1px solid #a5b4fc;color:#24245b}
+#admin .date-bookings-shortcut>strong{color:#302b70}
+#admin .date-bookings-shortcut>small{color:#56528b}
+#admin .date-bookings-panel{overflow:hidden;background:linear-gradient(145deg,#0b2540,#102f4d)!important;border:1px solid #3c6385!important}
+#admin .date-bookings-panel h3{color:#f6d98c!important}
+#admin .date-bookings-intro{color:#c1d5e8;line-height:1.65}
+#admin .date-bookings-summary{display:inline-flex;gap:8px;flex-wrap:wrap;margin:8px 0 17px;padding:10px 14px;border-radius:12px;background:#ffffff13;border:1px solid #ffffff25;color:#f5dfa0;font-weight:800}
+#admin .date-bookings-day{margin:12px 0;border:1px solid #355a78;border-radius:15px;overflow:hidden;background:#0b2035;box-shadow:0 8px 18px #0002}
+#admin .date-bookings-day-head{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:15px 17px;border-radius:0;background:linear-gradient(100deg,#174a73,#1d6590);color:#fff}
+#admin .date-bookings-date-label{font-weight:900;flex:1;text-transform:capitalize}
+#admin .date-bookings-count{padding:5px 10px;border-radius:20px;background:#f4c65f;color:#18314a;font-size:12px}
+#admin .date-bookings-arrow{font-size:22px;font-weight:900}
+#admin .date-bookings-day-content{display:grid;gap:10px;padding:12px}
+#admin .date-bookings-card{display:grid;grid-template-columns:84px minmax(0,1fr) auto;gap:13px;align-items:center;padding:14px;border:1px solid #42617b;border-left:5px solid #eab94e;border-radius:13px;background:linear-gradient(110deg,#173a56,#102a42);color:#edf6ff}
+#admin .date-booking-card.status-approved{border-left-color:#35c98a;background:linear-gradient(110deg,#123f43,#12334a)}
+#admin .date-booking-card.status-rejected,#admin .date-booking-card.status-cancelled{border-left-color:#fb7185;background:linear-gradient(110deg,#4a293b,#172b42)}
+#admin .date-booking-time{display:grid;place-items:center;min-height:54px;border-radius:12px;background:linear-gradient(145deg,#f4c65f,#ffe8a8);color:#17314b;font-size:21px;font-weight:900;box-shadow:0 4px 0 #9b741f}
+#admin .date-booking-student{display:grid;gap:5px;min-width:0}
+#admin .date-booking-student strong{color:#fff;font-size:14px}
+#admin .date-booking-student span{color:#c9d9e8;font-size:12px;overflow-wrap:anywhere}
+#admin .date-booking-student small{color:#9fb8ce;line-height:1.6}
+#admin .date-booking-status{padding:7px 10px;border-radius:20px;background:#fff0c2;color:#805600;font-size:11px;font-weight:900;white-space:nowrap}
+#admin .date-booking-card.status-approved .date-booking-status{background:#bbf7d0;color:#14532d}
+#admin .date-booking-card.status-rejected .date-booking-status,#admin .date-booking-card.status-cancelled .date-booking-status{background:#fecdd3;color:#881337}
+#admin .date-bookings-empty{padding:28px;text-align:center;border:1px dashed #64809a;border-radius:15px;color:#e6f1fb;background:#ffffff0c}
+@media(max-width:900px){#admin .admin-shortcuts.admin-shortcuts-blue{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){#admin .admin-shortcuts.admin-shortcuts-blue{grid-template-columns:1fr}#admin .date-booking-card{grid-template-columns:66px minmax(0,1fr);gap:10px;padding:11px}#admin .date-booking-time{font-size:18px;min-height:48px}#admin .date-booking-status{grid-column:2;justify-self:start}#admin .date-bookings-day-head{padding:12px 10px;gap:7px}#admin .date-bookings-date-label{font-size:13px}}
+</style>
 </head>
 
 <body>
@@ -1460,8 +1490,10 @@ hr,.divider{border-color:#294660!important}
   <button type="button" class="admin-shortcut existing-bookings-shortcut" id="openExistingBookings"><span>📋</span><strong>Գրանցված դասաժամերի ցանկ</strong><small>Դիտել և կառավարել ամրագրումները</small></button>
   <button type="button" class="admin-shortcut new-booking-shortcut" id="openBookingAdmin"><span>➕</span><strong>Նոր դասաժամի գրանցում</strong><small>Ընտրել օրն ու ազատ ժամը</small></button>
   <button type="button" class="admin-shortcut students-shortcut" id="openRegisteredStudents"><span>👥</span><strong>Աշակերտների ցանկ և արխիվ</strong><small>Գրանցված աշակերտների տվյալներ</small></button>
+  <button type="button" class="admin-shortcut date-bookings-shortcut" data-admin-jump="datebookings"><span>🗓️</span><strong>Դասաժամեր ըստ ամսաթվերի</strong><small>Դիտել յուրաքանչյուր օրվա ամրագրումները և աշակերտների տվյալները</small></button>
 </div>
 <div class="panel hidden admin-workspace-panel" id="adminExistingBookingsPanel"><div class="row"><h3 style="margin-right:auto">📋 Գրանցված դասաժամերի ցանկ</h3><button type="button" class="gray" id="refreshExistingBookings">↻ Թարմացնել</button></div><div class="booking-archive-tabs"><button type="button" class="blue" id="showActiveBookings">Ակտիվ դասաժամեր</button><button type="button" class="gray" id="showArchivedBookings">📦 Արխիվ</button></div><div id="adminBookings">Բեռնում...</div></div>
+<div class="panel hidden admin-workspace-panel date-bookings-panel" id="adminDateBookingsPanel"><div class="row"><h3 style="margin-right:auto">🗓️ Դասաժամեր՝ ըստ ամսաթվերի</h3><button type="button" class="blue" id="refreshDateBookings">↻ Թարմացնել</button></div><p class="date-bookings-intro">Ամրագրումները դասավորված են ըստ օրերի․ բացեք անհրաժեշտ ամսաթիվը և տեսեք այդ օրվա բոլոր աշակերտների դասաժամերն ու տվյալները։</p><div class="date-bookings-summary" id="dateBookingsSummary">Բեռնում...</div><div id="adminDateBookingsList"><p>Բեռնում...</p></div></div>
 <div class="panel hidden admin-workspace-panel" id="adminBookingSection"><div class="row"><h3 style="margin-right:auto">📅 Նոր դասաժամի գրանցում</h3><button type="button" class="gray" id="closeBookingAdmin">Փակել ✕</button></div><p class="muted">Ձախից ընտրեք օրը և ազատ ժամը, աջից լրացրեք աշակերտի տվյալները։ Կանաչը՝ ազատ, կարմիրը՝ զբաղված։</p>
 <div class="admin-booking-layout">
 <section class="admin-booking-calendar-pane"><h4>🗓️ Օրացույց — հասանելի և զբաղված ժամեր</h4><div id="adminCalendar" class="calendar-shell admin-calendar"><div id="adminCalendarContent">Բեռնում...</div></div></section>
@@ -2324,6 +2356,57 @@ function openAdminBookingModal(slot){
  const chosen=[...document.querySelectorAll('#adminCalendar .admin-time-list button')].find(b=>b.textContent.startsWith(String(slot.slot_time).slice(0,5))&&b.textContent.includes('Ազատ'));
  if(chosen)chosen.classList.add('selected');
 }
+async function loadAdminDateBookings(){
+ const box=$('adminDateBookingsList'),summary=$('dateBookingsSummary');
+ if(!isAdmin){if(box)box.textContent='Այս բաժինը հասանելի է միայն ադմինին։';return;}
+ if(box)box.innerHTML='<p>⏳ Ամրագրումները բեռնվում են…</p>';
+ if(summary)summary.textContent='Տվյալների բեռնում…';
+ try{
+  const {data,error}=await db.from('lesson_bookings')
+   .select('*,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time)')
+   .order('created_at',{ascending:false});
+  if(error)throw error;
+  const rows=data||[];
+  const grouped=new Map();
+  rows.forEach(b=>{
+   const date=b.lesson_slots?.slot_date||'Ամսաթիվը նշված չէ';
+   if(!grouped.has(date))grouped.set(date,[]);
+   grouped.get(date).push(b);
+  });
+  const dates=[...grouped.keys()].sort((a,b)=>b.localeCompare(a));
+  if(summary)summary.textContent='📚 Ընդամենը '+rows.length+' ամրագրում · 📆 '+dates.length+' ամսաթիվ';
+  if(!box)return;
+  box.replaceChildren();
+  if(!rows.length){const empty=document.createElement('div');empty.className='date-bookings-empty';empty.textContent='🎓 Դասաժամերի ամրագրումներ դեռ չկան։';box.append(empty);return;}
+  dates.forEach((date,index)=>{
+   const day=document.createElement('section');day.className='date-bookings-day';
+   const head=document.createElement('button');head.type='button';head.className='date-bookings-day-head';head.setAttribute('aria-expanded',index===0?'true':'false');
+   const label=document.createElement('span');label.className='date-bookings-date-label';
+   if(date==='Ամսաթիվը նշված չէ')label.textContent='📅 '+date;
+   else label.textContent='📅 '+new Date(date+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+   const count=document.createElement('span');count.className='date-bookings-count';count.textContent=grouped.get(date).length+' դասաժամ';
+   const arrow=document.createElement('span');arrow.className='date-bookings-arrow';arrow.textContent=index===0?'−':'+';
+   head.append(label,count,arrow);
+   const content=document.createElement('div');content.className='date-bookings-day-content';if(index!==0)content.classList.add('hidden');
+   head.onclick=()=>{const closed=content.classList.toggle('hidden');head.setAttribute('aria-expanded',String(!closed));arrow.textContent=closed?'+':'−';};
+   grouped.get(date).sort((a,b)=>String(a.lesson_slots?.slot_time||'').localeCompare(String(b.lesson_slots?.slot_time||''))).forEach((b,i)=>{
+    const student=students.find(s=>s.id===b.student_id)||{};
+    const status=b.status||'pending';
+    const card=document.createElement('article');card.className='date-booking-card status-'+String(status).replace(/[^a-z-]/gi,'');
+    const time=document.createElement('div');time.className='date-booking-time';time.textContent=String(b.lesson_slots?.slot_time||'Ժամը նշված չէ').slice(0,5);
+    const info=document.createElement('div');info.className='date-booking-student';
+    const name=document.createElement('strong');name.textContent='👤 '+(b.student_name||student.name||student.full_name||'Աշակերտ');
+    const phone=document.createElement('span');phone.textContent='📞 '+(student.phone||b.student_phone||'Հեռախոսը նշված չէ');
+    const email=document.createElement('span');email.textContent='✉️ '+(student.email||b.student_email||'');
+    const extra=document.createElement('small');extra.textContent=['Տարիք՝ '+(student.age||'—'),'Սեռ՝ '+(student.gender||'—'),'Ուսուցում՝ '+(student.study_type||'—'),'Բնակավայր՝ '+(student.residence||'—'),'Քննական բաժին՝ '+(student.exam_location||'—')].join(' · ');
+    info.append(name,phone);if(student.email||b.student_email)info.append(email);info.append(extra);
+    const badge=document.createElement('span');badge.className='date-booking-status';badge.textContent=({pending:'Սպասման մեջ',approved:'Հաստատված',rejected:'Մերժված',cancelled:'Չեղարկված'}[status]||status);
+    card.append(time,info,badge);content.append(card);
+   });
+   day.append(head,content);box.append(day);
+  });
+ }catch(error){if(box)box.textContent='⚠️ Ամրագրումները բեռնել չհաջողվեց։ '+(error?.message||error);if(summary)summary.textContent='Տվյալների բեռնման սխալ';}
+}
 function renderAdminAvailabilityCalendar(slots){
  const root=$('adminCalendar');root.replaceChildren();root.classList.add('admin-calendar');
  const now=new Date();now.setHours(0,0,0,0);
@@ -2695,7 +2778,7 @@ async function loadRegisteredStudents(){
 $('openRegisteredStudents').onclick=()=>showAdminWorkspace('students');
 let currentAdminWorkspace='';
 window.currentAdminWorkspace='';
-const adminWorkspaceIds={booking:'adminBookingSection',bookings:'adminExistingBookingsPanel',students:'registeredStudentsSection',applications:'adminApplicationsPanel',chat:'adminChatPanel'};
+const adminWorkspaceIds={booking:'adminBookingSection',bookings:'adminExistingBookingsPanel',datebookings:'adminDateBookingsPanel',students:'registeredStudentsSection',applications:'adminApplicationsPanel',chat:'adminChatPanel'};
 function closeAdminWorkspace(){Object.values(adminWorkspaceIds).forEach(id=>$(id)?.classList.add('hidden'));currentAdminWorkspace='';window.currentAdminWorkspace='';}
 function showAdminWorkspace(key){
  const ids=adminWorkspaceIds;currentAdminWorkspace=key;window.currentAdminWorkspace=key;
@@ -2705,10 +2788,12 @@ function showAdminWorkspace(key){
  document.querySelectorAll('[data-admin-jump]').forEach(b=>b.classList.toggle('active',b.dataset.adminJump===key));
  if(key==='booking'){const form=$('adminBookingForm');form?.reset();const fields=$('adminBookingFields');if(fields)fields.disabled=true;const info=$('adminSelectedSlotInfo');if(info){info.textContent='Նախ ընտրեք օրացույցի կանաչ օրը, ապա՝ ազատ ժամը։ Դրանից հետո կակտիվանան գրանցման դաշտերը։';info.classList.remove('selected');}loadAdminBookingPanel();}
  if(key==='bookings')loadAdminBookingPanel();
+ if(key==='datebookings')loadAdminDateBookings();
  if(key==='students')loadRegisteredStudents();
  if(key==='applications')loadStudents();
  if(key){setTimeout(()=>scrollPanelIntoView(ids[key]),60);}
 }
+$('refreshDateBookings')?.addEventListener('click',loadAdminDateBookings);
 $('adminViewPublicSite').addEventListener('click',()=>{
  show('');
  window.scrollTo({top:0,left:0,behavior:'smooth'});
