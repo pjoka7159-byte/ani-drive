@@ -3201,6 +3201,16 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 </style>
 
 
+<style id="ani-student-header-actions">
+/* After student login, keep only the logout action in the top header. */
+body.account-view:not(.admin-authenticated) .ani-global-actions > :not(#logoutBtn) {
+  display:none!important;
+}
+body.account-view:not(.admin-authenticated) .ani-global-actions #logoutBtn {
+  display:inline-flex!important;
+}
+</style>
+
 <style id="ani-account-view-isolation">
 /* Student accounts retain the complete public site; admin tools require admin authentication. */
 body:not(.admin-authenticated) #admin,
