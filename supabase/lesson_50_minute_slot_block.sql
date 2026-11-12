@@ -81,6 +81,16 @@ begin
 end;
 $$;
 
+-- Apply the rule to active bookings that already exist.
+update public.lesson_slots next_slot
+   set is_available = false
+  from public.lesson_bookings b
+  join public.lesson_slots booked_slot on booked_slot.id = b.slot_id
+ where b.status in ('pending', 'approved')
+   and b.archived_at is null
+   and next_slot.slot_date = booked_slot.slot_date
+   and next_slot.slot_time = booked_slot.slot_time + interval '30 minutes';
+
 drop trigger if exists lesson_booking_50_minute_following_slot
   on public.lesson_bookings;
 
