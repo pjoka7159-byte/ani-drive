@@ -1976,13 +1976,20 @@ async function loadUser() {
   currentUser = user;
   await loadStudentAvatar();
 
+  // A registered student must always receive the student view, never the admin dashboard.
+  const {data:studentRecord,error:studentRoleError} = await db
+    .from('students')
+    .select('id')
+    .eq('id',user.id)
+    .maybeSingle();
+
   const {data:admin,error:adminError} = await db
     .from('admins')
     .select('user_id')
     .eq('user_id',user.id)
     .maybeSingle();
 
-  isAdmin = !adminError && !!admin;
+  isAdmin = !studentRoleError && !studentRecord && !adminError && !!admin;
   document.body.classList.toggle('admin-authenticated',isAdmin);
   $('admin').classList.add('hidden');
 
