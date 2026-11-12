@@ -3202,10 +3202,14 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 
 
 <style id="ani-account-view-isolation">
-/* When an account is open, show only its workspace instead of the public homepage. */
-body.account-view .fx-main > :not(#admin):not(#studentArea) {
+/* Student accounts retain the complete public site; admin tools require admin authentication. */
+body:not(.admin-authenticated) #admin,
+body:not(.admin-authenticated) #adminBtn,
+body:not(.admin-authenticated) .admin-only,
+body:not(.admin-authenticated) [data-admin-only="true"] {
   display:none!important;
 }
+body.admin-authenticated #admin:not(.hidden) { display:block!important; }
 </style>
 
 <!-- Trigger fresh Vercel production deployment from the verified design-6 main branch. -->
