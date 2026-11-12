@@ -2110,8 +2110,11 @@ $('studentBookingForm').onsubmit=async e=>{
  const sameDayStarts=(existingBookings||[]).filter(b=>b.lesson_slots?.slot_date===chosen.slot_date)
   .map(b=>toMinutes(b.lesson_slots.slot_time)).filter(Number.isFinite);
  const allStarts=[...new Set([...sameDayStarts,selectedMinute])].sort((a,b)=>a-b);
- let run=0,previous=null,selectedRunLength=0;
- for(const minute of allStarts){run=previous!==null&&minute-previous===60?run+1:1;if(minute===selectedMinute)selectedRunLength=run;previous=minute;}
+ const selectedIndex=allStarts.indexOf(selectedMinute);
+ let left=selectedIndex,right=selectedIndex;
+ while(left>0&&allStarts[left]-allStarts[left-1]===60)left--;
+ while(right<allStarts.length-1&&allStarts[right+1]-allStarts[right]===60)right++;
+ const selectedRunLength=right-left+1;
  if(selectedRunLength>=3){message('studentBookingMsg','Չի թույլատրվում նույն օրը ամրագրել իրար հաջորդող երեք կամ ավելի դասաժամ։ Կարող եք ամրագրել առավելագույնը երկու իրար հաջորդող դասաժամ։',true);return;}
  const {data:s}=await db.from('students').select('first_name,last_name,email,phone').eq('id',currentUser.id).maybeSingle();
  if(!s){message('studentBookingMsg','Աշակերտի տվյալները չգտնվեցին։',true);return;}
