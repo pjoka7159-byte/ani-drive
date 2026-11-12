@@ -1752,6 +1752,7 @@ let currentUser = null;
 let isAdmin = false;
 let isRootAdmin = false;
 const ROOT_ADMIN_EMAILS = ['pjoka7519@gmail.com','graergrigoryan1986@gmail.com'];
+const ROOT_ADMIN_USER_IDS = ['46ae27ef-f325-4d32-a8a1-62692c410d6f','be1cab4b-ff71-49e1-b5d1-621322085482'];
 let students = [];
 let currentFilter = 'all';
 const autoArchiveTimers = new Map();
@@ -2031,8 +2032,11 @@ async function loadUser() {
   }
 
   currentUser = user;
-  isRootAdmin = ROOT_ADMIN_EMAILS.includes(String(user.email||'').toLowerCase());
-  await loadStudentAvatar();
+  const signedInEmail = String(user.email||'').trim().toLowerCase();
+  isRootAdmin = ROOT_ADMIN_EMAILS.includes(signedInEmail) || ROOT_ADMIN_USER_IDS.includes(user.id);
+  // Root owners are identified by their verified Auth UUID as well as email.
+  // A missing student avatar must never prevent an owner from opening the admin workspace.
+  try { await loadStudentAvatar(); } catch (avatarError) { console.warn('Student avatar could not be loaded:', avatarError); }
 
   // Student records always take precedence over admin UI.
   const {data:studentRecord,error:studentRoleError} = await db
