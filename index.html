@@ -3541,3 +3541,48 @@ body.admin-authenticated .ani-global-actions #logoutBtn {
 @media(max-width:850px){#studentArea .student-layout{grid-template-columns:minmax(0,1fr)}#studentArea .student-upcoming-panel{position:static}#studentArea .student-sidebar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#studentArea .student-sidebar button{margin:0;min-width:0}}
 @media(max-width:480px){.student-lesson-card{grid-template-columns:42px minmax(0,1fr);gap:10px;padding:12px}.student-lesson-number{width:38px;height:38px}.student-lesson-time{font-size:21px}}
 </style>
+
+
+<style id="ani-student-left-sidebar-final-fix">
+/* Վերջնական ուղղում․ աշակերտի բաժինները ձախ ուղղահայաց սյունակում են։ */
+body.account-view:not(.admin-authenticated) #studentArea .student-layout{
+ display:grid!important;
+ grid-template-columns:minmax(245px,290px) minmax(0,1fr)!important;
+ flex-direction:initial!important;
+ align-items:start!important;
+ gap:18px!important;
+}
+body.account-view:not(.admin-authenticated) #studentArea .student-upcoming-panel{
+ display:block!important;grid-column:1!important;grid-row:1!important;
+ width:100%!important;box-sizing:border-box!important;position:sticky!important;top:14px!important;
+}
+body.account-view:not(.admin-authenticated) #studentArea .student-sidebar{
+ display:flex!important;visibility:visible!important;opacity:1!important;
+ flex-direction:column!important;flex-wrap:nowrap!important;
+ width:100%!important;max-width:100%!important;box-sizing:border-box!important;
+ margin:16px 0 0!important;gap:8px!important;
+}
+body.account-view:not(.admin-authenticated) #studentArea .student-sidebar button{
+ display:flex!important;width:100%!important;min-height:44px!important;
+ justify-content:flex-start!important;white-space:normal!important;
+ margin:0!important;text-align:left!important;
+}
+body.account-view:not(.admin-authenticated) #studentArea .student-main{
+ grid-column:2!important;grid-row:1!important;width:100%!important;min-width:0!important;
+}
+@media(max-width:850px){
+ body.account-view:not(.admin-authenticated) #studentArea .student-layout{
+  grid-template-columns:minmax(0,1fr)!important;gap:14px!important;
+ }
+ body.account-view:not(.admin-authenticated) #studentArea .student-upcoming-panel,
+ body.account-view:not(.admin-authenticated) #studentArea .student-main{
+  grid-column:1!important;grid-row:auto!important;position:static!important;
+ }
+ body.account-view:not(.admin-authenticated) #studentArea .student-sidebar{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ }
+ body.account-view:not(.admin-authenticated) #studentArea .student-sidebar button{
+  width:100%!important;justify-content:center!important;text-align:center!important;
+ }
+}
+</style>
