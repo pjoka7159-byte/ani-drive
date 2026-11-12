@@ -1286,6 +1286,23 @@ hr,.divider{border-color:#294660!important}
 @media(prefers-reduced-motion:reduce){.academy-module-tile{transition:none}}
 </style>
 
+<style id="ani-drive-block-focus-auth">
+.ani-global-header{position:sticky!important;top:0;z-index:120!important;background:rgba(9,15,23,.97)!important;border-bottom:1px solid #c5a15d66!important;padding:10px 0!important;backdrop-filter:blur(14px)}
+.ani-global-header .bar{gap:10px}
+.ani-global-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px!important}
+.ani-global-actions button{min-height:38px;padding:8px 13px!important;font-size:12px}
+.ani-global-actions #showAuth,.ani-global-actions #showRegister{background:linear-gradient(145deg,#e6cb8c,#a9823d)!important;color:#17130b!important;border:1px solid #f2dda9!important}
+.ani-global-actions #adminBtn{background:linear-gradient(145deg,#d8b56d,#8d682d)!important;color:#17130b!important}
+.ani-global-actions #logoutBtn{background:#713b36!important;color:#fff!important}
+.academy-detail-bar{position:relative;background:linear-gradient(110deg,#151d28,#222b36);border-bottom:1px solid #c5a15d66;box-shadow:0 8px 24px #0005}
+.academy-detail-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:13px;padding-bottom:13px}
+.academy-detail-kicker{font-size:9px;letter-spacing:2px;color:#d6b66e;font-weight:900}
+.academy-detail-inner h2{margin:2px 0 0!important;color:#fff!important;font-size:18px!important}
+.academy-detail-close{flex-shrink:0;background:linear-gradient(145deg,#e4c783,#a27b39)!important;color:#17130b!important;border:1px solid #f2dda9!important;padding:8px 13px!important;border-radius:10px!important;box-shadow:0 4px 0 #634a22,0 8px 15px #0006!important}
+.academy-detail-close span{font-size:11px}
+@media(max-width:650px){.ani-global-header{position:relative!important}.ani-global-header .bar{align-items:flex-start}.ani-global-actions{gap:6px!important}.ani-global-actions button{padding:7px 9px!important;font-size:11px}.academy-detail-inner h2{font-size:15px!important}.academy-detail-close{padding:7px 9px!important}.academy-detail-close span{display:none}}
+</style>
+
 </head>
 
 <body>
@@ -1331,19 +1348,26 @@ hr,.divider{border-color:#294660!important}
    <div class="ani-car-caption">Անի Դրայվ</div>
   </div>
  </div>
-<header>
+</section>
+<header class="ani-global-header">
 <div class="wrap bar">
   <div class="logo" id="aniHomeLogo" role="button" tabindex="0" title="Գլխավոր էջ" style="cursor:pointer">ANI <span>DRIVE</span></div>
-  <div class="row">
+  <div class="row ani-global-actions">
     <a href="tel:+37441334477" style="color:white">041 334477</a>
     <button class="outline" id="showAuth">Մուտք</button>
     <button id="showRegister">Գրանցում</button>
-    <button class="hidden" id="adminBtn">Ադմինիստրատոր</button>
+    <button class="hidden" id="adminBtn">Ադմին</button>
     <button class="hidden danger" id="logoutBtn">Ելք</button>
   </div>
 </div>
-
 </header>
+
+<!-- Selected academy block: only its content is shown -->
+<section id="academyDetailBar" class="academy-detail-bar hidden" aria-live="polite">
+ <div class="wrap academy-detail-inner">
+  <div><span class="academy-detail-kicker">ANI DRIVE • ԲԱԺԻՆ</span><h2 id="academyDetailTitle">Բաժնի տեղեկություն</h2></div>
+  <button type="button" id="academyDetailClose" class="academy-detail-close" aria-label="Փակել բաժինը">× <span>Փակել / Վերադառնալ</span></button>
+ </div>
 </section>
 
 <!-- ANI DRIVE — compact 3D Auto Academy blocks -->
@@ -2909,8 +2933,8 @@ function initPublicNavigation(){
  const nav=$('publicNav');if(!nav)return;
  const pages={home:['hero','academyTiles','publicBookingCalendar','courseSection','weatherSection'],registration:['publicBookingCalendar','register'],traffic:['courseSection'],courses:['courseSection'],about:['aboutPage'],ani:['aniPage'],instructors:['instructorsPage'],licenses:['licensesPage'],reviews:['reviewsPage'],grounds:['groundsPage'],routes:['routesPage'],offices:['examOffices'],documents:['documentsPage'],links:['linksPage'],content:['publishedBlocks'],media:['publishedMedia']};
  const all=['hero','academyTiles','publicBookingCalendar','courseSection','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
- function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');nav.classList.add('hidden');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');window.scrollTo({top:0,behavior:'smooth'});}
- nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));document.querySelectorAll('[data-academy-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.academyPage)));
+ function go(key){const chosen=pages[key]||pages.home;all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});$('academyDetailBar')?.classList.add('hidden');nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===key));document.body.classList.add('public-nav-active');document.body.classList.remove('account-view');if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('open');nav.classList.add('hidden');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');window.scrollTo({top:0,behavior:'smooth'});}
+ nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));document.querySelectorAll('[data-academy-page]').forEach(b=>b.addEventListener('click',()=>{const key=b.dataset.academyPage;go(key);$('academyDetailTitle').textContent=b.querySelector('.academy-module-title')?.textContent||'Բաժնի տեղեկություն';$('academyDetailBar').classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'});}));$('academyDetailClose').addEventListener('click',()=>go('home'));
  $('openPublicNav').onclick=(e)=>{e.stopPropagation();const opened=!nav.classList.contains('open');nav.classList.remove('hidden');nav.classList.toggle('open',opened);document.querySelector('.fx-shell')?.classList.toggle('nav-is-open',opened);};
  $('closePublicNav').onclick=()=>{nav.classList.remove('open');nav.classList.add('hidden');document.querySelector('.fx-shell')?.classList.remove('nav-is-open');};
  // Փակել մենյուն միայն այն ժամանակ, երբ սեղմում են մենյուից դուրս։
