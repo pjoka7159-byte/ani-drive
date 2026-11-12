@@ -1750,7 +1750,18 @@ async function checkAdminNotices(){if(!isAdmin)return;const [b,s,r]=await Promis
 async function checkStudentNotices(){if(!currentUser||isAdmin)return;const [b,s]=await Promise.all([db.from('lesson_bookings').select('id,status').eq('student_id',currentUser.id).order('created_at',{ascending:false}).limit(20),db.from('students').select('status').eq('id',currentUser.id).maybeSingle()]);if(b.error||s.error)return;const snap=(b.data||[]).map(x=>x.id+':'+x.status).join('|')+'|profile:'+s.data?.status;if(studentNoticeSnapshot&&snap!==studentNoticeSnapshot)playNotice();studentNoticeSnapshot=snap;}
 
 function show(id) {
-  if(id==='admin'&&!isAdmin){$('admin')?.classList.add('hidden');return;}
+  // Never render the administrator workspace or expose its entry point to non-admin accounts.
+  if(id==='admin'&&!isAdmin){
+    $('admin')?.classList.add('hidden');
+    $('adminBtn')?.classList.add('hidden');
+    document.body.classList.remove('admin-authenticated');
+    return;
+  }
+  if(!isAdmin){
+    $('admin')?.classList.add('hidden');
+    $('adminBtn')?.classList.add('hidden');
+    document.body.classList.remove('admin-authenticated');
+  }
   // Keep student header controls hidden while navigating any public section after login.
   const accountView = id === 'admin' || id === 'studentArea' || (!!currentUser && !isAdmin);
   document.body.classList.toggle('account-view', accountView);
@@ -1966,8 +1977,14 @@ $('forgotBtn').onclick = async () => {
 };
 
 async function loadUser() {
-  const {data:{user},error} = await db.auth.getUser();
+  // Fail closed: no account receives admin UI until its authenticated user ID
+  // is confirmed in the admins table.
+  isAdmin = false;
+  document.body.classList.remove('admin-authenticated');
+  $('adminBtn')?.classList.add('hidden');
+  $('admin')?.classList.add('hidden');
 
+  const {data:{user},error} = await db.auth.getUser();
   if (error || !user) {
     currentUser = null;
     return;
@@ -1976,22 +1993,22 @@ async function loadUser() {
   currentUser = user;
   await loadStudentAvatar();
 
-  // A registered student must always receive the student view, never the admin dashboard.
+  // Student records always take precedence over admin UI.
   const {data:studentRecord,error:studentRoleError} = await db
     .from('students')
     .select('id')
     .eq('id',user.id)
     .maybeSingle();
 
+  // Only a user explicitly registered by ID in public.admins is an administrator.
   const {data:admin,error:adminError} = await db
     .from('admins')
     .select('user_id')
     .eq('user_id',user.id)
     .maybeSingle();
 
-  isAdmin = !studentRoleError && !studentRecord && !adminError && !!admin;
+  isAdmin = !studentRoleError && !studentRecord && !adminError && admin?.user_id === user.id;
   document.body.classList.toggle('admin-authenticated',isAdmin);
-  $('admin').classList.add('hidden');
 
   $('logoutBtn').classList.remove('hidden');
   $('showAuth').classList.add('hidden');
@@ -3248,6 +3265,17 @@ body.account-view:not(.admin-authenticated) .ani-global-actions #logoutBtn {
 
 <style id="ani-account-view-isolation">
 /* Student accounts retain the complete public site; admin tools require admin authentication. */
+body:not(.admin-authenticated) #admin,
+body:not(.admin-authenticated) #adminBtn,
+body:not(.admin-authenticated) .admin-only,
+body:not(.admin-authenticated) [data-admin-only="true"] {
+  display:none!important;
+}
+body.admin-authenticated #admin:not(.hidden) { display:block!important; }
+</style>
+
+<style id="ani-admin-access-final-guard">
+/* Admin workspace and every admin-only control are visible only after admins-table verification. */
 body:not(.admin-authenticated) #admin,
 body:not(.admin-authenticated) #adminBtn,
 body:not(.admin-authenticated) .admin-only,
