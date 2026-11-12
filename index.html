@@ -1640,6 +1640,7 @@ hr,.divider{border-color:#294660!important}
 
 
 
+<section class="section public-extra-page hidden" id="trafficPage"><div class="wrap"><div class="feature-detail"><h2>🚦 ՃԱՆԱՊԱՐՀԱՅԻՆ ԿԱՆՈՆՆԵՐ</h2><p>Ուսումնասիրեք ճանապարհային նշանները, գծանշումները, լուսացույցների ազդանշանները և երթևեկության առաջնահերթության կանոնները։ Այս բաժինը նախատեսված է տեսական գիտելիքները ամրապնդելու և անվտանգ վարելու հիմքերը սովորելու համար։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
 <section class="section" id="courseSection">
 <div class="wrap">
 <h2>Մեր դասընթացները</h2>
@@ -1684,7 +1685,7 @@ hr,.divider{border-color:#294660!important}
 <div class="card student-pane" id="pane-home"><h3>👤 Իմ անձնական պրոֆիլը</h3><div class="student-avatar-editor"><img id="studentAvatarPreview" class="hidden" alt="Անձնական նկար"><label>📷 Ավելացնել / փոխել նկարը <input type="file" id="studentAvatarFile" accept="image/*"></label><button type="button" id="removeStudentAvatar" class="danger hidden">🗑️ Հեռացնել նկարը</button></div><p id="studentName"></p><p>Հայտի կարգավիճակ՝ <strong id="studentStatus"></strong></p><p id="studentInfo" class="muted"></p>
 <form id="studentProfileForm"><input required name="first_name" placeholder="Անուն"><input required name="last_name" placeholder="Ազգանուն"><select required name="gender"><option value="">Սեռը ընտրեք</option><option>Արական</option><option>Իգական</option><option>Չնշել</option></select><select required name="study_type"><option value="">Ուսուցման տեսակը ընտրեք</option><option>Տեսական</option><option>Գործնական</option><option>Տեսական և գործնական</option></select><input required name="residence" placeholder="Բնակության վայրը"><input required name="phone" type="tel" placeholder="Հեռախոսահամար"><button class="blue">Պահպանել փոփոխությունները</button></form><p id="profileMsg" class="message"></p></div>
 <div class="card student-pane hidden" id="pane-booking"><h3>🗓️ Օնլայն գրանցում — ազատ օրեր և ժամեր</h3><p class="muted">Ընտրեք կանաչով նշված ազատ օրը, ապա՝ ժամը։ Ամրագրումը կուղարկվի ադմինին հաստատման։</p><div class="calendar-shell"><div class="calendar-head"><button type="button" class="gray" id="studentCalPrev">‹</button><strong id="studentCalTitle">Օրացույց</strong><button type="button" class="gray" id="studentCalNext">›</button></div><div id="studentCalendar" class="calendar-grid"></div></div><h4>🕒 Ընտրված օրվա ազատ ժամերը</h4><div id="studentSlotChoices"></div><form id="studentBookingForm"><input type="hidden" name="slot"><button class="blue" type="submit">Ուղարկել ամրագրման հայտը</button></form><p id="studentBookingMsg" class="message"></p><h4>📌 Իմ ամրագրումները</h4><div id="studentBookings"></div></div>
-<div class="card student-pane hidden" id="pane-lessons"><h3>📚 Իմ դասերը և նյութերը</h3><div id="studentBlocks"></div></div>
+<div class="card student-pane hidden" id="pane-lessons"><h3>📚 ԻՄ ԴԱՍԱԺԱՄԵՐԸ</h3><p class="muted">Ձեր առաջիկա դասաժամերը՝ ըստ օրվա և ժամի։</p><div id="studentUpcomingLessonsList" class="student-upcoming-lessons-list"></div><div class="student-lessons-materials"><h3>📘 Ուսումնական նյութեր</h3><div id="studentBlocks"></div></div></div>
 <div class="card student-pane hidden" id="pane-mail"><h3>✉️ Նամակագրություն</h3><div id="studentMailList"></div></div>
 <div class="card student-pane hidden" id="pane-chat"><h3>💬 Օնլայն չատ — Ադմին</h3><div class="chat-box" id="studentChatBox"></div><form id="studentChatForm"><input name="chatBody" required maxlength="2000" placeholder="Գրեք հաղորդագրությունը"><button class="blue">Ուղարկել</button></form><p id="studentChatMsg" class="message"></p></div>
 <div class="card student-pane hidden" id="pane-contact"><h3>☎️ Կապ ադմինի հետ</h3><form id="studentContactForm"><input name="contactTitle" required placeholder="Թեմա"><input name="contactBody" required placeholder="Հաղորդագրություն"><button class="blue">Ուղարկել ադմինին</button></form><p id="studentContactMsg" class="message"></p></div>
@@ -2115,8 +2116,14 @@ document.querySelectorAll('.student-pane').forEach(p=>{
  bar.append(back,close);p.prepend(bar);
 });
 $('studentBookingShortcut').onclick=()=>showStudentPane('booking');
-const myLessonsBtn=document.createElement('button');myLessonsBtn.type='button';myLessonsBtn.className='student-lessons-shortcut';myLessonsBtn.textContent='📚 Իմ դասերը';myLessonsBtn.onclick=()=>showStudentPane('lessons');
-$('studentUpcomingPanel')?.insertBefore(myLessonsBtn,$('studentBookingShortcut'));
+const studentSidebar=$('studentArea')?.querySelector('.student-sidebar');
+const studentAside=$('studentUpcomingPanel');
+if(studentSidebar&&studentAside){studentSidebar.classList.remove('hidden');studentAside.append(studentSidebar);}
+const lessonsNavButton=studentSidebar?.querySelector('[data-stab="lessons"]');
+if(lessonsNavButton){lessonsNavButton.textContent='📚 ԻՄ ԴԱՍԱԺԱՄԵՐԸ';lessonsNavButton.classList.add('student-lessons-shortcut');}
+const bookingNavButton=studentSidebar?.querySelector('[data-stab="booking"]');
+if(bookingNavButton)bookingNavButton.textContent='🗓️ Օնլայն գրանցում';
+
 document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>showStudentPane(b.dataset.stab));
 let accountSwipeX=0,accountSwipeY=0;
 document.addEventListener('touchstart',e=>{const t=e.touches?.[0];if(t){accountSwipeX=t.clientX;accountSwipeY=t.clientY;}},{passive:true});
@@ -2191,6 +2198,26 @@ function renderStudentUpcoming(bookings){
  const active=(bookings||[]).filter(b=>['pending','approved'].includes(b.status)&&b.lesson_slots)
   .filter(b=>new Date(b.lesson_slots.slot_date+'T'+String(b.lesson_slots.slot_time).slice(0,5)+':00')>=now)
   .sort((a,b)=>(a.lesson_slots.slot_date+' '+a.lesson_slots.slot_time).localeCompare(b.lesson_slots.slot_date+' '+b.lesson_slots.slot_time));
+ const lessonList=$('studentUpcomingLessonsList');
+ if(lessonList){
+  lessonList.replaceChildren();
+  if(!active.length){
+   const empty=document.createElement('div');empty.className='student-lessons-empty';
+   empty.innerHTML='<span>🛣️</span><strong>Առաջիկա դասաժամեր դեռ չկան</strong><small>Ամրագրեք հարմար օրը և ժամը՝ ձեր առաջին դասը պլանավորելու համար։</small>';
+   lessonList.append(empty);
+  }else{
+   active.forEach((booking,index)=>{
+    const item=document.createElement('article');item.className='student-lesson-card';
+    const number=document.createElement('span');number.className='student-lesson-number';number.textContent=String(index+1).padStart(2,'0');
+    const info=document.createElement('div');info.className='student-lesson-info';
+    const date=document.createElement('strong');date.textContent=new Date(booking.lesson_slots.slot_date+'T12:00:00').toLocaleDateString('hy-AM',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const time=document.createElement('div');time.className='student-lesson-time';time.textContent='🕒 '+String(booking.lesson_slots.slot_time).slice(0,5);
+    const duration=document.createElement('small');duration.textContent='50 րոպե դասաժամ · 10 րոպե ընդմիջում';
+    const status=document.createElement('span');status.className='student-lesson-status '+booking.status;status.textContent=booking.status==='approved'?'✓ Հաստատված':'◷ Սպասում է հաստատման';
+    info.append(date,time,duration,status);item.append(number,info);lessonList.append(item);
+   });
+  }
+ }
  const next=active[0];
  if(next){
   const card=document.createElement('div');card.className='student-next-lesson';
@@ -3104,8 +3131,8 @@ document.querySelectorAll('#courseSection .grid .card').forEach((card,index)=>{
 
 function initPublicNavigation(){
  const nav=$('publicNav');if(!nav)return;
- const pages={home:['hero','academyTiles'],registration:['publicBookingCalendar'],traffic:['courseSection'],courses:['courseSection'],about:['aboutPage'],ani:['aniPage'],instructors:['instructorsPage'],licenses:['licensesPage'],reviews:['reviewsPage'],grounds:['groundsPage'],routes:['routesPage'],offices:['examOffices'],documents:['documentsPage'],links:['linksPage'],content:['publishedBlocks'],media:['publishedMedia']};
- const all=['hero','academyTiles','publicBookingCalendar','courseSection','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
+ const pages={home:['hero','academyTiles'],registration:['publicBookingCalendar'],traffic:['trafficPage'],courses:['courseSection'],about:['aboutPage'],ani:['aniPage'],instructors:['instructorsPage'],licenses:['licensesPage'],reviews:['reviewsPage'],grounds:['groundsPage'],routes:['routesPage'],offices:['examOffices'],documents:['documentsPage'],links:['linksPage'],content:['publishedBlocks'],media:['publishedMedia']};
+ const all=['hero','academyTiles','publicBookingCalendar','courseSection','trafficPage','weatherSection','examOffices','publishedBlocks','publishedMedia','register','auth','aboutPage','aniPage','instructorsPage','licensesPage','reviewsPage','groundsPage','routesPage','documentsPage','linksPage'];
  let currentPublicPage='home';
  function go(key){const chosen=pages[key]||pages.home;currentPublicPage=Object.prototype.hasOwnProperty.call(pages,key)?key:'home';all.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!chosen.includes(id));});$('academyDetailBar')?.classList.add('hidden');document.querySelectorAll('.section-back-home').forEach(x=>x.remove());if(currentPublicPage!=='home'){const target=$(chosen[0]);const wrap=target?.querySelector('.wrap')||target;if(wrap){const back=document.createElement('button');back.type='button';back.className='section-back-home';back.textContent='← Վերադառնալ գլխավոր էջ';back.onclick=()=>go('home');wrap.prepend(back);}}nav.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===currentPublicPage));document.body.classList.add('public-nav-active');document.body.classList.toggle('account-view',!!currentUser&&!isAdmin);if(key==='content')loadPublicBlocks();if(key==='media')loadPublicMedia();nav.classList.remove('hidden');nav.classList.add('open');document.querySelector('.fx-shell')?.classList.add('nav-is-open');window.scrollTo({top:0,behavior:'smooth'});}
  nav.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
@@ -3392,13 +3419,19 @@ body.admin-authenticated #adminBookingNoticeButton{top:104px!important;right:18p
 
 
 <style id="ani-student-booking-only">
-/* Student login opens only online registration and its calendar. */
-body.account-view:not(.admin-authenticated) #studentArea .student-sidebar,
-body.account-view:not(.admin-authenticated) #studentArea .student-pane:not(#pane-booking) {
-  display:none!important;
+/* Աշակերտի բոլոր անձնական բաժինները հասանելի են ձախ մենյուից։ */
+body.account-view:not(.admin-authenticated) #studentArea .student-sidebar {
+  display:flex!important;visibility:visible!important;opacity:1!important;
+  flex-direction:column;gap:7px;
 }
-body.account-view:not(.admin-authenticated) #studentArea #pane-booking {
-  display:block!important;
+body.account-view:not(.admin-authenticated) #studentArea .student-sidebar button {
+  display:block!important;width:100%;text-align:left;
+}
+body.account-view:not(.admin-authenticated) #studentArea .student-main .student-pane {
+  display:block;
+}
+body.account-view:not(.admin-authenticated) #studentArea .student-main .student-pane.hidden {
+  display:none!important;
 }
 </style>
 
@@ -3471,4 +3504,32 @@ body.admin-authenticated .ani-global-actions #logoutBtn {
   visibility:visible!important;
   opacity:1!important;
 }
+</style>
+
+
+<style id="ani-student-lessons-and-section-navigation">
+/* Աշակերտի ձախ մենյու և ապագա դասաժամերի քարտեր */
+#studentArea .student-layout{grid-template-columns:minmax(250px,300px) minmax(0,1fr);gap:18px;align-items:start}
+#studentArea .student-upcoming-panel{min-width:0}
+#studentArea .student-sidebar{margin-top:16px;padding:10px;background:#ffffff16;border:1px solid #ffffff35;border-radius:14px}
+#studentArea .student-sidebar button{min-height:42px;padding:10px 12px;border-radius:10px}
+#studentArea .student-sidebar button.student-lessons-shortcut{background:linear-gradient(135deg,#f4b942,#ffe39a);color:#14233b;border:1px solid #ffe6a8}
+#studentArea .student-main{min-width:0}
+#studentArea .student-pane{min-width:0}
+.student-upcoming-lessons-list{display:grid;gap:13px;margin:18px 0}
+.student-lesson-card{display:grid;grid-template-columns:52px minmax(0,1fr);gap:14px;align-items:start;padding:17px;border:1px solid #d9e6f5;border-radius:16px;background:linear-gradient(135deg,#fff,#f3f8ff 68%,#fff8e8);box-shadow:0 8px 22px #092f5b10;transition:transform .2s,box-shadow .2s}
+.student-lesson-card:hover{transform:translateY(-2px);box-shadow:0 13px 27px #092f5b18}
+.student-lesson-number{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#082c59,#1769b4);color:white;font-weight:900}
+.student-lesson-info{display:grid;gap:7px;min-width:0}
+.student-lesson-info>strong{color:#123b68;font-size:15px;line-height:1.5;text-transform:capitalize}
+.student-lesson-time{font-size:23px;font-weight:900;color:#1769b4}
+.student-lesson-info>small{color:#65748b}
+.student-lesson-status{width:max-content;max-width:100%;padding:6px 10px;border-radius:30px;font-size:12px;font-weight:800;background:#fff0c2;color:#805600}
+.student-lesson-status.approved{background:#dcfce7;color:#166534}
+.student-lessons-empty{display:grid;justify-items:center;gap:9px;text-align:center;padding:34px 18px;border:1px dashed #b9cde5;border-radius:17px;background:linear-gradient(135deg,#f4f8ff,#fff9e9);color:#123b68}
+.student-lessons-empty>span{font-size:38px}.student-lessons-empty small{max-width:390px;color:#65748b;line-height:1.6}
+.student-lessons-materials{margin-top:24px;padding-top:16px;border-top:1px solid #e1e8f1}
+.student-lessons-materials h3{color:#123b68}
+@media(max-width:850px){#studentArea .student-layout{grid-template-columns:minmax(0,1fr)}#studentArea .student-upcoming-panel{position:static}#studentArea .student-sidebar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}#studentArea .student-sidebar button{margin:0;min-width:0}}
+@media(max-width:480px){.student-lesson-card{grid-template-columns:42px minmax(0,1fr);gap:10px;padding:12px}.student-lesson-number{width:38px;height:38px}.student-lesson-time{font-size:21px}}
 </style>
