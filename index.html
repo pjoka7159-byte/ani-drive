@@ -1668,7 +1668,7 @@ hr,.divider{border-color:#294660!important}
 <section class="section public-extra-page hidden" id="linksPage"><div class="wrap"><div class="feature-detail"><h2>🔗 ԿԱՐԵՎՈՐ ԿԱՅՔԵՐԻ ՀՂՈՒՄՆԵՐ</h2><a class="card" style="display:block;max-width:420px" href="https://roadpolice.am/" target="_blank" rel="noopener noreferrer"><h3>🚔 ROADPOLICE.AM</h3><p>Ճանապարհային ոստիկանության պաշտոնական կայք</p><strong>Բացել կայքը ↗</strong></a><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
 <!-- Աշակերտի էջ -->
 <section class="section hidden" id="studentArea"><div class="wrap">
-<h2 class="account-dashboard-title">🚘 Աշակերտի անձնական վահանակ</h2><div class="student-layout">
+<h2 class="account-dashboard-title">🗓️ Օնլայն գրանցում</h2><div class="student-layout">
 <nav class="student-sidebar">
 <button class="active" data-stab="home">🚗 Գլխավոր</button><button data-stab="booking">📅 Ամրագրում</button><button data-stab="lessons">📚 Իմ դասերը</button><button data-stab="mail">✉️ Նամակագրություն</button><button data-stab="chat">💬 Օնլայն չատ</button><button data-stab="contact">☎️ Կապ ադմինի հետ</button>
 </nav><div class="student-main">
@@ -3200,6 +3200,17 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 }
 </style>
 
+
+<style id="ani-student-booking-only">
+/* Student login opens only online registration and its calendar. */
+body.account-view:not(.admin-authenticated) #studentArea .student-sidebar,
+body.account-view:not(.admin-authenticated) #studentArea .student-pane:not(#pane-booking) {
+  display:none!important;
+}
+body.account-view:not(.admin-authenticated) #studentArea #pane-booking {
+  display:block!important;
+}
+</style>
 
 <style id="ani-student-header-actions">
 /* After student login, keep only the logout action in the top header. */
