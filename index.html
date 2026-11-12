@@ -2079,9 +2079,20 @@ async function loadUser() {
     if(!window.aniStudentNoticeTimer)window.aniStudentNoticeTimer=setInterval(checkStudentNotices,20000);
 
     // After customer login, show the student workspace and keep authentication forms closed.
-    show('studentArea');
-    studentPaneHistory=[];showStudentPane('booking',false);
     document.body.classList.add('account-view','public-nav-active');
+    show('studentArea');
+    studentPaneHistory=[];
+    // Աշակերտի էջը ցուցադրելուց հետո բացել ամրագրման օրացույցը։
+    requestAnimationFrame(()=>{
+      const bookingPane=$('pane-booking');
+      if(bookingPane){
+        document.querySelectorAll('.student-pane').forEach(p=>p.classList.toggle('hidden',p!==bookingPane));
+        currentStudentPane='booking';
+        document.querySelectorAll('[data-stab]').forEach(b=>b.classList.toggle('active',b.dataset.stab==='booking'));
+        loadStudentSlots();
+        loadStudentBookings();
+      }
+    });
     const publicNav=$('publicNav');
     if(publicNav){
       publicNav.classList.remove('hidden');
@@ -2116,6 +2127,8 @@ document.querySelectorAll('.student-pane').forEach(p=>{
  bar.append(back,close);p.prepend(bar);
 });
 $('studentBookingShortcut').onclick=()=>showStudentPane('booking');
+const studentBookingMenuButton=$('studentArea')?.querySelector('[data-stab="booking"]');
+if(studentBookingMenuButton)studentBookingMenuButton.onclick=()=>showStudentPane('booking');
 const studentSidebar=$('studentArea')?.querySelector('.student-sidebar');
 const studentAside=$('studentUpcomingPanel');
 if(studentSidebar&&studentAside){studentSidebar.classList.remove('hidden');studentAside.append(studentSidebar);}
@@ -3584,5 +3597,15 @@ body.account-view:not(.admin-authenticated) #studentArea .student-main{
  body.account-view:not(.admin-authenticated) #studentArea .student-sidebar button{
   width:100%!important;justify-content:center!important;text-align:center!important;
  }
+}
+</style>
+
+<style id="ani-student-booking-calendar-visibility-fix">
+body.account-view:not(.admin-authenticated) #studentArea #pane-booking:not(.hidden){
+ display:block!important;visibility:visible!important;opacity:1!important;
+}
+body.account-view:not(.admin-authenticated) #studentArea #pane-booking .calendar-shell,
+body.account-view:not(.admin-authenticated) #studentArea #pane-booking #studentCalendar{
+ display:grid!important;visibility:visible!important;opacity:1!important;
 }
 </style>
