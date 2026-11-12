@@ -1751,7 +1751,8 @@ async function checkStudentNotices(){if(!currentUser||isAdmin)return;const [b,s]
 
 function show(id) {
   if(id==='admin'&&!isAdmin){$('admin')?.classList.add('hidden');return;}
-  const accountView = id === 'admin' || id === 'studentArea';
+  // Keep student header controls hidden while navigating any public section after login.
+  const accountView = id === 'admin' || id === 'studentArea' || (!!currentUser && !isAdmin);
   document.body.classList.toggle('account-view', accountView);
   const sideNav = $('publicNav');
   if (sideNav) {
@@ -2099,6 +2100,19 @@ async function cancelBooking(id,role){
 }
 $('studentBookingForm').onsubmit=async e=>{
  e.preventDefault();const slot_id=e.target.elements.slot.value;if(!slot_id){message('studentBookingMsg','Նախ ընտրեք ազատ օրը և ժամը։',true);return;}const chosen=studentAvailableSlots.find(x=>x.id===slot_id);if(!chosen||!chosen.is_available){message('studentBookingMsg','Այս ժամը զբաղված է։ Նոր ամրագրումը հնարավոր է միայն կանաչ՝ ազատ ժամի համար։ Փոփոխության հայտ ուղարկեք արդեն գրանցված դասաժամի կողքի ընտրացանկից։',true);return;}
+ // A student may have at most two consecutive lessons on the same day.
+ const {data:existingBookings,error:existingError}=await db.from('lesson_bookings')
+  .select('status,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time)')
+  .eq('student_id',currentUser.id).is('archived_at',null).in('status',['pending','approved']);
+ if(existingError){message('studentBookingMsg','Չհաջողվեց ստուգել Ձեր առկա ամրագրումները։ '+existingError.message,true);return;}
+ const toMinutes=value=>{const parts=String(value||'').slice(0,5).split(':').map(Number);return parts.length===2?parts[0]*60+parts[1]:NaN;};
+ const selectedMinute=toMinutes(chosen.slot_time);
+ const sameDayStarts=(existingBookings||[]).filter(b=>b.lesson_slots?.slot_date===chosen.slot_date)
+  .map(b=>toMinutes(b.lesson_slots.slot_time)).filter(Number.isFinite);
+ const allStarts=[...new Set([...sameDayStarts,selectedMinute])].sort((a,b)=>a-b);
+ let run=0,previous=null,selectedRunLength=0;
+ for(const minute of allStarts){run=previous!==null&&minute-previous===60?run+1:1;if(minute===selectedMinute)selectedRunLength=run;previous=minute;}
+ if(selectedRunLength>=3){message('studentBookingMsg','Չի թույլատրվում նույն օրը ամրագրել իրար հաջորդող երեք կամ ավելի դասաժամ։ Կարող եք ամրագրել առավելագույնը երկու իրար հաջորդող դասաժամ։',true);return;}
  const {data:s}=await db.from('students').select('first_name,last_name,email,phone').eq('id',currentUser.id).maybeSingle();
  if(!s){message('studentBookingMsg','Աշակերտի տվյալները չգտնվեցին։',true);return;}
  const {error}=await db.from('lesson_bookings').insert({slot_id,student_id:currentUser.id,student_name:s.first_name+' '+s.last_name,student_email:s.email,student_phone:s.phone,status:'pending'});
