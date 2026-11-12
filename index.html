@@ -3414,3 +3414,17 @@ body.admin-authenticated #admin:not(.hidden) { display:block!important; }
 <style id="ani-admin-booking-notice-style">
 .admin-booking-notice-button{position:fixed;right:18px;top:18px;z-index:210000;background:linear-gradient(135deg,#f4b942,#ffe39a);color:#14233b;border:2px solid #fff;box-shadow:0 8px 24px #0004;border-radius:30px;padding:12px 18px;font-weight:900}
 </style>
+
+<!-- ANI DRIVE: authenticated admin header actions -->
+<style id="ani-admin-header-actions-final">
+/* Ադմինի մուտքից հետո վերևում թողնել միայն Ադմին և Ելք կոճակները։ */
+body.admin-authenticated .ani-global-actions > :not(#adminBtn):not(#logoutBtn) {
+  display:none!important;
+}
+body.admin-authenticated .ani-global-actions #adminBtn,
+body.admin-authenticated .ani-global-actions #logoutBtn {
+  display:inline-flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+</style>
