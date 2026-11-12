@@ -2777,10 +2777,10 @@ async function loadPublicBlocks(){
   const title=document.createElement('h3');title.textContent=row.label;const hint=document.createElement('p');hint.textContent='Սեղմեք՝ մանրամասները բացելու համար ↗';card.append(icon,title,hint);grid.append(card);
   card.onclick=()=>{inner.replaceChildren();const detail=document.createElement('div');detail.className='feature-detail';const h=document.createElement('h2');h.textContent=icon.textContent+' '+row.label;detail.append(h);
    if(row.content_type==='image'){const img=document.createElement('img');img.src=row.content_value;img.alt=row.label;img.loading='lazy';img.style.maxWidth='100%';img.style.borderRadius='14px';detail.append(img);}
- drawGallery(detail,(window.aniGalleries||{})[row.content_key]||[]);
    else if(row.content_type==='video'){const v=document.createElement('video');v.src=row.content_value;v.controls=true;v.preload='metadata';v.style.width='100%';detail.append(v);}
    else if(row.content_type==='link'){const a=document.createElement('a');a.href=row.content_value;a.target='_blank';a.rel='noopener noreferrer';a.textContent='Բացել հղումը';detail.append(a);}
    else{const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=row.content_value;detail.append(p);}
+   drawGallery(detail,(window.aniGalleries||{})[row.content_key]||[]);
    const back=document.createElement('button');back.type='button';back.className='feature-back';back.textContent='← Վերադառնալ բաժինների ցանկին';back.onclick=loadPublicBlocks;detail.append(back);inner.append(detail);window.scrollTo({top:section.offsetTop,behavior:'smooth'});};
  });
 }
