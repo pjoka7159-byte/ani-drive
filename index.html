@@ -3200,4 +3200,12 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 }
 </style>
 
+
+<style id="ani-account-view-isolation">
+/* When an account is open, show only its workspace instead of the public homepage. */
+body.account-view .fx-main > :not(#admin):not(#studentArea) {
+  display:none!important;
+}
+</style>
+
 <!-- Trigger fresh Vercel production deployment from the verified design-6 main branch. -->
