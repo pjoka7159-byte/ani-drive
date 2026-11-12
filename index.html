@@ -3352,9 +3352,17 @@ body.account-view #auth,body.account-view #register{display:none!important}
 </style>
 
 <style id="ani-admin-notice-button-position-fix">
-/* Ծանուցման կոճակը իջեցված է, որպեսզի չծածկի ադմինի բաժինների վահանակը։ */
-body.admin-authenticated #adminBookingNoticeButton{top:104px!important;right:18px!important;z-index:1200!important}
-@media(max-width:850px){body.admin-authenticated #adminBookingNoticeButton{top:82px!important;right:10px!important;padding:9px 13px!important;font-size:12px!important}}
+/* Նոր ամրագրումների ծանուցումը տեղափոխված է ձախ եզր՝ ԲԱԺԻՆՆԵՐ կոճակից ներքև։ */
+body.admin-authenticated #adminBookingNoticeButton{
+ position:fixed!important;left:12px!important;right:auto!important;top:145px!important;
+ z-index:1200!important;max-width:calc(100vw - 24px);white-space:normal;
+}
+@media(max-width:850px){
+ body.admin-authenticated #adminBookingNoticeButton{
+  left:10px!important;right:auto!important;top:140px!important;
+  padding:9px 13px!important;font-size:12px!important;
+ }
+}
 </style>
 </body>
 </html>
