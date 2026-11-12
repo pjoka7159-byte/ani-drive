@@ -2891,10 +2891,24 @@ $('mediaForm').onsubmit=async e=>{
 };
 async function loadAdminAccounts(){
  const box=$('adminsList');if(!box)return;
- const {data,error}=await db.from('admins').select('email,user_id');
- if(error){box.textContent='Ադմինների ցանկը բեռնել չհաջողվեց։ '+error.message;return;}
+ box.textContent='Ադմինների ցանկը բեռնվում է…';
+ // The admins table is keyed by user_id; do not require an optional email column
+ // that may not exist in older Supabase schemas.
+ const {data,error}=await db.from('admins').select('user_id');
+ if(error){
+  box.textContent='Ադմինների ցանկը բեռնել չհաջողվեց։ '+error.message+' Եթե մուտքը թույլատրված է, ստուգեք admins աղյուսակի SELECT RLS քաղաքականությունը։';
+  return;
+ }
  box.replaceChildren();
- (data||[]).forEach(a=>{const p=document.createElement('p');p.textContent=(a.email||a.user_id)+' — Ակտիվ ադմին';box.append(p);});
+ if(!data||!data.length){
+  box.textContent='Ադմինների ցանկը դատարկ է։';
+  return;
+ }
+ data.forEach((a,index)=>{
+  const p=document.createElement('p');
+  p.textContent=(index+1)+'. '+a.user_id+' — Ակտիվ ադմին';
+  box.append(p);
+ });
 }
 async function readSwitch(key,defaultValue){
  const {data}=await db.from('site_content').select('content_value').eq('content_key',key).maybeSingle();
