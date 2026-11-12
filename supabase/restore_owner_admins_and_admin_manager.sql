@@ -4,6 +4,13 @@
 alter table public.admins
   add column if not exists email text;
 
+-- Fill email values for owner rows that may already exist.
+update public.admins a
+set email = lower(u.email)
+from auth.users u
+where a.user_id = u.id
+  and lower(u.email) in ('pjoka7519@gmail.com', 'graergrigoryan1986@gmail.com');
+
 -- Ensure the two original owner accounts are present in public.admins.
 insert into public.admins (user_id, email)
 select u.id, lower(u.email)
