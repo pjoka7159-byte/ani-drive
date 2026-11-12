@@ -1558,9 +1558,16 @@ hr,.divider{border-color:#294660!important}
 </div>
 <p class="muted">Կարգավորումները պահպանվում են կայքի բովանդակության բաժնում։</p>
 </div>
-<div class="panel admin-tool-panel">
-<h3>Ադմինների ցանկ</h3>
-<p class="muted">Երկու հաստատված ադմինների հաշիվները կառավարվում են Supabase Auth-ից և admins աղյուսակից։</p>
+<div class="panel admin-tool-panel hidden" id="rootAdminManager">
+<h3>Ադմինների կառավարում</h3>
+<p class="muted">Այս բաժինը հասանելի է միայն գլխավոր ադմիններին։ Նոր օգտատերը նախ պետք է գրանցված լինի կայքում։ Մուտքագրեք նրա Supabase Auth User ID-ն և գրանցված էլ․ փոստը։</p>
+<form id="addAdminForm">
+<input name="adminEmail" type="email" required placeholder="Նոր ադմինի էլ․ փոստը">
+<input name="adminUserId" required placeholder="Supabase Auth User UID (UUID)">
+<button class="blue" type="submit">➕ Ավելացնել նոր ադմին</button>
+</form>
+<p id="addAdminMsg" class="message"></p>
+<h4>Գործող ադմինների ցանկ</h4>
 <div id="adminsList">Բեռնում...</div>
 </div>
 <div class="panel admin-tool-panel">
@@ -1743,6 +1750,8 @@ const db = window.supabase.createClient(
 
 let currentUser = null;
 let isAdmin = false;
+let isRootAdmin = false;
+const ROOT_ADMIN_EMAILS = ['pjoka7519@gmail.com','graergrigoryan1986@gmail.com'];
 let students = [];
 let currentFilter = 'all';
 const autoArchiveTimers = new Map();
@@ -1993,6 +2002,7 @@ async function loadUser() {
   }
 
   currentUser = user;
+  isRootAdmin = ROOT_ADMIN_EMAILS.includes(String(user.email||'').toLowerCase());
   await loadStudentAvatar();
 
   // Student records always take precedence over admin UI.
@@ -2010,7 +2020,8 @@ async function loadUser() {
     .eq('user_id',user.id)
     .maybeSingle();
 
-  isAdmin = !studentRoleError && !studentRecord && !adminError && admin?.user_id === user.id;
+  // The two original owner accounts remain administrators even if they also have student rows.
+  isAdmin = isRootAdmin || (!studentRoleError && !studentRecord && !adminError && admin?.user_id === user.id);
   document.body.classList.toggle('admin-authenticated',isAdmin);
 
   $('logoutBtn').classList.remove('hidden');
@@ -2679,7 +2690,9 @@ async function updateStatus(id,status) {
 async function loadContentTools(){
  if(!isAdmin)return;
  await loadMediaFiles();
- await loadAdminAccounts();
+ const rootAdminPanel=$('rootAdminManager');
+ if(rootAdminPanel)rootAdminPanel.classList.toggle('hidden',!isRootAdmin);
+ if(isRootAdmin)await loadAdminAccounts();
  await loadSiteSwitches();
  initAdminToolTiles();
  await loadPublicAccessSettings();
@@ -2893,26 +2906,32 @@ $('mediaForm').onsubmit=async e=>{
  finally{btn.disabled=false;}
 };
 async function loadAdminAccounts(){
- const box=$('adminsList');if(!box)return;
+ const box=$('adminsList');if(!box||!isRootAdmin)return;
  box.textContent='Ադմինների ցանկը բեռնվում է…';
- // The admins table is keyed by user_id; do not require an optional email column
- // that may not exist in older Supabase schemas.
- const {data,error}=await db.from('admins').select('user_id');
- if(error){
-  box.textContent='Ադմինների ցանկը բեռնել չհաջողվեց։ '+error.message+' Եթե մուտքը թույլատրված է, ստուգեք admins աղյուսակի SELECT RLS քաղաքականությունը։';
-  return;
- }
+ const {data,error}=await db.from('admins').select('user_id,email').order('email');
+ if(error){box.textContent='Ադմինների ցանկը բեռնել չհաջողվեց։ '+error.message;return;}
  box.replaceChildren();
- if(!data||!data.length){
-  box.textContent='Ադմինների ցանկը դատարկ է։';
-  return;
- }
+ if(!data||!data.length){box.textContent='Ադմինների ցանկը դատարկ է։';return;}
  data.forEach((a,index)=>{
   const p=document.createElement('p');
-  p.textContent=(index+1)+'. '+a.user_id+' — Ակտիվ ադմին';
+  p.textContent=(index+1)+'. '+(a.email||'Էլ․ փոստը նշված չէ')+' — '+a.user_id;
   box.append(p);
  });
 }
+$('addAdminForm')?.addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!isRootAdmin){message('addAdminMsg','Այս գործողությունը հասանելի է միայն գլխավոր ադմիններին։',true);return;}
+ const email=e.target.elements.adminEmail.value.trim().toLowerCase();
+ const userId=e.target.elements.adminUserId.value.trim();
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId)){
+  message('addAdminMsg','Մուտքագրեք ճիշտ Supabase Auth User UID (UUID)։',true);return;
+ }
+ if(ROOT_ADMIN_EMAILS.includes(email)){message('addAdminMsg','Այս էլ․ փոստն արդեն գլխավոր ադմին է։',true);return;}
+ const {error}=await db.from('admins').upsert({user_id:userId,email},{onConflict:'user_id'});
+ if(error){message('addAdminMsg','Ադմին ավելացնել չհաջողվեց։ '+error.message,true);return;}
+ message('addAdminMsg','Նոր ադմինը հաջողությամբ ավելացվեց։');
+ e.target.reset();await loadAdminAccounts();
+});
 async function readSwitch(key,defaultValue){
  const {data}=await db.from('site_content').select('content_value').eq('content_key',key).maybeSingle();
  return data?data.content_value!=='false':defaultValue;
