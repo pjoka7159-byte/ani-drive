@@ -1791,6 +1791,8 @@ async function checkAdminNotices(){
 async function checkStudentNotices(){if(!currentUser||isAdmin)return;const [b,s]=await Promise.all([db.from('lesson_bookings').select('id,status').eq('student_id',currentUser.id).order('created_at',{ascending:false}).limit(20),db.from('students').select('status').eq('id',currentUser.id).maybeSingle()]);if(b.error||s.error)return;const snap=(b.data||[]).map(x=>x.id+':'+x.status).join('|')+'|profile:'+s.data?.status;if(studentNoticeSnapshot&&snap!==studentNoticeSnapshot)playNotice();studentNoticeSnapshot=snap;}
 
 function show(id) {
+  // A signed-in account must never reopen login or registration forms.
+  if(currentUser&&(id==='auth'||id==='register'))id=isAdmin?'admin':'studentArea';
   // Never render the administrator workspace or expose its entry point to non-admin accounts.
   if(id==='admin'&&!isAdmin){
     $('admin')?.classList.add('hidden');
@@ -2075,7 +2077,9 @@ async function loadUser() {
     await checkStudentNotices();
     if(!window.aniStudentNoticeTimer)window.aniStudentNoticeTimer=setInterval(checkStudentNotices,20000);
 
-    // After customer login, automatically expand the complete public sections menu.
+    // After customer login, show the student workspace and keep authentication forms closed.
+    show('studentArea');
+    studentPaneHistory=[];showStudentPane('booking',false);
     document.body.classList.add('account-view','public-nav-active');
     const publicNav=$('publicNav');
     if(publicNav){
@@ -2090,14 +2094,33 @@ async function loadUser() {
   }
 }
 
-$('studentBookingShortcut').onclick=()=>{document.querySelector('[data-stab=booking]')?.click();};
-document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>{
- document.querySelectorAll('.student-pane').forEach(p=>p.classList.add('hidden'));
- $('pane-'+b.dataset.stab).classList.remove('hidden');
- document.querySelectorAll('[data-stab]').forEach(x=>x.classList.toggle('active',x===b));
- if(b.dataset.stab==='chat'||b.dataset.stab==='mail')loadStudentMessages();
- if(b.dataset.stab==='booking'){loadStudentSlots();loadStudentBookings();}
+let studentPaneHistory=[];
+let currentStudentPane='home';
+function showStudentPane(key,remember=true){
+ const target=$('pane-'+key);if(!target)return;
+ if(remember&&currentStudentPane!==key)studentPaneHistory.push(currentStudentPane);
+ currentStudentPane=key;
+ document.querySelectorAll('.student-pane').forEach(p=>p.classList.toggle('hidden',p!==target));
+ document.querySelectorAll('[data-stab]').forEach(x=>x.classList.toggle('active',x.dataset.stab===key));
+ if(key==='chat'||key==='mail')loadStudentMessages();
+ if(key==='booking'){loadStudentSlots();loadStudentBookings();}
+ window.scrollTo({top:0,left:0,behavior:'smooth'});
+}
+function backStudentPane(){showStudentPane(studentPaneHistory.pop()||'home',false);}
+document.querySelectorAll('.student-pane').forEach(p=>{
+ if(p.querySelector('.student-pane-nav'))return;
+ const bar=document.createElement('div');bar.className='student-pane-nav';
+ const back=document.createElement('button');back.type='button';back.className='gray';back.textContent='← Նախորդ էջ';back.onclick=backStudentPane;
+ const close=document.createElement('button');close.type='button';close.className='gray';close.textContent='✕ Փակել';close.onclick=backStudentPane;
+ bar.append(back,close);p.prepend(bar);
 });
+$('studentBookingShortcut').onclick=()=>showStudentPane('booking');
+const myLessonsBtn=document.createElement('button');myLessonsBtn.type='button';myLessonsBtn.className='student-lessons-shortcut';myLessonsBtn.textContent='📚 Իմ դասերը';myLessonsBtn.onclick=()=>showStudentPane('lessons');
+$('studentUpcomingPanel')?.insertBefore(myLessonsBtn,$('studentBookingShortcut'));
+document.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>showStudentPane(b.dataset.stab));
+let accountSwipeX=0,accountSwipeY=0;
+document.addEventListener('touchstart',e=>{const t=e.touches?.[0];if(t){accountSwipeX=t.clientX;accountSwipeY=t.clientY;}},{passive:true});
+document.addEventListener('touchend',e=>{const t=e.changedTouches?.[0];if(!t)return;const dx=t.clientX-accountSwipeX,dy=t.clientY-accountSwipeY;if(dx>95&&Math.abs(dx)>Math.abs(dy)*1.35){if(document.body.classList.contains('account-view')&&!isAdmin&&currentStudentPane!=='home'&&!$('studentArea').classList.contains('hidden'))backStudentPane();else if(document.body.classList.contains('admin-authenticated')&&window.currentAdminWorkspace)closeAdminWorkspace();}},{passive:true});
 $('studentProfileForm').onsubmit=async e=>{
  e.preventDefault();const f=new FormData(e.target);
  const payload={first_name:String(f.get('first_name')).trim(),last_name:String(f.get('last_name')).trim(),gender:String(f.get('gender')),study_type:String(f.get('study_type')),residence:String(f.get('residence')).trim(),phone:String(f.get('phone')).trim()};
@@ -2626,9 +2649,15 @@ async function loadRegisteredStudents(){
  rows.forEach(st=>{const item=document.createElement('div');item.className='admin-item';const h=document.createElement('strong');h.textContent='👤 '+st.first_name+' '+st.last_name;const p=document.createElement('p');p.textContent='☎️ '+(st.phone||'—')+' · '+(st.email||'—');const d=document.createElement('p');d.textContent='Էլ․ փոստ՝ '+(st.email||'—')+' · Տարիք՝ '+(st.age||'—')+' · Սեռ՝ '+(st.gender||'—')+' · Ուսուցման տեսակ՝ '+(st.study_type||'—')+' · Բնակավայր՝ '+(st.residence||'—')+' · Քննական բաժին՝ '+(st.exam_location||'—')+' · Կարգավիճակ՝ '+(st.status||'—');const b=document.createElement('button');b.className=registeredListMode==='archived'?'good':'gray';b.textContent=registeredListMode==='archived'?'Վերականգնել':'Արխիվացնել';b.onclick=async()=>{if(!confirm('Շարունակե՞լ։'))return;const {error}=await db.from('students').update({archived_at:registeredListMode==='archived'?null:new Date().toISOString()}).eq('id',st.id);if(error){message('adminMsg',error.message,true);return;}loadRegisteredStudents();};item.append(h,p,d,b);box.append(item);});
 }
 $('openRegisteredStudents').onclick=()=>showAdminWorkspace('students');
+let currentAdminWorkspace='';
+window.currentAdminWorkspace='';
+const adminWorkspaceIds={booking:'adminBookingSection',bookings:'adminExistingBookingsPanel',students:'registeredStudentsSection',applications:'adminApplicationsPanel',chat:'adminChatPanel'};
+function closeAdminWorkspace(){Object.values(adminWorkspaceIds).forEach(id=>$(id)?.classList.add('hidden'));currentAdminWorkspace='';window.currentAdminWorkspace='';}
 function showAdminWorkspace(key){
- const ids={booking:'adminBookingSection',bookings:'adminExistingBookingsPanel',students:'registeredStudentsSection',applications:'adminApplicationsPanel',chat:'adminChatPanel'};
+ const ids=adminWorkspaceIds;currentAdminWorkspace=key;window.currentAdminWorkspace=key;
  Object.entries(ids).forEach(([k,id])=>$(id)?.classList.toggle('hidden',k!==key));
+ const activePanel=$(ids[key]);
+ if(activePanel&&!activePanel.querySelector('.admin-section-nav')){const bar=document.createElement('div');bar.className='admin-section-nav';const back=document.createElement('button');back.type='button';back.className='gray';back.textContent='← Նախորդ էջ';back.onclick=closeAdminWorkspace;const close=document.createElement('button');close.type='button';close.className='gray';close.textContent='✕ Փակել';close.onclick=closeAdminWorkspace;bar.append(back,close);activePanel.prepend(bar);}
  document.querySelectorAll('[data-admin-jump]').forEach(b=>b.classList.toggle('active',b.dataset.adminJump===key));
  if(key==='booking'){const form=$('adminBookingForm');form?.reset();const fields=$('adminBookingFields');if(fields)fields.disabled=true;const info=$('adminSelectedSlotInfo');if(info){info.textContent='Նախ ընտրեք օրացույցի կանաչ օրը, ապա՝ ազատ ժամը։ Դրանից հետո կակտիվանան գրանցման դաշտերը։';info.classList.remove('selected');}loadAdminBookingPanel();}
  if(key==='bookings')loadAdminBookingPanel();
@@ -3285,7 +3314,16 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 #adminBookingSection #adminBookingFields:disabled input,#adminBookingSection #adminBookingFields:disabled select{cursor:not-allowed;background:#edf1f6}
 #adminBookingSection #adminBookingFields:disabled button{cursor:not-allowed}
 #adminBookingSection #adminBookingFields:not(:disabled){opacity:1;filter:none}
-@media(max-width:900px){#adminBookingSection .admin-booking-layout{grid-template-columns:minmax(0,1fr)}#adminBookingSection .admin-booking-calendar-pane .admin-calendar .calendar-day{min-height:42px}}</style></body>
+@media(max-width:900px){#adminBookingSection .admin-booking-layout{grid-template-columns:minmax(0,1fr)}#adminBookingSection .admin-booking-calendar-pane .admin-calendar .calendar-day{min-height:42px}}</style>
+<style id="ani-account-section-navigation">
+body.account-view #auth,body.account-view #register{display:none!important}
+.student-pane-nav,.admin-section-nav{display:flex;justify-content:space-between;gap:8px;align-items:center;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid #dce6f4}
+.student-pane-nav button,.admin-section-nav button{padding:8px 12px;font-size:12px;border-radius:9px}
+.student-lessons-shortcut{width:100%;margin:10px 0 0;padding:12px 14px;border:1px solid #ffffff65;border-radius:11px;background:linear-gradient(135deg,#eaf3ff,#fff);color:#123b68;font-weight:850;text-align:left;cursor:pointer}
+.student-lessons-shortcut:hover{background:linear-gradient(135deg,#f4b942,#ffe39a)}
+@media(max-width:850px){.student-pane-nav,.admin-section-nav{position:sticky;top:4px;z-index:20;background:inherit}}
+</style>
+</body>
 </html>
 <style>
 /* Զբաղված ժամերը տեսանելի են կարմիրով բոլոր օրացույցներում */
