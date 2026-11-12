@@ -1205,6 +1205,17 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 /* The public booking calendar is redundant and takes space above private dashboards. */
 body.account-view #publicBookingCalendar{display:none!important;}
 </style>
+
+<style id="ani-drive-auth-buttons-visibility-fix">
+/* Keep public login and registration controls visible above the hero/calendar */
+header{display:block!important;position:relative!important;z-index:10050!important;visibility:visible!important;opacity:1!important}
+header .bar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;flex-wrap:wrap!important}
+header .bar>.row{display:flex!important;visibility:visible!important;opacity:1!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;flex-wrap:wrap!important;margin-left:auto!important}
+header #showAuth,header #showRegister{display:inline-flex!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:10060!important;min-height:40px!important;align-items:center!important;justify-content:center!important}
+header #showAuth{background:#fff!important;color:#12365b!important;border:2px solid #f2bd52!important;font-weight:900!important}
+header #showRegister{background:#1769c2!important;color:#fff!important;border:1px solid #fff!important}
+@media(max-width:650px){header .bar{justify-content:center!important}header .bar>.row{width:100%!important;justify-content:center!important}header #showAuth,header #showRegister{flex:1 1 110px!important}}
+</style>
 </head>
 
 <body>
