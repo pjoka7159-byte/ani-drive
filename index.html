@@ -1757,7 +1757,36 @@ let currentFilter = 'all';
 const autoArchiveTimers = new Map();
 let adminNoticeSnapshot=null,studentNoticeSnapshot='';
 function playNotice(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const c=new AC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.setValueAtTime(.001,c.currentTime);g.gain.exponentialRampToValueAtTime(.13,c.currentTime+.04);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.38);o.start();o.stop(c.currentTime+.4);o.onended=()=>c.close();}catch(e){}}
-async function checkAdminNotices(){if(!isAdmin)return;const [b,s,r]=await Promise.all([db.from('lesson_bookings').select('id',{count:'exact',head:true}).eq('status','pending').is('archived_at',null),db.from('students').select('id',{count:'exact',head:true}).eq('status','pending'),db.from('lesson_bookings').select('id',{count:'exact',head:true}).not('requested_slot_id','is',null).is('archived_at',null)]);if(b.error||s.error||r.error)return;const snap=(b.count||0)+':'+(s.count||0)+':'+(r.count||0);if(adminNoticeSnapshot!==null&&snap!==adminNoticeSnapshot)playNotice();adminNoticeSnapshot=snap;}
+function renderAdminBookingNotice(count){
+ let btn=$('adminBookingNoticeButton');
+ if(!btn){btn=document.createElement('button');btn.id='adminBookingNoticeButton';btn.type='button';btn.className='admin-booking-notice-button';btn.onclick=openLatestPendingBooking;document.body.append(btn);}
+ btn.textContent='🔔 Նոր ամրագրում՝ '+count;btn.classList.toggle('hidden',!isAdmin||!count);
+}
+function ensureNewBookingNoticeModal(){
+ let modal=$('adminNewBookingNotice');if(modal)return modal;
+ modal=document.createElement('div');modal.id='adminNewBookingNotice';modal.className='admin-booking-modal';
+ modal.innerHTML='<div class="admin-booking-modal-card" role="dialog" aria-modal="true"><div class="row"><h3 style="margin:0 auto 0 0">🔔 Նոր ամրագրում</h3><button type="button" class="gray" id="closeNewBookingNotice">Փակել ✕</button></div><div id="newBookingNoticeDetails"></div></div>';
+ document.body.append(modal);$('closeNewBookingNotice').onclick=()=>modal.classList.remove('open');modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open');});return modal;
+}
+async function openLatestPendingBooking(){
+ const {data,error}=await db.from('lesson_bookings').select('*,lesson_slots:lesson_slots!lesson_bookings_slot_id_fkey(slot_date,slot_time)').eq('status','pending').is('archived_at',null).order('created_at',{ascending:false}).limit(1).maybeSingle();
+ if(error||!data){alert('Սպասման մեջ գտնվող ամրագրում չի գտնվել։');return;}
+ const modal=ensureNewBookingNoticeModal(),box=$('newBookingNoticeDetails');box.replaceChildren();
+ const title=document.createElement('h3');title.textContent='👤 '+(data.student_name||'Աշակերտ');box.append(title);
+ const contact=document.createElement('p');contact.textContent='📞 '+(data.student_phone||'—')+' · ✉️ '+(data.student_email||'—');box.append(contact);
+ const lesson=document.createElement('p');lesson.textContent='📅 '+(data.lesson_slots?slotLabel(data.lesson_slots):'Դասաժամը նշված չէ');box.append(lesson);
+ const state=document.createElement('p');state.textContent='Կարգավիճակ՝ Սպասման մեջ';box.append(state);
+ const open=document.createElement('button');open.type='button';open.className='blue';open.textContent='Բացել ամրագրումների ցանկը';open.onclick=()=>{modal.classList.remove('open');$('adminBookings')?.scrollIntoView({behavior:'smooth',block:'start'});};box.append(open);
+ modal.classList.add('open');
+}
+async function checkAdminNotices(){
+ if(!isAdmin){$('adminBookingNoticeButton')?.classList.add('hidden');return;}
+ const [b,s,r]=await Promise.all([db.from('lesson_bookings').select('id',{count:'exact',head:true}).eq('status','pending').is('archived_at',null),db.from('students').select('id',{count:'exact',head:true}).eq('status','pending'),db.from('lesson_bookings').select('id',{count:'exact',head:true}).not('requested_slot_id','is',null).is('archived_at',null)]);
+ if(b.error||s.error||r.error)return;
+ const count=b.count||0,snap=count+':'+(s.count||0)+':'+(r.count||0);
+ if(adminNoticeSnapshot!==null&&snap!==adminNoticeSnapshot)playNotice();
+ adminNoticeSnapshot=snap;renderAdminBookingNotice(count);
+}
 async function checkStudentNotices(){if(!currentUser||isAdmin)return;const [b,s]=await Promise.all([db.from('lesson_bookings').select('id,status').eq('student_id',currentUser.id).order('created_at',{ascending:false}).limit(20),db.from('students').select('status').eq('id',currentUser.id).maybeSingle()]);if(b.error||s.error)return;const snap=(b.data||[]).map(x=>x.id+':'+x.status).join('|')+'|profile:'+s.data?.status;if(studentNoticeSnapshot&&snap!==studentNoticeSnapshot)playNotice();studentNoticeSnapshot=snap;}
 
 function show(id) {
@@ -3376,4 +3405,8 @@ body.admin-authenticated #admin:not(.hidden) { display:block!important; }
 .section-back-home{display:block;margin:0 0 16px;padding:10px 15px;border-radius:10px;background:#071a36;color:#fff;font-weight:800}
 .admin-booking-notice-button{position:fixed;right:18px;top:18px;z-index:210000;background:linear-gradient(135deg,#f4b942,#ffe39a);color:#14233b;border:2px solid #fff;box-shadow:0 8px 24px #0004;border-radius:30px;padding:12px 18px;font-weight:900}
 @media(max-width:850px){#studentArea .student-layout{grid-template-columns:1fr}#studentArea .student-upcoming-panel{position:static}}
+</style>
+
+<style id="ani-admin-booking-notice-style">
+.admin-booking-notice-button{position:fixed;right:18px;top:18px;z-index:210000;background:linear-gradient(135deg,#f4b942,#ffe39a);color:#14233b;border:2px solid #fff;box-shadow:0 8px 24px #0004;border-radius:30px;padding:12px 18px;font-weight:900}
 </style>
