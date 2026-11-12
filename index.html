@@ -1679,13 +1679,13 @@ hr,.divider{border-color:#294660!important}
 <!-- Աշակերտի էջ -->
 <section class="section hidden" id="studentArea"><div class="wrap">
 <h2 class="account-dashboard-title">🗓️ Օնլայն գրանցում</h2><div class="student-layout">
-<aside class="student-upcoming-panel" id="studentUpcomingPanel"><div class="student-upcoming-heading"><span>🚘</span><div><h3>Իմ առաջիկա դասերը</h3><small>Մոտակա դասաժամը՝ առաջինը</small></div></div><div id="studentUpcomingContent"></div><div class="student-notice-heading">🔔 Ծանուցումներ</div><div id="studentNoticePanel" class="student-notice-list">Նոր ծանուցումներ չկան։</div><button type="button" class="blue student-booking-shortcut" id="studentBookingShortcut">＋ Ամրագրել դասաժամ</button></aside><nav class="student-sidebar hidden">
+<aside class="student-upcoming-panel" id="studentUpcomingPanel"><div class="student-upcoming-heading"><span>📚</span><div><h3>ԻՄ ԴԱՍԱԺԱՄԵՐԸ</h3><small>Ձեր մոտակա դասաժամերը՝ ըստ օրվա և ժամի</small></div></div><div id="studentUpcomingLessonsList" class="student-upcoming-lessons-list"></div><div class="student-next-lesson-wrap"><div class="student-next-label">⭐ ՀԱՋՈՐԴ ԴԱՍԱԺԱՄԸ</div><div id="studentUpcomingContent"></div></div><div class="student-notice-heading">🔔 Ծանուցումներ</div><div id="studentNoticePanel" class="student-notice-list">Նոր ծանուցումներ չկան։</div><button type="button" class="blue student-booking-shortcut" id="studentBookingShortcut">＋ Ամրագրել դասաժամ</button></aside><nav class="student-sidebar hidden">
 <button class="active" data-stab="home">🚗 Գլխավոր</button><button data-stab="booking">📅 Ամրագրում</button><button data-stab="lessons">📚 Իմ դասերը</button><button data-stab="mail">✉️ Նամակագրություն</button><button data-stab="chat">💬 Օնլայն չատ</button><button data-stab="contact">☎️ Կապ ադմինի հետ</button>
 </nav><div class="student-main">
 <div class="card student-pane" id="pane-home"><h3>👤 Իմ անձնական պրոֆիլը</h3><div class="student-avatar-editor"><img id="studentAvatarPreview" class="hidden" alt="Անձնական նկար"><label>📷 Ավելացնել / փոխել նկարը <input type="file" id="studentAvatarFile" accept="image/*"></label><button type="button" id="removeStudentAvatar" class="danger hidden">🗑️ Հեռացնել նկարը</button></div><p id="studentName"></p><p>Հայտի կարգավիճակ՝ <strong id="studentStatus"></strong></p><p id="studentInfo" class="muted"></p>
 <form id="studentProfileForm"><input required name="first_name" placeholder="Անուն"><input required name="last_name" placeholder="Ազգանուն"><select required name="gender"><option value="">Սեռը ընտրեք</option><option>Արական</option><option>Իգական</option><option>Չնշել</option></select><select required name="study_type"><option value="">Ուսուցման տեսակը ընտրեք</option><option>Տեսական</option><option>Գործնական</option><option>Տեսական և գործնական</option></select><input required name="residence" placeholder="Բնակության վայրը"><input required name="phone" type="tel" placeholder="Հեռախոսահամար"><button class="blue">Պահպանել փոփոխությունները</button></form><p id="profileMsg" class="message"></p></div>
 <div class="card student-pane hidden" id="pane-booking"><h3>🗓️ Օնլայն գրանցում — ազատ օրեր և ժամեր</h3><p class="muted">Ընտրեք կանաչով նշված ազատ օրը, ապա՝ ժամը։ Ամրագրումը կուղարկվի ադմինին հաստատման։</p><div class="calendar-shell"><div class="calendar-head"><button type="button" class="gray" id="studentCalPrev">‹</button><strong id="studentCalTitle">Օրացույց</strong><button type="button" class="gray" id="studentCalNext">›</button></div><div id="studentCalendar" class="calendar-grid"></div></div><h4>🕒 Ընտրված օրվա ազատ ժամերը</h4><div id="studentSlotChoices"></div><form id="studentBookingForm"><input type="hidden" name="slot"><button class="blue" type="submit">Ուղարկել ամրագրման հայտը</button></form><p id="studentBookingMsg" class="message"></p><h4>📌 Իմ ամրագրումները</h4><div id="studentBookings"></div></div>
-<div class="card student-pane hidden" id="pane-lessons"><h3>📚 ԻՄ ԴԱՍԱԺԱՄԵՐԸ</h3><p class="muted">Ձեր առաջիկա դասաժամերը՝ ըստ օրվա և ժամի։</p><div id="studentUpcomingLessonsList" class="student-upcoming-lessons-list"></div><div class="student-lessons-materials"><h3>📘 Ուսումնական նյութեր</h3><div id="studentBlocks"></div></div></div>
+<div class="card student-pane hidden" id="pane-lessons"><h3>📘 ՈՒՍՈՒՄՆԱԿԱՆ ՆՅՈՒԹԵՐ</h3><p class="muted">Ձեր ուսումնական նյութերը և դասընթացի բովանդակությունը։</p><div id="studentBlocks"></div></div>
 <div class="card student-pane hidden" id="pane-mail"><h3>✉️ Նամակագրություն</h3><div id="studentMailList"></div></div>
 <div class="card student-pane hidden" id="pane-chat"><h3>💬 Օնլայն չատ — Ադմին</h3><div class="chat-box" id="studentChatBox"></div><form id="studentChatForm"><input name="chatBody" required maxlength="2000" placeholder="Գրեք հաղորդագրությունը"><button class="blue">Ուղարկել</button></form><p id="studentChatMsg" class="message"></p></div>
 <div class="card student-pane hidden" id="pane-contact"><h3>☎️ Կապ ադմինի հետ</h3><form id="studentContactForm"><input name="contactTitle" required placeholder="Թեմա"><input name="contactBody" required placeholder="Հաղորդագրություն"><button class="blue">Ուղարկել ադմինին</button></form><p id="studentContactMsg" class="message"></p></div>
@@ -2084,14 +2084,7 @@ async function loadUser() {
     studentPaneHistory=[];
     // Աշակերտի էջը ցուցադրելուց հետո բացել ամրագրման օրացույցը։
     requestAnimationFrame(()=>{
-      const bookingPane=$('pane-booking');
-      if(bookingPane){
-        document.querySelectorAll('.student-pane').forEach(p=>p.classList.toggle('hidden',p!==bookingPane));
-        currentStudentPane='booking';
-        document.querySelectorAll('[data-stab]').forEach(b=>b.classList.toggle('active',b.dataset.stab==='booking'));
-        loadStudentSlots();
-        loadStudentBookings();
-      }
+      if($('pane-booking'))showStudentPane('booking',false);
     });
     const publicNav=$('publicNav');
     if(publicNav){
@@ -2115,7 +2108,11 @@ function showStudentPane(key,remember=true){
  document.querySelectorAll('.student-pane').forEach(p=>p.classList.toggle('hidden',p!==target));
  document.querySelectorAll('[data-stab]').forEach(x=>x.classList.toggle('active',x.dataset.stab===key));
  if(key==='chat'||key==='mail')loadStudentMessages();
- if(key==='booking'){loadStudentSlots();loadStudentBookings();}
+ if(key==='booking'){
+  // Նախ նկարել օրացույցի կառուցվածքը, հետո բեռնել ազատ/զբաղված ժամերը։
+  renderStudentCalendar();renderStudentSlotChoices();
+  loadStudentSlots();loadStudentBookings();
+ }
  window.scrollTo({top:0,left:0,behavior:'smooth'});
 }
 function backStudentPane(){showStudentPane(studentPaneHistory.pop()||'home',false);}
@@ -2192,16 +2189,23 @@ function renderStudentCalendar(){
  for(let n=1;n<=days;n++){const key=dateKey(new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth(),n)),b=document.createElement('button');b.type='button';b.className='calendar-day'+(free.has(key)?' available':busy.has(key)?' busy':'')+(selectedStudentDate===key?' selected':'');b.textContent=n;b.disabled=(!free.has(key)&&!busy.has(key))||new Date(key+'T12:00:00').getDay()===1;if(!b.disabled)b.onclick=()=>{selectedStudentDate=key;renderStudentCalendar();renderStudentSlotChoices();};grid.append(b);}
 }
 function renderStudentSlotChoices(){
- const box=$('studentSlotChoices'),hidden=$('studentBookingForm').elements.slot;box.replaceChildren();hidden.value='';
- const slots=studentAllSlots.filter(x=>x.slot_date===selectedStudentDate&&isWorkingLessonTime(x.slot_time));if(!slots.length){box.textContent='Ընտրեք օրացույցի նշված օրերից մեկը։';return;}
+ const box=$('studentSlotChoices'),form=$('studentBookingForm');if(!box||!form)return;const hidden=form.elements.slot;box.replaceChildren();hidden.value='';
+ const slots=studentAllSlots.filter(x=>x.slot_date===selectedStudentDate&&isWorkingLessonTime(x.slot_time));if(!slots.length){box.textContent='Ընտրեք կանաչով նշված ազատ օրը։';return;}
  slots.forEach(slot=>{const b=document.createElement('button');b.type='button';b.className='slot-choice '+(slot.is_available?'available-time':'busy-time');b.textContent=String(slot.slot_time).slice(0,5)+(slot.is_available?' · Ազատ':' · Զբաղված');b.disabled=!slot.is_available;if(slot.is_available)b.onclick=()=>{hidden.value=slot.id;box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');};box.append(b);});
 }
 $('studentCalPrev').onclick=()=>{studentCalendarMonth=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()-1,1);renderStudentCalendar();};
 $('studentCalNext').onclick=()=>{studentCalendarMonth=new Date(studentCalendarMonth.getFullYear(),studentCalendarMonth.getMonth()+1,1);renderStudentCalendar();};
 async function loadStudentSlots(){
+ // Օրացույցը երբեք դատարկ/անտեսանելի չթողնել՝ նույնիսկ տվյալների բեռնման սխալի դեպքում։
+ studentAllSlots=[];studentAvailableSlots=[];selectedStudentDate='';
+ renderStudentCalendar();renderStudentSlotChoices();
  const {data,error}=await db.from('lesson_slots').select('id,slot_date,slot_time,is_available').gte('slot_date',dateKey(new Date())).order('slot_date').order('slot_time');
- if(error){message('studentBookingMsg','Ժամերը բեռնել չհաջողվեց։ '+error.message,true);return;}
- studentAllSlots=(data||[]).filter(x=>isWorkingLessonTime(x.slot_time)&&new Date(x.slot_date+'T12:00:00').getDay()!==1);studentAvailableSlots=studentAllSlots.filter(x=>x.is_available);if(!studentAllSlots.some(x=>x.slot_date===selectedStudentDate))selectedStudentDate='';
+ if(error){
+  message('studentBookingMsg','Օրացույցը ցուցադրված է, սակայն ազատ ժամերը չբեռնվեցին։ '+error.message,true);
+  renderStudentCalendar();renderStudentSlotChoices();return;
+ }
+ studentAllSlots=(data||[]).filter(x=>isWorkingLessonTime(x.slot_time)&&new Date(x.slot_date+'T12:00:00').getDay()!==1);
+ studentAvailableSlots=studentAllSlots.filter(x=>x.is_available);
  renderStudentCalendar();renderStudentSlotChoices();
 }
 function renderStudentUpcoming(bookings){
@@ -3608,4 +3612,39 @@ body.account-view:not(.admin-authenticated) #studentArea #pane-booking .calendar
 body.account-view:not(.admin-authenticated) #studentArea #pane-booking #studentCalendar{
  display:grid!important;visibility:visible!important;opacity:1!important;
 }
+</style>
+
+<style id="ani-student-lessons-3d-left-panel-final">
+body.account-view:not(.admin-authenticated) #studentArea .student-upcoming-panel{
+ position:sticky!important;top:14px!important;align-self:start!important;overflow:hidden!important;
+ padding:18px!important;border:1px solid #b9dcff!important;border-radius:22px!important;
+ background:radial-gradient(circle at 90% 4%,#ffffff38 0 9%,transparent 30%),radial-gradient(circle at 0 100%,#f4b94244,transparent 35%),linear-gradient(145deg,#061b3c 0%,#10539a 58%,#1676bd 100%)!important;
+ box-shadow:0 18px 38px #061a3b40,inset 0 1px 0 #ffffff55!important;
+}
+#studentArea .student-upcoming-heading{align-items:center!important;gap:12px!important;padding:4px 0 15px!important;border-bottom:1px solid #ffffff50!important}
+#studentArea .student-upcoming-heading>span{display:grid!important;place-items:center!important;width:48px!important;height:48px!important;flex:0 0 48px!important;border-radius:16px!important;font-size:27px!important;background:linear-gradient(145deg,#fff,#dbeafe)!important;box-shadow:0 7px 0 #061a3b55,0 12px 22px #0003!important;animation:aniLessonFloat 3s ease-in-out infinite}
+#studentArea .student-upcoming-heading h3{font-size:16px!important;letter-spacing:.35px!important;text-shadow:0 2px 8px #00152d88!important}
+#studentArea .student-upcoming-heading small{color:#e0f2ff!important;line-height:1.5!important}
+#studentArea .student-upcoming-panel .student-upcoming-lessons-list{display:grid!important;gap:11px!important;margin:15px 0!important}
+#studentArea .student-upcoming-panel .student-lesson-card{position:relative!important;grid-template-columns:42px minmax(0,1fr)!important;gap:10px!important;padding:13px!important;border:1px solid #ffffffb8!important;border-radius:16px!important;background:linear-gradient(145deg,#fff 0%,#eef7ff 70%,#fff5d9 100%)!important;box-shadow:0 7px 0 #041a36aa,0 13px 22px #00152d55,inset 0 1px 0 white!important}
+#studentArea .student-upcoming-panel .student-lesson-card:hover{transform:translateY(-3px)!important;box-shadow:0 10px 0 #041a36aa,0 18px 26px #00152d66!important}
+#studentArea .student-upcoming-panel .student-lesson-number{width:38px!important;height:38px!important;border-radius:12px!important;font-size:13px!important;background:linear-gradient(145deg,#f4b942,#ffdf83)!important;color:#102a49!important;box-shadow:0 4px 0 #b47b10,0 7px 12px #1235!important}
+#studentArea .student-upcoming-panel .student-lesson-info>strong{font-size:13px!important;color:#123b68!important}
+#studentArea .student-upcoming-panel .student-lesson-time{font-size:24px!important;color:#075ca8!important;text-shadow:0 2px 0 #d5eaff!important}
+#studentArea .student-upcoming-panel .student-lesson-info>small{font-size:10px!important;line-height:1.4!important}
+#studentArea .student-upcoming-panel .student-lesson-status{font-size:10px!important;padding:5px 8px!important}
+#studentArea .student-upcoming-panel .student-lessons-empty{padding:19px 12px!important;border:1px dashed #ffffff9c!important;background:#ffffff16!important;color:#fff!important;box-shadow:inset 0 1px 0 #ffffff25!important}
+#studentArea .student-upcoming-panel .student-lessons-empty small{color:#e0efff!important}
+#studentArea .student-next-lesson-wrap{margin-top:10px;padding:11px;border:1px solid #ffffff45;border-radius:14px;background:#001b3c35;box-shadow:inset 0 1px 0 #ffffff20}
+#studentArea .student-next-label{font-size:10px;font-weight:900;letter-spacing:.8px;color:#ffe39a;margin-bottom:6px}
+#studentArea .student-next-lesson{margin-top:0!important;padding:10px!important;border-radius:11px!important;box-shadow:0 5px 0 #00142e55!important}
+#studentArea .student-next-time{font-size:27px!important}
+#studentArea .student-notice-heading{margin-top:15px!important}
+#studentArea .student-booking-shortcut{border:1px solid #fff2c7!important;box-shadow:0 6px 0 #9b690e,0 12px 18px #00152d55!important;font-weight:900!important}
+body.account-view:not(.admin-authenticated) #studentArea #pane-booking:not(.hidden){display:block!important;visibility:visible!important;opacity:1!important}
+body.account-view:not(.admin-authenticated) #studentArea #pane-booking .calendar-shell{display:block!important;visibility:visible!important;opacity:1!important;min-height:250px!important}
+body.account-view:not(.admin-authenticated) #studentArea #pane-booking #studentCalendar{display:grid!important;visibility:visible!important;opacity:1!important;min-height:190px!important}
+body.account-view:not(.admin-authenticated) #studentArea #pane-booking .calendar-day{min-height:38px!important}
+@keyframes aniLessonFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
+@media(max-width:850px){body.account-view:not(.admin-authenticated) #studentArea .student-upcoming-panel{position:static!important}}
 </style>
