@@ -1020,6 +1020,8 @@ body.account-view .fx-shell .nav-open-btn{position:fixed!important;top:12px!impo
 .top-auth-panel .card{padding:14px!important;margin:0!important}
 .top-auth-panel form{gap:9px!important}
 .top-auth-panel input,.top-auth-panel select{min-height:40px!important}
+html body:not(.admin-authenticated) section#admin,html body:not(.admin-authenticated) #adminBtn{display:none!important;visibility:hidden!important;pointer-events:none!important}
+html body.admin-authenticated section#admin:not(.hidden){display:block!important;visibility:visible!important;pointer-events:auto!important}
 body:not(.admin-authenticated) #admin,body:not(.admin-authenticated) #adminBtn,
 body:not(.admin-authenticated) .admin-only,body:not(.admin-authenticated) [data-admin-only="true"]{display:none!important}
 body.admin-authenticated #admin:not(.hidden){display:block!important}
@@ -1996,8 +1998,9 @@ async function loadUser() {
   // Student records always take precedence over admin UI.
   const {data:studentRecord,error:studentRoleError} = await db
     .from('students')
-    .select('id')
-    .eq('id',user.id)
+    .select('id,user_id')
+    .or('id.eq.'+user.id+',user_id.eq.'+user.id)
+    .limit(1)
     .maybeSingle();
 
   // Only a user explicitly registered by ID in public.admins is an administrator.
