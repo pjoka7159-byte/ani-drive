@@ -1785,7 +1785,7 @@ ANI DRIVE • Երևան •
 'use strict';
 
 // Expose a stable global wrapper immediately: login can finish while this async initializer is still running.
-window.loadStudents = async (...args) => loadStudents(...args);
+// Expose the actual implementation after its declaration below.
 
 const $ = id => document.getElementById(id);
 let editingGallery=[];
@@ -2827,7 +2827,8 @@ async function loadStudents() {
   await refreshAdminChatStudents();
 }
 
-// loadStudents-ը արդեն հայտարարված է window.loadStudents անունով։
+// Expose the actual implementation; avoid a self-referencing forwarding wrapper.
+window.loadStudents = loadStudents;
 
 
 let registeredListMode='active';
@@ -3609,9 +3610,11 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 
 /* ANI DRIVE — universal in-place visual editor for admins */
 (function(){
- const EDIT_KEY='ani_visual_edits_v1';
- let editMode=false,selected=null,edits={};
- const excluded='input,select,textarea,option,script,style,svg,path,form,[contenteditable="true"],#aniUniversalEditor,#admin,#studentArea,#loginArea,#registerArea';
+ // Stable shared state for async callbacks and MutationObserver.
+ window.ANI_VISUAL_window.ANI_VISUAL_EDIT_KEY='ani_visual_edits_v1';
+ window.ANI_VISUAL_EDITS=window.ANI_VISUAL_EDITS||{};
+ window.ANI_VISUAL_EXCLUDED='input,select,textarea,option,script,style,svg,path,form,[contenteditable="true"],#aniUniversalEditor,#admin,#studentArea,#loginArea,#registerArea';
+ let editMode=false,selected=null;
  function safePath(el){
   if(el.id)return '#'+CSS.escape(el.id);
   const parts=[];let n=el;
@@ -3641,9 +3644,9 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
  }
  async function loadAll(){
   if(!window.ANI_DRIVE_DB)return;
-  const {data,error}=await window.ANI_DRIVE_DB.from('site_content').select('content_value').eq('content_key',EDIT_KEY).maybeSingle();
+  const {data,error}=await window.ANI_DRIVE_DB.from('site_content').select('content_value').eq('content_key',window.ANI_VISUAL_EDIT_KEY).maybeSingle();
   if(error||!data?.content_value)return;
-  try{edits=JSON.parse(data.content_value)||{};Object.entries(edits).forEach(([path,r])=>{try{applyRecord(document.querySelector(path),r);}catch(e){}});}catch(e){console.warn('ANI visual edits could not be loaded',e);}
+  try{window.ANI_VISUAL_EDITS=JSON.parse(data.content_value)||{};Object.entries(window.ANI_VISUAL_EDITS).forEach(([path,r])=>{try{applyRecord(document.querySelector(path),r);}catch(e){}});}catch(e){console.warn('ANI visual edits could not be loaded',e);}
  }
  function toggle(on){
   if(!window.ANI_DRIVE_IS_ADMIN){alert('Միայն ադմինիստրատորը կարող է խմբագրել։');return;}
@@ -3654,15 +3657,15 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
  }
  function applySelected(){
   if(!selected)return;
-  const path=safePath(selected),r=edits[path]||{style:{}};
+  const path=safePath(selected),r=window.ANI_VISUAL_EDITS[path]||{style:{}};
   const text=document.getElementById('aniEditText').value;
   if(text.trim()&&!selected.children.length)r.text=text;
   r.style={color:document.getElementById('aniEditColor').value,backgroundColor:document.getElementById('aniEditBg').value,fontSize:Math.max(10,Math.min(64,+document.getElementById('aniEditSize').value||16))+'px',padding:Math.max(0,Math.min(80,+document.getElementById('aniEditPad').value||0))+'px',borderRadius:selected.style.borderRadius||'',fontFamily:document.getElementById('aniEditFont').value,textAlign:document.getElementById('aniEditAlign').value};
-  edits[path]=r;applyRecord(selected,r);
+  window.ANI_VISUAL_EDITS[path]=r;applyRecord(selected,r);
  }
  async function saveAll(){
   if(!window.ANI_DRIVE_IS_ADMIN)return;
-  const {error}=await window.ANI_DRIVE_DB.from('site_content').upsert({content_key:EDIT_KEY,label:'Կայքի բոլոր բլոկների տեղային ձևավորում',content_type:'text',content_value:JSON.stringify(edits),is_published:true,updated_at:new Date().toISOString()},{onConflict:'content_key'});
+  const {error}=await window.ANI_DRIVE_DB.from('site_content').upsert({content_key:window.ANI_VISUAL_EDIT_KEY,label:'Կայքի բոլոր բլոկների տեղային ձևավորում',content_type:'text',content_value:JSON.stringify(window.ANI_VISUAL_EDITS),is_published:true,updated_at:new Date().toISOString()},{onConflict:'content_key'});
   if(error){alert('Չհաջողվեց պահպանել․ '+error.message);return;}
   alert('Փոփոխությունները պահպանվեցին։ Հրապարակային էջը կցուցադրի դրանք։');
  }
@@ -3675,7 +3678,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
   document.body.append(editBadge);return editBadge;
  }
  function showContextBadge(el){
-  if(!window.ANI_DRIVE_IS_ADMIN||!el||el===document.body||el===document.documentElement||el.closest(excluded))return hideContextBadge();
+  if(!window.ANI_DRIVE_IS_ADMIN||!el||el===document.body||el===document.documentElement||el.closest(window.ANI_VISUAL_EXCLUDED))return hideContextBadge();
   hoverTarget=el;const b=ensureEditBadge(),r=el.getBoundingClientRect();
   b.style.display='block';b.style.left=Math.max(6,Math.min(window.innerWidth-132,r.right-110))+'px';b.style.top=Math.max(6,Math.min(window.innerHeight-42,r.top-34))+'px';
  }
@@ -3696,7 +3699,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
   toolbar();
   if(selected)selected.classList.remove('ani-edit-selected');
   selected=el;selected.classList.add('ani-edit-selected');
-  const path=safePath(el),r=edits[path]||{};
+  const path=safePath(el),r=window.ANI_VISUAL_EDITS[path]||{};
   document.getElementById('aniEditTarget').textContent='Ընտրված է՝ '+(el.getAttribute('aria-label')||el.textContent.trim().slice(0,70)||el.tagName.toLowerCase());
   document.getElementById('aniEditText').value=r.text||(!el.children.length?el.textContent.trim():'');
   const st=r.style||styleFrom(el);
@@ -3712,7 +3715,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
   if(!e.target.closest||e.target.closest('#aniUniversalEditor,#aniContextEditBadge,#admin,#studentArea,#loginArea,#registerArea'))return;
   if(!window.ANI_DRIVE_IS_ADMIN)return;
   const el=e.target.closest('*');
-  if(!el||el===document.body||el===document.documentElement||el.closest(excluded))return;
+  if(!el||el===document.body||el===document.documentElement||el.closest(window.ANI_VISUAL_EXCLUDED))return;
   if(editMode){e.preventDefault();e.stopPropagation();}
   selectForEditing(el);
  },true);
@@ -3720,7 +3723,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
  window.aniLoadUniversalEdits=loadAll;
  const css=document.createElement('style');css.textContent=`#aniContextEditBadge,#aniUniversalEditor{font-family:"Noto Sans Armenian","Noto Sans",Arial,sans-serif}#aniUniversalEditor{display:none;position:fixed;right:16px;bottom:16px;z-index:99999;width:min(390px,calc(100vw - 24px));max-height:75vh;overflow:auto;padding:16px;background:#071a36;color:white;border:1px solid #f4b942;border-radius:16px;box-shadow:0 15px 45px #0006;gap:10px;font:14px Arial}#aniUniversalEditor input{width:100%;padding:7px;margin-top:4px}#aniUniversalEditor .ani-edit-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}#aniUniversalEditor label{font-size:12px;color:#e5edf8}#aniUniversalEditor small{color:#d4dfef;line-height:1.5}.ani-edit-mode h1,.ani-edit-mode h2,.ani-edit-mode h3,.ani-edit-mode h4,.ani-edit-mode p,.ani-edit-mode .card,.ani-edit-mode .panel,.ani-edit-mode section,.ani-edit-mode article{cursor:crosshair}.ani-edit-selected{outline:3px dashed #e4a927!important;outline-offset:3px!important}`;
  document.head.append(css);
- const mo=new MutationObserver(()=>{if(window.ANI_DRIVE_IS_ADMIN){Object.entries(edits).forEach(([path,record])=>{try{applyRecord(document.querySelector(path),record);}catch(e){}});}if(window.ANI_DRIVE_IS_ADMIN&&!document.getElementById('aniEditLaunch')){const host=document.querySelector('#admin .admin-account-dashboard');if(host){const b=document.createElement('button');b.id='aniEditLaunch';b.type='button';b.className='blue';b.textContent='🖊️ Խմբագրել ցանկացած բլոկ / բաժին';b.onclick=()=>toggle(true);host.append(b);}}});
+ const mo=new MutationObserver(()=>{if(window.ANI_DRIVE_IS_ADMIN){Object.entries(window.ANI_VISUAL_EDITS).forEach(([path,record])=>{try{applyRecord(document.querySelector(path),record);}catch(e){}});}if(window.ANI_DRIVE_IS_ADMIN&&!document.getElementById('aniEditLaunch')){const host=document.querySelector('#admin .admin-account-dashboard');if(host){const b=document.createElement('button');b.id='aniEditLaunch';b.type='button';b.className='blue';b.textContent='🖊️ Խմբագրել ցանկացած բլոկ / բաժին';b.onclick=()=>toggle(true);host.append(b);}}});
  mo.observe(document.body,{childList:true,subtree:true});
  document.addEventListener('DOMContentLoaded',()=>setTimeout(loadAll,1200));
  setTimeout(loadAll,2500);
