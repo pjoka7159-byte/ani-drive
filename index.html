@@ -2757,7 +2757,7 @@ $('adminStudentChatForm').onsubmit=async e=>{
  if(error){message('adminStudentChatMsg','Ուղարկել չհաջողվեց։ '+error.message,true);return;}
  e.target.reset();message('adminStudentChatMsg','Պատասխանը ուղարկվեց։');await loadAdminStudentChat();
 };
-async function loadStudents() {
+window.loadStudents = async function loadStudents() {
   if (!isAdmin) return;
 
   $('studentsList').textContent = 'Բեռնում...';
