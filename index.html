@@ -3477,7 +3477,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 (function(){
  const EDIT_KEY='ani_visual_edits_v1';
  let editMode=false,selected=null,edits={};
- const excluded='button,a,input,select,textarea,option,script,style,svg, path,form,[contenteditable="true"],#admin,#studentArea,#loginArea,#registerArea';
+ const excluded='input,select,textarea,option,script,style,svg,path,form,[contenteditable="true"],#aniUniversalEditor,#admin,#studentArea,#loginArea,#registerArea';
  function safePath(el){
   if(el.id)return '#'+CSS.escape(el.id);
   const parts=[];let n=el;
@@ -3532,6 +3532,31 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
   if(error){alert('Չհաջողվեց պահպանել․ '+error.message);return;}
   alert('Փոփոխությունները պահպանվեցին։ Հրապարակային էջը կցուցադրի դրանք։');
  }
+ let hoverTarget=null,editBadge=null;
+ function ensureEditBadge(){
+  if(editBadge)return editBadge;
+  editBadge=document.createElement('button');editBadge.type='button';editBadge.id='aniContextEditBadge';editBadge.textContent='✏️ Խմբագրել';
+  editBadge.style.cssText='position:fixed;z-index:100001;display:none;padding:7px 12px;border:1px solid #f4b942;border-radius:10px;background:#071a36;color:#fff;font-weight:700;font-size:12px;box-shadow:0 5px 18px #0005;cursor:pointer';
+  editBadge.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(hoverTarget)selectForEditing(hoverTarget);});
+  document.body.append(editBadge);return editBadge;
+ }
+ function showContextBadge(el){
+  if(!isAdmin||!el||el===document.body||el===document.documentElement||el.closest(excluded))return hideContextBadge();
+  hoverTarget=el;const b=ensureEditBadge(),r=el.getBoundingClientRect();
+  b.style.display='block';b.style.left=Math.max(6,Math.min(window.innerWidth-132,r.right-110))+'px';b.style.top=Math.max(6,Math.min(window.innerHeight-42,r.top-34))+'px';
+ }
+ function hideContextBadge(){if(editBadge)editBadge.style.display='none';}
+ document.addEventListener('pointerover',e=>{
+  if(!isAdmin||e.target.closest('#aniUniversalEditor,#aniContextEditBadge,#admin,#studentArea,#loginArea,#registerArea'))return;
+  const el=e.target.closest('*');if(el)showContextBadge(el);
+ },true);
+ document.addEventListener('pointerout',e=>{
+  if(!isAdmin||!editBadge)return;
+  if(e.relatedTarget&& (editBadge.contains(e.relatedTarget)||hoverTarget?.contains(e.relatedTarget)))return;
+  hideContextBadge();
+ },true);
+ window.addEventListener('scroll',()=>{if(hoverTarget&&editBadge?.style.display==='block')showContextBadge(hoverTarget);},{passive:true});
+ window.addEventListener('resize',()=>{if(hoverTarget&&editBadge?.style.display==='block')showContextBadge(hoverTarget);});
  function selectForEditing(el){
   if(!el)return;
   if(selected)selected.classList.remove('ani-edit-selected');
@@ -3547,16 +3572,16 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
   document.getElementById('aniUniversalEditor').style.display='grid';
  }
  document.addEventListener('click',e=>{
-  if(e.target.closest('#aniUniversalEditor')||e.target.closest('#admin')||e.target.closest('#studentArea')||e.target.closest('#loginArea')||e.target.closest('#registerArea'))return;
+  if(e.target.closest('#aniUniversalEditor,#aniContextEditBadge,#admin,#studentArea,#loginArea,#registerArea'))return;
   if(!isAdmin)return;
-  const el=e.target.closest('h1,h2,h3,h4,h5,p,section,article,div.card,div.panel,.hero,.wrap,header,footer,aside,li,label,small,strong,nav a,[data-section],.content-block,.info-block');
-  if(!el||el.closest(excluded))return;
+  const el=e.target.closest('*');
+  if(!el||el===document.body||el===document.documentElement||el.closest(excluded))return;
   if(editMode){e.preventDefault();e.stopPropagation();}
   selectForEditing(el);
  },true);
  window.aniEnableUniversalEditor=()=>toggle(true);
  window.aniLoadUniversalEdits=loadAll;
- const css=document.createElement('style');css.textContent='#aniUniversalEditor{display:none;position:fixed;right:16px;bottom:16px;z-index:99999;width:min(390px,calc(100vw - 24px));max-height:75vh;overflow:auto;padding:16px;background:#071a36;color:white;border:1px solid #f4b942;border-radius:16px;box-shadow:0 15px 45px #0006;gap:10px;font:14px Arial}#aniUniversalEditor input{width:100%;padding:7px;margin-top:4px}#aniUniversalEditor .ani-edit-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}#aniUniversalEditor label{font-size:12px;color:#e5edf8}#aniUniversalEditor small{color:#d4dfef;line-height:1.5}.ani-edit-mode h1,.ani-edit-mode h2,.ani-edit-mode h3,.ani-edit-mode h4,.ani-edit-mode p,.ani-edit-mode .card,.ani-edit-mode .panel,.ani-edit-mode section,.ani-edit-mode article{cursor:crosshair}.ani-edit-selected{outline:3px dashed #e4a927!important;outline-offset:3px!important}';
+ const css=document.createElement('style');css.textContent='#aniContextEditBadge{font-family:Arial,sans-serif}#aniUniversalEditor{display:none;position:fixed;right:16px;bottom:16px;z-index:99999;width:min(390px,calc(100vw - 24px));max-height:75vh;overflow:auto;padding:16px;background:#071a36;color:white;border:1px solid #f4b942;border-radius:16px;box-shadow:0 15px 45px #0006;gap:10px;font:14px Arial}#aniUniversalEditor input{width:100%;padding:7px;margin-top:4px}#aniUniversalEditor .ani-edit-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}#aniUniversalEditor label{font-size:12px;color:#e5edf8}#aniUniversalEditor small{color:#d4dfef;line-height:1.5}.ani-edit-mode h1,.ani-edit-mode h2,.ani-edit-mode h3,.ani-edit-mode h4,.ani-edit-mode p,.ani-edit-mode .card,.ani-edit-mode .panel,.ani-edit-mode section,.ani-edit-mode article{cursor:crosshair}.ani-edit-selected{outline:3px dashed #e4a927!important;outline-offset:3px!important}';
  document.head.append(css);
  const mo=new MutationObserver(()=>{if(isAdmin){Object.entries(edits).forEach(([path,record])=>{try{applyRecord(document.querySelector(path),record);}catch(e){}});}if(isAdmin&&!document.getElementById('aniEditLaunch')){const host=document.querySelector('#admin .admin-account-dashboard');if(host){const b=document.createElement('button');b.id='aniEditLaunch';b.type='button';b.className='blue';b.textContent='🖊️ Խմբագրել ցանկացած բլոկ / բաժին';b.onclick=()=>toggle(true);host.append(b);}}});
  mo.observe(document.body,{childList:true,subtree:true});
