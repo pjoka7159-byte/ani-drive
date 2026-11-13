@@ -1,0 +1,133 @@
+/* ANI DRIVE — unified navy redesign, layered after legacy styles */
+:root{
+  --ani-navy:#061a35;--ani-blue:#0b3b70;--ani-blue2:#125b9d;
+  --ani-line:rgba(255,255,255,.22);--ani-gold:#f2c15d;
+}
+html{scroll-behavior:smooth;background:#061a35}
+body{
+  color:#f4f8ff!important;
+  background:
+    radial-gradient(ellipse at 72% 16%,rgba(34,111,178,.28),transparent 42%),
+    linear-gradient(145deg,#04152d 0%,#08294f 52%,#061a35 100%)!important;
+  min-height:100vh;
+  position:relative;
+}
+body:before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.075;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 700'%3E%3Cg fill='none' stroke='%23d9edff' stroke-width='3'%3E%3Cpath d='M120 470h110l65-100q18-27 55-27h350q42 0 70 34l75 93h105q34 0 34 34v38H110v-35q0-37 10-37z'/%3E%3Cpath d='M340 360l-53 110h545l-77-91q-19-22-53-22H340z'/%3E%3Ccircle cx='300' cy='535' r='53'/%3E%3Ccircle cx='820' cy='535' r='53'/%3E%3Cpath d='M0 620h1200M70 660h180m120 0h180m120 0h180m120 0h180' stroke-dasharray='34 30'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center 62%;background-size:min(1100px,95vw) auto;
+}
+body>*{position:relative;z-index:1}
+header.ani-global-header{
+  position:sticky!important;top:0!important;z-index:3000!important;
+  padding:16px 0!important;background:rgba(4,20,43,.94)!important;
+  border-bottom:1px solid rgba(255,255,255,.2)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.2)!important;backdrop-filter:blur(14px);
+}
+.ani-global-header .wrap{max-width:none!important;padding:0 28px!important}
+.ani-global-header .bar{min-height:54px;position:relative;justify-content:flex-end!important;align-items:center!important;flex-wrap:nowrap!important}
+.ani-global-header .logo{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  font-size:clamp(30px,4vw,48px)!important;letter-spacing:.16em!important;
+  white-space:nowrap;text-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+.ani-global-header .logo span{color:#fff!important;margin-left:.22em}
+.ani-global-actions{margin-left:auto;gap:10px!important;flex-wrap:nowrap!important}
+.ani-global-actions a{font-weight:700;text-decoration:none;white-space:nowrap}
+.ani-global-actions button{border-radius:12px!important;border:1px solid rgba(255,255,255,.55)!important;padding:11px 17px!important}
+.ani-global-actions #showAuth{background:transparent!important;color:#fff!important}
+.ani-global-actions #showRegister{background:var(--ani-gold)!important;color:#10233c!important;border-color:var(--ani-gold)!important}
+.public-nav,.public-nav#publicNav{
+  position:fixed!important;z-index:4000!important;left:14px!important;top:94px!important;bottom:14px!important;
+  width:246px!important;max-height:calc(100vh - 108px)!important;
+  padding:15px!important;gap:8px!important;overflow:auto!important;
+  background:linear-gradient(160deg,rgba(5,25,52,.97),rgba(13,68,116,.96))!important;
+  border:1px solid rgba(255,255,255,.3)!important;border-radius:20px!important;
+  box-shadow:0 18px 45px rgba(0,0,0,.35)!important;backdrop-filter:blur(16px);
+}
+.public-nav-head{padding:9px 5px 14px!important;border-bottom:1px solid var(--ani-line)!important}
+.public-nav-head strong{font-size:16px;letter-spacing:.06em}
+.public-nav-head button{border:1px solid var(--ani-line)!important;border-radius:9px!important}
+.public-nav>button[data-page]{
+  display:flex!important;align-items:center!important;gap:10px!important;min-height:47px!important;
+  padding:10px 11px!important;text-align:left!important;border:1px solid rgba(255,255,255,.16)!important;
+  border-radius:12px!important;background:rgba(255,255,255,.045)!important;color:#f5f9ff!important;
+  font-size:13px!important;transition:background .2s,border-color .2s,transform .2s;
+}
+.public-nav>button[data-page]:hover,.public-nav>button[data-page].active{
+  background:linear-gradient(100deg,rgba(242,193,93,.22),rgba(255,255,255,.1))!important;
+  border-color:rgba(242,193,93,.8)!important;color:#fff!important;transform:translateX(2px);
+}
+.public-nav .nav-thumb{width:25px;flex:0 0 25px;text-align:center;font-size:17px}
+.public-nav .nav-label{flex:1;line-height:1.4}
+.public-nav .nav-chevron{opacity:.65}
+.nav-open-btn{display:none!important}
+body:not(.account-view)>header~.hero,
+body:not(.account-view)>header~section,
+body:not(.account-view)>header~footer{
+  margin-left:274px!important;width:calc(100% - 288px)!important;
+}
+.hero.ani-car-hero{
+  min-height:340px!important;height:340px!important;margin-top:18px!important;
+  border:1px solid rgba(255,255,255,.28)!important;border-radius:24px!important;
+  background:linear-gradient(120deg,rgba(5,28,57,.88),rgba(15,83,139,.78))!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.26)!important;
+}
+.ani-car-caption{border-color:rgba(255,255,255,.45)!important}
+section.section,section.public-extra-page,#publishedBlocks,#publishedMedia{
+  margin-top:18px!important;margin-bottom:18px!important;padding:clamp(24px,4vw,46px) 0!important;
+  border:1px solid rgba(255,255,255,.2)!important;border-radius:22px!important;
+  background:linear-gradient(145deg,rgba(7,35,68,.88),rgba(10,57,96,.82))!important;
+  box-shadow:0 15px 36px rgba(0,0,0,.16)!important;
+}
+section.section h1,section.section h2,section.section h3,
+.public-extra-page h1,.public-extra-page h2,.public-extra-page h3{
+  color:#fff!important;text-shadow:0 2px 12px rgba(0,0,0,.28)!important;
+}
+section.section p,.public-extra-page p{color:#e2edf9!important}
+section.section .card,.public-extra-page .card,#publishedBlocks .card,#publishedMedia .card{
+  color:#18314d!important;background:rgba(255,255,255,.97)!important;
+  border:1px solid rgba(255,255,255,.8)!important;border-radius:16px!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.18)!important;
+}
+section.section .card p,.public-extra-page .card p{color:#4a5d73!important}
+.feature-card{background:linear-gradient(145deg,#fff,#eaf3ff)!important}
+.public-booking-section{background:linear-gradient(145deg,rgba(5,30,60,.96),rgba(13,70,116,.94))!important}
+.public-booking-heading h2,.public-booking-heading p{color:#fff!important}
+.public-booking-card,.calendar-shell,.admin-calendar{
+  background:#fff!important;border:1px solid rgba(255,255,255,.7)!important;
+  box-shadow:0 16px 38px rgba(0,0,0,.24)!important;
+}
+#admin .card,#studentArea .card,.panel,.admin-item{
+  background:#fff!important;color:#18314d!important;border-color:#d9e5f2!important;
+}
+#admin h2,#admin h3,#studentArea h2,#studentArea h3{color:#fff}
+input,select,textarea{background:#fff!important;color:#17243a!important;border:1px solid #bdcde0!important}
+footer{background:rgba(3,18,38,.96)!important;border-top:1px solid var(--ani-line)!important}
+body.account-view #admin,body.account-view #studentArea{
+  background:linear-gradient(145deg,rgba(5,28,57,.9),rgba(11,57,96,.88))!important;
+  border:1px solid rgba(255,255,255,.2)!important;border-radius:20px!important;
+  padding:24px!important;box-shadow:0 18px 40px rgba(0,0,0,.2)!important;
+}
+@media(max-width:850px){
+  header.ani-global-header .wrap{padding:0 12px!important}
+  .ani-global-header .bar{min-height:48px!important}
+  .ani-global-header .logo{position:static!important;transform:none!important;margin-right:auto;font-size:25px!important;letter-spacing:.1em!important}
+  .ani-global-actions a{display:none}
+  .ani-global-actions{gap:6px!important}
+  .ani-global-actions button{padding:9px 11px!important;font-size:12px!important}
+  .public-nav,.public-nav#publicNav{
+    top:0!important;left:0!important;bottom:0!important;width:min(300px,86vw)!important;
+    max-height:100vh!important;border-radius:0 20px 20px 0!important;
+    transform:translateX(-110%)!important;transition:transform .25s!important;
+  }
+  .public-nav.open{transform:translateX(0)!important}
+  .nav-open-btn{display:block!important;position:fixed!important;z-index:3999!important;left:10px!important;top:82px!important}
+  body:not(.account-view)>header~.hero,
+  body:not(.account-view)>header~section,
+  body:not(.account-view)>header~footer{margin-left:0!important;width:100%!important}
+  .hero.ani-car-hero{margin:12px!important;width:calc(100% - 24px)!important;height:235px!important;min-height:235px!important}
+  section.section,section.public-extra-page,#publishedBlocks,#publishedMedia{margin:12px!important;width:calc(100% - 24px)!important}
+  body.account-view #admin,body.account-view #studentArea{margin:12px!important;width:calc(100% - 24px)!important;padding:15px!important}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.public-nav>button[data-page]{transition:none!important}}
