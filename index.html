@@ -4130,3 +4130,46 @@ body.account-view:not(.admin-authenticated) #studentArea #pane-booking .calendar
 @keyframes aniLessonFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
 @media(max-width:850px){body.account-view:not(.admin-authenticated) #studentArea .student-upcoming-panel{position:static!important}}
 </style>
+
+
+<style id="ani-readable-sections-global-v2">
+/* Ensure all public information sections have readable contrast regardless of wrapper nesting. */
+section.section:not(#publicBookingCalendar):not(.public-booking-section),
+.public-extra-page,#publishedBlocks,#publishedMedia{
+  background:linear-gradient(135deg,#071a36 0%,#10395f 55%,#0b2948 100%)!important;
+  color:#f4f7fb!important;
+  border-top:1px solid #d7b66a66!important;
+  border-bottom:1px solid #d7b66a66!important;
+}
+section.section:not(#publicBookingCalendar):not(.public-booking-section) h1,
+section.section:not(#publicBookingCalendar):not(.public-booking-section) h2,
+section.section:not(#publicBookingCalendar):not(.public-booking-section) h3,
+.public-extra-page h1,.public-extra-page h2,.public-extra-page h3,
+#publishedBlocks h1,#publishedBlocks h2,#publishedBlocks h3,
+#publishedMedia h1,#publishedMedia h2,#publishedMedia h3{
+  color:#ffe3a0!important;text-shadow:0 2px 10px #0009!important;
+}
+section.section:not(#publicBookingCalendar):not(.public-booking-section) p,
+.public-extra-page p,#publishedBlocks p,#publishedMedia p{
+  color:#edf4fc!important;
+}
+section.section:not(#publicBookingCalendar):not(.public-booking-section) .card,
+section.section:not(#publicBookingCalendar):not(.public-booking-section) .panel,
+section.section:not(#publicBookingCalendar):not(.public-booking-section) .feature-card,
+.public-extra-page .card,.public-extra-page .panel,
+#publishedBlocks .card,#publishedMedia .card{
+  background:#fff!important;color:#17304d!important;
+}
+section.section:not(#publicBookingCalendar):not(.public-booking-section) .card p,
+section.section:not(#publicBookingCalendar):not(.public-booking-section) .panel p,
+section.section:not(#publicBookingCalendar):not(.public-booking-section) .feature-card p,
+.public-extra-page .card p,.public-extra-page .panel p,
+#publishedBlocks .card p,#publishedMedia .card p{
+  color:#34465d!important;
+}
+section.section:not(#publicBookingCalendar):not(.public-booking-section) a,
+.public-extra-page a{color:#ffd779!important}
+section.section:not(#publicBookingCalendar):not(.public-booking-section) .card a,
+section.section:not(#publicBookingCalendar):not(.public-booking-section) .panel a,
+.public-extra-page .card a,.public-extra-page .panel a{color:#145da8!important}
+</style>
