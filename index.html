@@ -3611,7 +3611,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
 /* ANI DRIVE — universal in-place visual editor for admins */
 (function(){
  // Stable shared state for async callbacks and MutationObserver.
- window.ANI_VISUAL_window.ANI_VISUAL_EDIT_KEY='ani_visual_edits_v1';
+ window.ANI_VISUAL_EDIT_KEY='ani_visual_edits_v1';
  window.ANI_VISUAL_EDITS=window.ANI_VISUAL_EDITS||{};
  window.ANI_VISUAL_EXCLUDED='input,select,textarea,option,script,style,svg,path,form,[contenteditable="true"],#aniUniversalEditor,#admin,#studentArea,#loginArea,#registerArea';
  let editMode=false,selected=null;
