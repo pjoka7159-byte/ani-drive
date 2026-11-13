@@ -2148,7 +2148,7 @@ async function loadUser() {
 
   if (isAdmin) {
     $('adminBtn').classList.remove('hidden');
-    await loadStudents();
+    await window.loadStudents();
     await loadContentTools();
     await loadAdminBookingPanel();
     await checkAdminNotices();
@@ -2793,7 +2793,7 @@ async function loadStudents() {
           return;
         }
         students = students.filter(s => s.id !== student.id);
-        await loadStudents();
+        await window.loadStudents();
         const registeredSection = $('registeredStudentsSection');
         if (registeredSection && !registeredSection.classList.contains('hidden')) {
           await loadRegisteredStudents();
@@ -2814,6 +2814,8 @@ async function loadStudents() {
   renderStudents();
   await refreshAdminChatStudents();
 }
+
+window.loadStudents=loadStudents;
 
 
 let registeredListMode='active';
@@ -2840,7 +2842,7 @@ function showAdminWorkspace(key){
  if(key==='bookings')loadAdminBookingPanel();
  if(key==='datebookings')loadAdminDateBookings();
  if(key==='students')loadRegisteredStudents();
- if(key==='applications')loadStudents();
+ if(key==='applications')window.loadStudents();
  if(key){setTimeout(()=>scrollPanelIntoView(ids[key]),60);}
 }
 $('refreshDateBookings')?.addEventListener('click',loadAdminDateBookings);
@@ -2945,7 +2947,7 @@ async function updateStatus(id,status) {
   }
 
   message('adminMsg','Կարգավիճակը հաջողությամբ փոխվեց։');
-  await loadStudents();
+  await window.loadStudents();
 }
 
 
@@ -3384,8 +3386,8 @@ document.querySelectorAll('.filterBtn').forEach(btn=>{
   };
 });
 
-$('toggleStudentApplications').onclick=async()=>{const box=$('studentApplicationsContent'),btn=$('toggleStudentApplications'),open=box.classList.toggle('hidden')===false;btn.innerHTML=open?'Փակել հայտերը <span>⌃</span>':'Բացել հայտերը <span>⌄</span>';btn.setAttribute('aria-expanded',String(open));if(open)await loadStudents();};
-$('refreshBtn').onclick = async()=>{await loadStudents();await loadAdminBookingPanel();};
+$('toggleStudentApplications').onclick=async()=>{const box=$('studentApplicationsContent'),btn=$('toggleStudentApplications'),open=box.classList.toggle('hidden')===false;btn.innerHTML=open?'Փակել հայտերը <span>⌃</span>':'Բացել հայտերը <span>⌄</span>';btn.setAttribute('aria-expanded',String(open));if(open)await window.loadStudents();};
+$('refreshBtn').onclick = async()=>{await window.loadStudents();await loadAdminBookingPanel();};
 $('openBookingAdmin').onclick=()=>showAdminWorkspace('booking');
 $('closeBookingAdmin').onclick=()=>$('adminBookingSection').classList.add('hidden');
 $('openExistingBookings').onclick=()=>showAdminWorkspace('bookings');
