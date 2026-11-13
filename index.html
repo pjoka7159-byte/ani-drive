@@ -1751,8 +1751,8 @@ hr,.divider{border-color:#294660!important}
 <section class="section public-extra-page hidden" id="instructorsPage"><div class="wrap"><div class="feature-detail"><h2>👨‍🏫 ՀՐԱՀԱՆԳԻՉՆԵՐ</h2><p>Հրահանգիչների անունները, փորձը և կապի տվյալները կհրապարակվեն այս բաժնում՝ ավտոդպրոցի կողմից հաստատումից հետո։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
 <section class="section public-extra-page hidden" id="licensesPage"><div class="wrap"><div class="feature-detail"><h2>📜 ԼԻՑԵՆԶԻԱՆԵՐ</h2><p>Ավտոդպրոցի լիցենզիաների և թույլտվությունների վերաբերյալ հաստատված փաստաթղթերը կցուցադրվեն այստեղ։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
 <section class="section public-extra-page hidden" id="reviewsPage"><div class="wrap"><div class="feature-detail"><h2>⭐ ԿԱՐԾԻՔՆԵՐ</h2><p>Աշակերտների իրական կարծիքները կհրապարակվեն այս բաժնում։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
-<section class="section public-extra-page hidden" id="groundsPage"><div class="wrap"><div class="feature-detail"><h2>🅿️ ՔՆՆԱԿԱՆ ՏԱՐԱԾՔՆԵՐ</h2><p>Քննական տարածքների նկարները, հասցեները և օգտակար տեղեկությունները կտեղադրվեն այստեղ։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
-<section class="section public-extra-page hidden" id="routesPage"><div class="wrap"><div class="feature-detail"><h2>🛣️ ՔՆՆԱԿԱՆ ԵՐԹՈՒՂԻՆԵՐ</h2><p>Քննական երթուղիների նկարագրությունները և ուսումնական նյութերը կցուցադրվեն այս բաժնում։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="groundsPage"><div class="wrap"><div class="feature-detail"><h2>🅿️ ՔՆՆԱԿԱՆ ՏԱՐԱԾՔՆԵՐ</h2><p>Քննական տարածքների հասցեները, նկարագրությունները, քարտեզներն ու օգտակար հղումները։</p><div id="groundsCards" class="grid"></div><div id="groundsDetail" class="card hidden" style="margin-top:18px"></div><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
+<section class="section public-extra-page hidden" id="routesPage"><div class="wrap"><div class="feature-detail"><h2>🛣️ ՔՆՆԱԿԱՆ ԵՐԹՈՒՂԻՆԵՐ</h2><p>Երթուղիների անվանումները, նկարագրությունները, մեկնարկային հասցեները, քարտեզներն ու ուսումնական հղումները։</p><div id="routesCards" class="grid"></div><div id="routesDetail" class="card hidden" style="margin-top:18px"></div><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
 <section class="section public-extra-page hidden" id="documentsPage"><div class="wrap"><div class="feature-detail"><h2>📄 ՔՆՆՈՒԹՅԱՆ ՀԱՄԱՐ ԱՆՀՐԱԺԵՇՏ ՓԱՍՏԱԹՂԹԵՐ</h2><p>Անձը հաստատող փաստաթուղթ՝ անձնագիր կամ ID քարտ։ Բժշկական տեղեկանք և վճարի անդորրագիր՝ եթե պահանջվում են տվյալ քննության կարգով։ Վերջնական ցանկը ճշտեք պաշտոնական աղբյուրներից։</p><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
 <section class="section public-extra-page hidden" id="linksPage"><div class="wrap"><div class="feature-detail"><h2>🔗 ԿԱՐԵՎՈՐ ԿԱՅՔԵՐԻ ՀՂՈՒՄՆԵՐ</h2><a class="card" style="display:block;max-width:420px" href="https://roadpolice.am/" target="_blank" rel="noopener noreferrer"><h3>🚔 ROADPOLICE.AM</h3><p>Ճանապարհային ոստիկանության պաշտոնական կայք</p><strong>Բացել կայքը ↗</strong></a><button class="feature-back public-back-home">← Վերադառնալ գլխավոր էջ</button></div></div></section>
 <!-- Աշակերտի էջ -->
@@ -2986,6 +2986,7 @@ async function loadContentTools(){
  if(!isAdmin)return;
  await loadMenuEditor();
  await loadExamOffices();
+ await loadExamResources();
  await loadMediaFiles();
  const rootAdminPanel=$('rootAdminManager');
  if(rootAdminPanel)rootAdminPanel.classList.toggle('hidden',!isRootAdmin);
@@ -3132,6 +3133,67 @@ async function loadExamOffices(){
  };
  renderExamOfficeCards();
 }
+
+const EXAM_RESOURCE_CONFIG={
+ grounds:{key:'exam_grounds_directory',label:'Քննական տարածքներ',icon:'🅿️',singular:'քննական տարածք'},
+ routes:{key:'exam_routes_directory',label:'Քննական երթուղիներ',icon:'🛣️',singular:'քննական երթուղի'}
+};
+async function loadExamResources(){
+ for(const [kind,cfg] of Object.entries(EXAM_RESOURCE_CONFIG)){
+  const grid=$(kind+'Cards'),detail=$(kind+'Detail');if(!grid||!detail)continue;
+  let rows=[];
+  try{const q=await db.from('site_content').select('content_value').eq('content_key',cfg.key).maybeSingle();if(!q.error&&q.data?.content_value){const parsed=JSON.parse(q.data.content_value);if(Array.isArray(parsed))rows=parsed;}}catch(e){console.warn(cfg.label+' load failed',e);}
+  const field=(parent,label,value,tag='input',placeholder='')=>{
+   const wrap=document.createElement('label');wrap.style.cssText='display:block;margin:10px 0;color:#17243a';wrap.textContent=label;
+   const el=document.createElement(tag);if(tag==='textarea')el.rows=3;el.value=value||'';el.placeholder=placeholder;
+   el.style.cssText='display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:10px;border:1px solid #9aaac0;border-radius:9px;background:#fff;color:#17243a';wrap.append(el);parent.append(wrap);return el;
+  };
+  const showDetail=(row,index)=>{
+   detail.className='card feature-detail';detail.replaceChildren();
+   const h=document.createElement('h3');h.textContent=cfg.icon+' '+row.name;detail.append(h);
+   const line=(label,value)=>{if(value){const p=document.createElement('p');p.textContent=label+value;detail.append(p);}};
+   line('Հասցե / մեկնարկային կետ՝ ',row.address);line('Նկարագրություն՝ ',row.description);
+   if(row.mapUrl){const a=document.createElement('a');a.href=row.mapUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='📍 Բացել քարտեզը';a.style.cssText='display:inline-block;margin:6px 8px 6px 0';detail.append(a);}
+   (row.links||[]).forEach(x=>{if(!x.url)return;const a=document.createElement('a');a.href=x.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='🔗 '+(x.label||'Բացել հղումը');a.style.cssText='display:block;margin:7px 0';detail.append(a);});
+   if(isAdmin){const edit=document.createElement('button');edit.type='button';edit.className='blue';edit.textContent='✏️ Խմբագրել';edit.onclick=()=>editRow(row,index);detail.append(edit);
+    const del=document.createElement('button');del.type='button';del.className='danger';del.textContent='🗑️ Ջնջել';del.style.marginLeft='8px';del.onclick=async()=>{if(!confirm('Ջնջե՞լ այս գրառումը։'))return;const next=rows.filter((_,i)=>i!==index);await persist(next);};detail.append(del);}
+   const close=document.createElement('button');close.type='button';close.className='gray';close.textContent='Փակել';close.style.marginLeft='8px';close.onclick=()=>{detail.className='card hidden';detail.replaceChildren();};detail.append(close);
+  };
+  const editRow=(row,index)=>{
+   detail.className='card feature-detail';detail.replaceChildren();
+   const h=document.createElement('h3');h.textContent=(index<0?'➕ Ավելացնել':'✏️ Խմբագրել')+' '+cfg.singular;detail.append(h);
+   const name=field(detail,'Անվանում',row.name,'input','Մուտքագրեք անվանումը');
+   const address=field(detail,kind==='routes'?'Մեկնարկային հասցե / կետ':'Հասցե',row.address,'input','Հասցե կամ տեղադրություն');
+   const description=field(detail,'Նկարագրություն',row.description,'textarea','Մանրամասն տեղեկություն');
+   const map=field(detail,'Քարտեզի հղում',row.mapUrl,'input','https://...');
+   const links=field(detail,'Լրացուցիչ հղումներ՝ յուրաքանչյուր տողում Անվանում | URL',(row.links||[]).map(x=>(x.label||'Հղում')+' | '+x.url).join('\n'),'textarea','Պաշտոնական կայք | https://...');
+   const actions=document.createElement('div');actions.className='row';actions.style.marginTop='12px';
+   const save=document.createElement('button');save.type='button';save.className='blue';save.textContent='💾 Պահպանել';
+   save.onclick=async()=>{
+    if(!name.value.trim()){alert('Լրացրեք անվանումը։');return;}
+    if(map.value.trim()&&!/^https?:\/\//i.test(map.value.trim())){alert('Քարտեզի հղումը պետք է սկսվի http:// կամ https://-ով։');return;}
+    const parsed=[];for(const ln of links.value.split(/\r?\n/)){if(!ln.trim())continue;const parts=ln.split('|');const label=(parts.shift()||'Հղում').trim();const url=parts.join('|').trim();if(!/^https?:\/\//i.test(url)){alert('Ստուգեք հղումը՝ '+ln);return;}parsed.push({label,url});}
+    const updated={id:row.id||kind+'_'+Date.now(),name:name.value.trim(),address:address.value.trim(),description:description.value.trim(),mapUrl:map.value.trim(),links:parsed};
+    const next=rows.slice();if(index<0)next.push(updated);else next[index]=updated;save.disabled=true;save.textContent='Պահպանվում է…';await persist(next);
+   };
+   const cancel=document.createElement('button');cancel.type='button';cancel.className='gray';cancel.textContent='Չեղարկել';cancel.onclick=()=>index<0?(detail.className='card hidden'):showDetail(row,index);
+   actions.append(save,cancel);detail.append(actions);
+  };
+  const persist=async next=>{
+   const result=await db.from('site_content').upsert({content_key:cfg.key,label:cfg.label,content_type:'text',content_value:JSON.stringify(next),is_published:true,updated_at:new Date().toISOString()},{onConflict:'content_key'});
+   if(result.error){alert('Պահպանել չհաջողվեց։ '+result.error.message);return;}
+   rows=next;render();detail.className='card hidden';detail.replaceChildren();
+  };
+  const render=()=>{
+   grid.replaceChildren();
+   rows.forEach((row,i)=>{const card=document.createElement('button');card.type='button';card.style.cssText='text-align:left;background:linear-gradient(135deg,#dbeafe,#fff);border:1px solid #dbe4f0;border-radius:15px;padding:20px;min-height:110px;color:#17243a';const h=document.createElement('strong');h.textContent=cfg.icon+' '+row.name;const p=document.createElement('div');p.style.cssText='font-size:12px;margin-top:7px';p.textContent=row.address||'Բացել մանրամասները →';card.append(h,p);card.onclick=()=>showDetail(row,i);grid.append(card);});
+   if(isAdmin){const add=document.createElement('button');add.type='button';add.className='blue';add.textContent='➕ Ավելացնել նոր '+cfg.singular;add.style.minHeight='110px';add.onclick=()=>editRow({name:'',address:'',description:'',mapUrl:'',links:[]},-1);grid.append(add);}
+   if(!rows.length){const p=document.createElement('p');p.className='muted';p.textContent='Տեղեկությունները դեռ ավելացված չեն։';grid.append(p);}
+  };
+  render();
+ }
+}
+
 async function loadWeather(){
  const box=$('weatherCards');
  try{
