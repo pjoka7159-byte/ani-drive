@@ -3551,7 +3551,6 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
   if(!isAdmin)return;
   const el=e.target.closest('h1,h2,h3,h4,h5,p,section,article,div.card,div.panel,.hero,.wrap,header,footer,aside,li,label,small,strong,nav a,[data-section],.content-block,.info-block');
   if(!el||el.closest(excluded))return;
-  if(!editMode && el.matches('nav a')){e.preventDefault();e.stopPropagation();}
   if(editMode){e.preventDefault();e.stopPropagation();}
   selectForEditing(el);
  },true);
