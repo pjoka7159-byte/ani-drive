@@ -3472,6 +3472,92 @@ if(isAdmin){runLessonAutoArchive();setInterval(runLessonAutoArchive,60000);}
 if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentLessonReminder,60000);}
 
 })();
+
+/* ANI DRIVE — universal in-place visual editor for admins */
+(function(){
+ const EDIT_KEY='ani_visual_edits_v1';
+ let editMode=false,selected=null,edits={};
+ const excluded='button,a,input,select,textarea,option,script,style,svg, path,form,[contenteditable="true"],#admin,#studentArea,#loginArea,#registerArea';
+ function safePath(el){
+  if(el.id)return '#'+CSS.escape(el.id);
+  const parts=[];let n=el;
+  while(n&&n.nodeType===1&&n!==document.body){
+   if(n.id){parts.unshift('#'+CSS.escape(n.id));break;}
+   let part=n.tagName.toLowerCase();
+   const parent=n.parentElement;
+   if(parent){const peers=[...parent.children].filter(x=>x.tagName===n.tagName);if(peers.length>1)part+=':nth-of-type('+(peers.indexOf(n)+1)+')';}
+   parts.unshift(part);n=parent;
+  }
+  return parts.join(' > ');
+ }
+ function toolbar(){
+  if(document.getElementById('aniUniversalEditor'))return;
+  const box=document.createElement('div');box.id='aniUniversalEditor';
+  box.innerHTML='<strong>🛠️ Կայքի տեղային խմբագրում</strong><span id="aniEditTarget">Ընտրեք էջի բլոկը</span><input id="aniEditText" placeholder="Տեքստ (միայն պարզ տեքստային բլոկների համար)"><div class="ani-edit-controls"><label>Տեքստի գույն<input id="aniEditColor" type="color" value="#17243a"></label><label>Ֆոնի գույն<input id="aniEditBg" type="color" value="#ffffff"></label><label>Տառաչափ<input id="aniEditSize" type="number" min="10" max="64" value="16"></label><label>Ներքին բացատ<input id="aniEditPad" type="number" min="0" max="80" value="0"></label></div><button type="button" id="aniEditApply">Կիրառել ընտրված բլոկին</button><button type="button" id="aniEditSave" class="blue">💾 Պահպանել կայքում</button><button type="button" id="aniEditExit" class="gray">Փակել խմբագրումը</button><small>Օրացույցի ժամերը, ամրագրումները և աշակերտների տվյալները չեն փոխվում․ խմբագրվում է դրանց տեսքը և տեքստային բլոկները։</small>';
+  document.body.append(box);
+  document.getElementById('aniEditExit').onclick=()=>toggle(false);
+  document.getElementById('aniEditApply').onclick=applySelected;
+  document.getElementById('aniEditSave').onclick=saveAll;
+ }
+ function styleFrom(el){return {color:el.style.color||'',backgroundColor:el.style.backgroundColor||'',fontSize:el.style.fontSize||'',padding:el.style.padding||'',borderRadius:el.style.borderRadius||''};}
+ function applyRecord(el,r){
+  if(!el||!r)return;
+  if(r.text!==undefined&&!el.children.length)el.textContent=r.text;
+  for(const k of ['color','backgroundColor','fontSize','padding','borderRadius'])if(r.style&&r.style[k])el.style[k]=r.style[k];
+ }
+ async function loadAll(){
+  if(!window.db||!window.isAdmin)return;
+  const {data,error}=await db.from('site_content').select('content_value').eq('content_key',EDIT_KEY).maybeSingle();
+  if(error||!data?.content_value)return;
+  try{edits=JSON.parse(data.content_value)||{};Object.entries(edits).forEach(([path,r])=>{try{applyRecord(document.querySelector(path),r);}catch(e){}});}catch(e){console.warn('ANI visual edits could not be loaded',e);}
+ }
+ function toggle(on){
+  if(!window.isAdmin){alert('Միայն ադմինիստրատորը կարող է խմբագրել։');return;}
+  editMode=on;toolbar();
+  document.getElementById('aniUniversalEditor').style.display=on?'grid':'none';
+  document.body.classList.toggle('ani-edit-mode',on);
+  if(!on&&selected){selected.classList.remove('ani-edit-selected');selected=null;}
+ }
+ function applySelected(){
+  if(!selected)return;
+  const path=safePath(selected),r=edits[path]||{style:{}};
+  const text=document.getElementById('aniEditText').value;
+  if(text.trim()&&!selected.children.length)r.text=text;
+  r.style={color:document.getElementById('aniEditColor').value,backgroundColor:document.getElementById('aniEditBg').value,fontSize:Math.max(10,Math.min(64,+document.getElementById('aniEditSize').value||16))+'px',padding:Math.max(0,Math.min(80,+document.getElementById('aniEditPad').value||0))+'px',borderRadius:selected.style.borderRadius||''};
+  edits[path]=r;applyRecord(selected,r);
+ }
+ async function saveAll(){
+  if(!window.isAdmin)return;
+  const {error}=await db.from('site_content').upsert({content_key:EDIT_KEY,label:'Կայքի բոլոր բլոկների տեղային ձևավորում',content_type:'text',content_value:JSON.stringify(edits),is_published:true,updated_at:new Date().toISOString()},{onConflict:'content_key'});
+  if(error){alert('Չհաջողվեց պահպանել․ '+error.message);return;}
+  alert('Փոփոխությունները պահպանվեցին։ Հրապարակային էջը կցուցադրի դրանք։');
+ }
+ document.addEventListener('click',e=>{
+  if(!editMode)return;
+  const el=e.target.closest('h1,h2,h3,h4,p,section,article,.card,.panel,.hero,.wrap,header,footer,aside,li,label,small,strong');
+  if(!el||el.closest('#aniUniversalEditor')||el.closest(excluded)||el.closest('#admin')||el.closest('#studentArea'))return;
+  e.preventDefault();e.stopPropagation();
+  if(selected)selected.classList.remove('ani-edit-selected');
+  selected=el;selected.classList.add('ani-edit-selected');
+  const path=safePath(el),r=edits[path]||{};
+  document.getElementById('aniEditTarget').textContent=path;
+  document.getElementById('aniEditText').value=r.text||(!el.children.length?el.textContent.trim():'');
+  const st=r.style||styleFrom(el);
+  document.getElementById('aniEditColor').value=st.color||'#17243a';
+  document.getElementById('aniEditBg').value=st.backgroundColor||'#ffffff';
+  document.getElementById('aniEditSize').value=parseInt(st.fontSize)||16;
+  document.getElementById('aniEditPad').value=parseInt(st.padding)||0;
+ },true);
+ window.aniEnableUniversalEditor=()=>toggle(true);
+ window.aniLoadUniversalEdits=loadAll;
+ const css=document.createElement('style');css.textContent='#aniUniversalEditor{display:none;position:fixed;right:16px;bottom:16px;z-index:99999;width:min(390px,calc(100vw - 24px));max-height:75vh;overflow:auto;padding:16px;background:#071a36;color:white;border:1px solid #f4b942;border-radius:16px;box-shadow:0 15px 45px #0006;gap:10px;font:14px Arial}#aniUniversalEditor input{width:100%;padding:7px;margin-top:4px}#aniUniversalEditor .ani-edit-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}#aniUniversalEditor label{font-size:12px;color:#e5edf8}#aniUniversalEditor small{color:#d4dfef;line-height:1.5}.ani-edit-mode h1,.ani-edit-mode h2,.ani-edit-mode h3,.ani-edit-mode h4,.ani-edit-mode p,.ani-edit-mode .card,.ani-edit-mode .panel,.ani-edit-mode section,.ani-edit-mode article{cursor:crosshair}.ani-edit-selected{outline:3px dashed #e4a927!important;outline-offset:3px!important}';
+ document.head.append(css);
+ const mo=new MutationObserver(()=>{if(window.isAdmin&&!document.getElementById('aniEditLaunch')){const host=document.querySelector('#admin .admin-account-dashboard');if(host){const b=document.createElement('button');b.id='aniEditLaunch';b.type='button';b.className='blue';b.textContent='🖊️ Խմբագրել կայքի ԲՈԼՈՐ բլոկները տեղում';b.onclick=()=>toggle(true);host.append(b);}}});
+ mo.observe(document.body,{childList:true,subtree:true});
+ document.addEventListener('DOMContentLoaded',()=>setTimeout(loadAll,1200));
+ setTimeout(()=>{if(window.isAdmin)loadAll();},2500);
+})();
+
 </script>
 
 <style>
