@@ -1784,6 +1784,9 @@ ANI DRIVE • Երևան •
 (async function() {
 'use strict';
 
+// Expose a stable global wrapper immediately: login can finish while this async initializer is still running.
+window.loadStudents = async (...args) => loadStudents(...args);
+
 const $ = id => document.getElementById(id);
 let editingGallery=[];
 function drawGallery(target,items){if(!target)return;target.replaceChildren();(items||[]).forEach(x=>{const el=document.createElement(x.type==='image'?'img':'video');el.src=x.url;if(el.tagName==='VIDEO')el.controls=true;el.style.cssText='width:100%;max-width:220px;max-height:180px;object-fit:cover;border-radius:12px;margin:5px';target.append(el);});}
@@ -2757,7 +2760,7 @@ $('adminStudentChatForm').onsubmit=async e=>{
  if(error){message('adminStudentChatMsg','Ուղարկել չհաջողվեց։ '+error.message,true);return;}
  e.target.reset();message('adminStudentChatMsg','Պատասխանը ուղարկվեց։');await loadAdminStudentChat();
 };
-window.loadStudents = async function loadStudents() {
+async function loadStudents() {
   if (!isAdmin) return;
 
   $('studentsList').textContent = 'Բեռնում...';
