@@ -1037,6 +1037,11 @@ body.admin-authenticated #admin:not(.hidden){display:block!important}
 .public-booking-heading h2{font-size:20px!important;margin:5px 0!important}.public-booking-heading p{font-size:12px!important;margin:4px 0 9px!important}
 .public-booking-card h3,.calendar-shell h3,.calendar-shell h4{font-size:13px!important;margin:9px 0 6px!important}.public-book-button{min-height:34px!important;padding:7px 12px!important;font-size:12px!important}
 @media(max-width:650px){.calendar-day{max-width:36px!important;max-height:36px!important;font-size:11px!important}.public-booking-card,.calendar-shell{padding:8px!important}}
+#siteMenuEditor{background:linear-gradient(135deg,#f7fbff,#fff8e8);border-color:#d9e5f4}
+#menuEditorFields{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+#menuEditorFields label{display:grid;gap:6px;font-size:13px;font-weight:700;color:#17406e}
+#menuEditorFields input{background:#fff}
+@media(max-width:600px){#menuEditorFields{grid-template-columns:1fr}}
 </style>
 
 <style id="account-dashboard-layout-fix">
@@ -1572,7 +1577,13 @@ hr,.divider{border-color:#294660!important}
 </div>
 <div id="adminToolTiles" class="admin-tool-tiles"></div><div class="panel admin-tool-panel">
 <h3>Կայքի բովանդակության կառավարում</h3>
-<p class="muted">Ավելացրեք կամ խմբագրեք կայքի տեքստային բաժինները և պատկերների հղումները։</p>
+<p class="muted">Կառավարեք կայքի մենյուն, էջերի վերնագրերը, տեքստերը, բաժինների բովանդակությունն ու մեդիան։ Փոփոխությունները կերևան այցելուներին՝ հրապարակելուց հետո։</p>
+<div class="admin-item" id="siteMenuEditor">
+ <h4>☰ Կայքի մենյուի ամբողջական խմբագրում</h4>
+ <p class="muted">Փոխեք հիմնական մենյուի բաժինների անունները։ Բաժինների գործող հղումները կպահպանվեն։</p>
+ <form id="menuEditorForm"><div class="grid" id="menuEditorFields"></div><button type="submit" class="blue">💾 Պահպանել մենյուի փոփոխությունները</button></form>
+ <p id="menuEditorMsg" class="message"></p>
+</div>
 <form id="contentForm">
 <label>Ո՞ր բաժինն եք խմբագրում</label>
 <select name="contentTarget" id="contentTarget">
@@ -1590,6 +1601,8 @@ hr,.divider{border-color:#294660!important}
 <option value="documentsPage">Քննության փաստաթղթեր</option>
 <option value="linksPage">Կարևոր հղումներ</option>
 <option value="weatherSection">Եղանակի բաժին</option>
+<option value="trafficPage">Ճանապարհային կանոններ</option>
+<option value="publishedMedia">Նկարներ և տեսանյութեր</option>
 </select>
 <input name="contentKey" id="contentKey" required placeholder="Նոր բաժնի բանալի (օր. my_new_section)">
 <input name="contentLabel" required placeholder="Բաժնի վերնագիր">
@@ -2931,8 +2944,42 @@ async function updateStatus(id,status) {
 }
 
 
+const SITE_MENU_ITEMS=[
+ ['home','Գլխավոր էջ'],['registration','Օնլայն գրանցում — ավտովարման դասեր'],
+ ['about','Մեր մասին'],['ani','Անի Դրայվի մասին'],['instructors','Հրահանգիչներ'],
+ ['licenses','Լիցենզիաներ'],['reviews','Կարծիքներ'],['grounds','Քննական տարածքներ'],
+ ['routes','Քննական երթուղիներ'],['offices','ՀՔԲ — հասցեներ'],['documents','Քննության համար անհրաժեշտ փաստաթղթեր'],
+ ['links','Կարևոր կայքերի հղումներ'],['content','Այլ նյութեր'],['media','Նկարներ և տեսանյութեր']
+];
+function renderMenuEditor(labels={}){
+ const host=$('menuEditorFields');if(!host)return;host.replaceChildren();
+ SITE_MENU_ITEMS.forEach(([key,defaultLabel])=>{
+  const label=document.createElement('label');label.textContent=defaultLabel;
+  const input=document.createElement('input');input.name=key;input.value=labels[key]||defaultLabel;input.maxLength=100;input.required=true;
+  label.append(input);host.append(label);
+ });
+}
+async function loadMenuEditor(){
+ const {data,error}=await db.from('site_content').select('content_value').eq('content_key','site_menu_labels').maybeSingle();
+ let labels={};if(!error&&data?.content_value){try{labels=JSON.parse(data.content_value)||{};}catch(e){}}
+ renderMenuEditor(labels);applyMenuLabels(labels);
+}
+function applyMenuLabels(labels={}){
+ SITE_MENU_ITEMS.forEach(([key,defaultLabel])=>{
+  const node=document.querySelector('#publicNav [data-page="'+key+'"] .nav-label');
+  if(node)node.textContent=labels[key]||defaultLabel;
+ });
+}
+$('menuEditorForm').onsubmit=async e=>{
+ e.preventDefault();if(!isAdmin)return;
+ const labels={};SITE_MENU_ITEMS.forEach(([key,defaultLabel])=>{labels[key]=String(new FormData(e.target).get(key)||defaultLabel).trim()||defaultLabel;});
+ const {error}=await db.from('site_content').upsert({content_key:'site_menu_labels',label:'Կայքի մենյուի անվանումներ',content_type:'text',content_value:JSON.stringify(labels),is_published:true,updated_at:new Date().toISOString()},{onConflict:'content_key'});
+ if(error){message('menuEditorMsg',error.message,true);return;}
+ applyMenuLabels(labels);message('menuEditorMsg','Մենյուի փոփոխությունները պահպանվեցին։');
+};
 async function loadContentTools(){
  if(!isAdmin)return;
+ await loadMenuEditor();
  await loadMediaFiles();
  const rootAdminPanel=$('rootAdminManager');
  if(rootAdminPanel)rootAdminPanel.classList.toggle('hidden',!isRootAdmin);
@@ -3057,6 +3104,8 @@ async function loadPublicBlocks(){
  const section=$('publishedBlocks'),inner=$('publishedBlocksInner');
  const {data,error}=await db.from('site_content').select('content_key,label,content_type,content_value').eq('is_published',true).order('updated_at',{ascending:true});
  if(error||!data)return;
+ const menuRow=data.find(row=>row.content_key==='site_menu_labels');
+ if(menuRow){try{applyMenuLabels(JSON.parse(menuRow.content_value||'{}'));}catch(e){}}
  // Existing fixed pages: update their visible heading and introductory text.
  data.filter(row=>row.content_key.startsWith('page_')).forEach(row=>{
   const target=$(row.content_key.slice(5));if(!target)return;
