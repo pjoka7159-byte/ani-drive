@@ -2985,6 +2985,7 @@ $('menuEditorForm').onsubmit=async e=>{
 async function loadContentTools(){
  if(!isAdmin)return;
  await loadMenuEditor();
+ await loadExamOffices();
  await loadMediaFiles();
  const rootAdminPanel=$('rootAdminManager');
  if(rootAdminPanel)rootAdminPanel.classList.toggle('hidden',!isRootAdmin);
@@ -3068,16 +3069,68 @@ $('messageForm').onsubmit=async e=>{
 
 
 
-const examOffices=['ՀՀ','Արմավիր','Աշտարակ','Երևան','Աբովյան','Արտաշատ','Հովտաշեն'];
-function loadExamOffices(){
- const grid=$('examOfficeGrid'),detail=$('examOfficeDetail');grid.replaceChildren();
+const examOfficeDefaults=['ՀՀ','Արմավիր','Աշտարակ','Երևան','Աբովյան','Արտաշատ','Հովտաշեն'];
+const EXAM_OFFICES_KEY='exam_offices_directory';
+let examOfficeRows=[];
+async function loadExamOffices(){
+ const grid=$('examOfficeGrid'),detail=$('examOfficeDetail');if(!grid||!detail)return;
+ let saved=null;
+ try{const q=await db.from('site_content').select('content_value').eq('content_key',EXAM_OFFICES_KEY).maybeSingle();if(!q.error&&q.data?.content_value)saved=JSON.parse(q.data.content_value);}catch(e){console.warn('Exam office directory load failed',e);}
+ examOfficeRows=Array.isArray(saved)&&saved.length?saved:examOfficeDefaults.map(name=>({id:name,name,address:'',hours:'',description:'Քննական վայրի հասցեն և աշխատանքային ժամերը կարող եք ճշտել ANI DRIVE-ի ադմինիստրատորից։',mapUrl:'',links:[]}));
+ grid.replaceChildren();
  const colors=['#dbeafe','#dcfce7','#fef3c7','#ede9fe','#ffe4e6','#cffafe','#fce7f3'];
- examOffices.forEach((name,i)=>{
-  const card=document.createElement('button');card.type='button';card.style.cssText='text-align:left;background:linear-gradient(135deg,'+colors[i]+',#fff);border:1px solid #dbe4f0;border-radius:16px;padding:22px;min-height:115px;color:#17243a';
-  card.innerHTML='<div class="emoji-orbit">🏢✨</div><strong>'+name+'</strong><div style="font-size:12px;margin-top:6px">Բացել տեղեկությունը →</div>';
-  card.onclick=()=>{detail.classList.remove('hidden');detail.className='card feature-detail';detail.innerHTML='<div class="emoji-orbit">📍✨</div><h3>'+name+' քննական բաժին</h3><p>Քննական վայրի հասցեն և աշխատանքային ժամերը կարող եք ճշտել ANI DRIVE-ի ադմինիստրատորից։</p><button type="button" class="feature-back" id="closeExamOffice">← Վերադառնալ բաժինների ցանկին</button>';$('closeExamOffice').onclick=()=>{detail.classList.add('hidden');detail.className='card hidden';};detail.scrollIntoView({behavior:'smooth',block:'center'});};
-  grid.append(card);
- });
+ const renderDetail=(row,index)=>{
+  detail.classList.remove('hidden');detail.className='card feature-detail';detail.replaceChildren();
+  const icon=document.createElement('div');icon.className='emoji-orbit';icon.textContent='📍✨';
+  const h=document.createElement('h3');h.textContent=row.name+' քննական բաժին';detail.append(icon,h);
+  const addLine=(label,value)=>{if(!value)return;const p=document.createElement('p');p.textContent=label+value;detail.append(p);};
+  addLine('Հասցե՝ ',row.address);addLine('Աշխատանքային ժամեր՝ ',row.hours);addLine('',row.description);
+  if(row.mapUrl){const a=document.createElement('a');a.href=row.mapUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='📍 Բացել քարտեզը';a.className='button-link';detail.append(a);}
+  (Array.isArray(row.links)?row.links:[]).forEach(link=>{if(!link||!link.url)return;const a=document.createElement('a');a.href=link.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent='🔗 '+(link.label||'Բացել հղումը');a.style.cssText='display:block;margin:8px 0';detail.append(a);});
+  if(isAdmin){const edit=document.createElement('button');edit.type='button';edit.className='blue';edit.textContent='✏️ Խմբագրել այս հասցեն';edit.onclick=()=>renderOfficeEditor(row,index);detail.append(edit);}
+  const back=document.createElement('button');back.type='button';back.className='feature-back';back.textContent='← Վերադառնալ բաժինների ցանկին';back.onclick=()=>{detail.classList.add('hidden');detail.className='card hidden';};detail.append(back);
+  detail.scrollIntoView({behavior:'smooth',block:'center'});
+ };
+ const renderOfficeEditor=(row,index)=>{
+  detail.replaceChildren();detail.className='card feature-detail';
+  const title=document.createElement('h3');title.textContent=index<0?'➕ Ավելացնել նոր քննական հասցե':'✏️ Խմբագրել '+row.name+' բաժինը';detail.append(title);
+  const field=(label,value,tag='input',placeholder='')=>{const wrap=document.createElement('label');wrap.style.cssText='display:block;margin:10px 0;color:inherit';wrap.textContent=label;const el=document.createElement(tag);if(tag==='textarea')el.rows=3;el.value=value||'';el.placeholder=placeholder;el.style.cssText='display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:10px;border-radius:9px;border:1px solid #9aaac0;background:#fff;color:#17243a';wrap.append(el);detail.append(wrap);return el;};
+  const name=field('Քաղաք / բաժնի անվանում',row.name,'input','Օրինակ՝ Գյումրի');
+  const address=field('Հասցե',row.address,'input','Մուտքագրեք ամբողջական հասցեն');
+  const hours=field('Աշխատանքային ժամեր',row.hours,'input','Օրինակ՝ Երկուշաբթի–Ուրբաթ 09:00–18:00');
+  const description=field('Լրացուցիչ տեղեկություն',row.description,'textarea','Բաժնի նկարագրություն');
+  const mapUrl=field('Քարտեզի հղում',row.mapUrl,'input','https://...');
+  const linksText=(Array.isArray(row.links)?row.links:[]).map(x=>(x.label||'Հղում')+' | '+(x.url||'')).join('\n');
+  const links=field('Լրացուցիչ հղումներ (յուրաքանչյուրը նոր տողով՝ Անվանում | URL)',linksText,'textarea','Օրինակ՝ Պաշտոնական կայք | https://example.am');
+  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:12px';
+  const save=document.createElement('button');save.type='button';save.className='blue';save.textContent='💾 Պահպանել';
+  save.onclick=async()=>{
+   const parsed=[];for(const line of links.value.split(/\r?\n/)){if(!line.trim())continue;const parts=line.split('|');const label=(parts.shift()||'Հղում').trim();const url=parts.join('|').trim();if(!/^https?:\/\//i.test(url)){alert('Յուրաքանչյուր հղում պետք է սկսվի https:// կամ http:// հասցեով։');return;}parsed.push({label,url});}
+   const updated={id:row.id||('office_'+Date.now()),name:name.value.trim(),address:address.value.trim(),hours:hours.value.trim(),description:description.value.trim(),mapUrl:mapUrl.value.trim(),links:parsed};
+   if(!updated.name){alert('Լրացրեք բաժնի անվանումը։');return;}
+   if(updated.mapUrl&&!/^https?:\/\//i.test(updated.mapUrl)){alert('Քարտեզի հղումը պետք է սկսվի https:// կամ http:// հասցեով։');return;}
+   const next=examOfficeRows.slice();if(index<0)next.push(updated);else next[index]=updated;
+   save.disabled=true;save.textContent='Պահպանվում է…';
+   const result=await db.from('site_content').upsert({content_key:EXAM_OFFICES_KEY,label:'ՀՔԲ քննական բաժինների հասցեներ',content_type:'text',content_value:JSON.stringify(next),is_published:true,updated_at:new Date().toISOString()},{onConflict:'content_key'});
+   save.disabled=false;save.textContent='💾 Պահպանել';
+   if(result.error){alert('Պահպանել չհաջողվեց։ '+result.error.message);return;}
+   examOfficeRows=next;renderExamOfficeCards();renderDetail(updated,index<0?next.length-1:index);
+  };
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='gray';cancel.textContent='Չեղարկել';cancel.onclick=()=>renderDetail(row,index);
+  actions.append(save,cancel);detail.append(actions);
+ };
+ const renderExamOfficeCards=()=>{
+  grid.replaceChildren();
+  examOfficeRows.forEach((row,i)=>{
+   const card=document.createElement('button');card.type='button';card.style.cssText='text-align:left;background:linear-gradient(135deg,'+colors[i%colors.length]+',#fff);border:1px solid #dbe4f0;border-radius:16px;padding:22px;min-height:115px;color:#17243a';
+   const icon=document.createElement('div');icon.className='emoji-orbit';icon.textContent='🏢✨';
+   const name=document.createElement('strong');name.textContent=row.name;
+   const hint=document.createElement('div');hint.style.cssText='font-size:12px;margin-top:6px';hint.textContent='Բացել տեղեկությունը →';
+   card.append(icon,name,hint);card.onclick=()=>renderDetail(row,i);grid.append(card);
+  });
+  if(isAdmin){const add=document.createElement('button');add.type='button';add.className='blue';add.style.cssText='min-height:115px;border-radius:16px;font-weight:700';add.textContent='➕ Ավելացնել նոր հասցե / բաժին';add.onclick=()=>renderOfficeEditor({name:'',address:'',hours:'',description:'',mapUrl:'',links:[]},-1);grid.append(add);}
+ };
+ renderExamOfficeCards();
 }
 async function loadWeather(){
  const box=$('weatherCards');
