@@ -3564,6 +3564,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
  window.addEventListener('resize',()=>{if(hoverTarget&&editBadge?.style.display==='block')showContextBadge(hoverTarget);});
  function selectForEditing(el){
   if(!el)return;
+  toolbar();
   if(selected)selected.classList.remove('ani-edit-selected');
   selected=el;selected.classList.add('ani-edit-selected');
   const path=safePath(el),r=edits[path]||{};
