@@ -2104,7 +2104,16 @@ $('forgotBtn').onclick = async () => {
   }
 };
 
+let loadUserPromise = null;
 async function loadUser() {
+  // Supabase emits SIGNED_IN while the login form also resumes; share one initialization.
+  if (loadUserPromise) return loadUserPromise;
+  loadUserPromise = performLoadUser();
+  try { return await loadUserPromise; }
+  finally { loadUserPromise = null; }
+}
+
+async function performLoadUser() {
   // Fail closed: no account receives admin UI until its authenticated user ID
   // is confirmed in the admins table.
   isAdmin = false;
