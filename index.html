@@ -3502,11 +3502,11 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
  function styleFrom(el){return {color:el.style.color||'',backgroundColor:el.style.backgroundColor||'',fontSize:el.style.fontSize||'',padding:el.style.padding||'',borderRadius:el.style.borderRadius||''};}
  function applyRecord(el,r){
   if(!el||!r)return;
-  if(r.text!==undefined&&!el.children.length)el.textContent=r.text;
+  if(r.text!==undefined&&!el.children.length&&el.textContent!==r.text)el.textContent=r.text;
   for(const k of ['color','backgroundColor','fontSize','padding','borderRadius'])if(r.style&&r.style[k])el.style[k]=r.style[k];
  }
  async function loadAll(){
-  if(typeof db==='undefined'||!isAdmin)return;
+  if(typeof db==='undefined')return;
   const {data,error}=await db.from('site_content').select('content_value').eq('content_key',EDIT_KEY).maybeSingle();
   if(error||!data?.content_value)return;
   try{edits=JSON.parse(data.content_value)||{};Object.entries(edits).forEach(([path,r])=>{try{applyRecord(document.querySelector(path),r);}catch(e){}});}catch(e){console.warn('ANI visual edits could not be loaded',e);}
@@ -3555,7 +3555,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
  const mo=new MutationObserver(()=>{if(isAdmin){Object.entries(edits).forEach(([path,record])=>{try{applyRecord(document.querySelector(path),record);}catch(e){}});}if(isAdmin&&!document.getElementById('aniEditLaunch')){const host=document.querySelector('#admin .admin-account-dashboard');if(host){const b=document.createElement('button');b.id='aniEditLaunch';b.type='button';b.className='blue';b.textContent='🖊️ Խմբագրել կայքի ԲՈԼՈՐ բլոկները տեղում';b.onclick=()=>toggle(true);host.append(b);}}});
  mo.observe(document.body,{childList:true,subtree:true});
  document.addEventListener('DOMContentLoaded',()=>setTimeout(loadAll,1200));
- setTimeout(()=>{if(isAdmin)loadAll();},2500);
+ setTimeout(loadAll,2500);
 })();
 
 </script>
