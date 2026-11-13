@@ -1335,6 +1335,38 @@ hr,.divider{border-color:#294660!important}
 @media(max-width:900px){#admin .admin-shortcuts.admin-shortcuts-blue{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){#admin .admin-shortcuts.admin-shortcuts-blue{grid-template-columns:1fr}#admin .date-booking-card{grid-template-columns:66px minmax(0,1fr);gap:10px;padding:11px}#admin .date-booking-time{font-size:18px;min-height:48px}#admin .date-booking-status{grid-column:2;justify-self:start}#admin .date-bookings-day-head{padding:12px 10px;gap:7px}#admin .date-bookings-date-label{font-size:13px}}
 </style>
+
+<style id="ani-drive-premium-section-visuals">
+/* Premium visual identity for every public section */
+#publicNav{gap:7px!important;padding:14px 11px!important;background:linear-gradient(165deg,#06172d 0%,#0b315b 58%,#071a36 100%)!important;border:1px solid #c9a65b55!important;box-shadow:0 20px 50px #020b18a8, inset 0 1px 0 #ffffff18!important}
+#publicNav .public-nav-head{padding:10px 7px 15px!important;margin-bottom:7px!important;border-bottom:1px solid #d5b56d55!important;letter-spacing:.7px}
+#publicNav .public-nav-head strong{font-size:15px;color:#f5d995!important}
+#publicNav>button[data-page]{display:grid!important;grid-template-columns:42px minmax(0,1fr) 15px!important;align-items:center!important;gap:10px!important;min-height:51px!important;padding:6px 8px!important;border:1px solid #ffffff16!important;border-radius:13px!important;background:linear-gradient(110deg,#ffffff0d,#ffffff04)!important;color:#f7f4ed!important;text-align:left!important;box-shadow:inset 0 1px 0 #ffffff0c!important;transition:transform .2s,border-color .2s,background .2s!important}
+#publicNav>button[data-page]:hover,#publicNav>button[data-page].active{transform:translateX(3px);border-color:#d9b86d99!important;background:linear-gradient(105deg,#b28c453d,#ffffff0b)!important;color:#ffe5a3!important}
+#publicNav .nav-thumb{display:grid;place-items:center;width:40px;height:38px;border-radius:11px;font-size:21px;background:linear-gradient(145deg,#e8d39b,#9d793d);color:#12233a;box-shadow:inset 0 1px 2px #fff9,0 4px 10px #0006;position:relative;overflow:hidden}
+#publicNav .nav-thumb:after{content:"";position:absolute;inset:-30% 45% -30% -20%;transform:rotate(35deg);background:#ffffff35}
+#publicNav .nav-label{font-size:12px;line-height:1.3;font-weight:750;min-width:0}
+#publicNav .nav-chevron{color:#d9b86d;font-size:15px;opacity:.75}
+#publicNav>button[data-art="car"] .nav-thumb,#publicNav>button[data-art="registration"] .nav-thumb{background:linear-gradient(145deg,#bfe5ff,#3476b9)}
+#publicNav>button[data-art="instructor"] .nav-thumb,#publicNav>button[data-art="review"] .nav-thumb{background:linear-gradient(145deg,#ffe5b4,#bd8a45)}
+#publicNav>button[data-art="license"] .nav-thumb,#publicNav>button[data-art="document"] .nav-thumb{background:linear-gradient(145deg,#e7eaf0,#8795a9)}
+#publicNav>button[data-art="parking"] .nav-thumb,#publicNav>button[data-art="route"] .nav-thumb{background:linear-gradient(145deg,#b9e8d0,#398d72)}
+#publicNav>button[data-art="office"] .nav-thumb,#publicNav>button[data-art="link"] .nav-thumb{background:linear-gradient(145deg,#d8d1ff,#7770b9)}
+#publicNav>button[data-art="gallery"] .nav-thumb,#publicNav>button[data-art="books"] .nav-thumb{background:linear-gradient(145deg,#ffd5e2,#ba6e91)}
+/* Larger editorial visual treatment for the six home shortcuts */
+.academy-module-tile{isolation:isolate;overflow:hidden!important;padding-top:17px!important}
+.academy-module-tile:before{content:"";position:absolute;z-index:-1;right:-18px;top:-28px;width:132px;height:116px;border-radius:32px;transform:rotate(-18deg);background:radial-gradient(circle at 30% 30%,#f3d48b66,transparent 65%),linear-gradient(145deg,#ffffff12,#d5ad5a08);border:1px solid #d9b86d25}
+.academy-module-tile:after{content:"";position:absolute;z-index:-1;right:14px;bottom:8px;width:66px;height:35px;border-top:2px solid #d9b86d55;border-radius:50%;transform:rotate(-18deg)}
+.academy-module-icon{width:45px!important;height:45px!important;border-radius:14px!important;font-size:23px!important;box-shadow:inset 0 1px 2px #fff9,0 7px 15px #0008!important}
+.academy-module-title{font-size:15px!important;letter-spacing:.1px}
+.academy-module-sub{max-width:88%;font-size:11px!important}
+.academy-module-arrow{width:27px;height:27px;display:grid;place-items:center;border-radius:50%;background:#d9b86d20;border:1px solid #d9b86d66}
+.academy-modules{background:radial-gradient(ellipse at 80% 0%,#24486b 0%,transparent 42%),linear-gradient(145deg,#071522,#101d2b 58%,#081727)!important}
+.academy-modules-heading h2{letter-spacing:.3px!important}
+@media(max-width:850px){#publicNav>button[data-page]{min-height:48px!important}.academy-module-grid{gap:9px!important}}
+@media(prefers-reduced-motion:reduce){#publicNav>button[data-page],.academy-module-tile{transition:none!important}}
+</style>
+
 </head>
 
 <body>
@@ -1454,20 +1486,20 @@ hr,.divider{border-color:#294660!important}
 </section>
 <aside class="public-nav" id="publicNav">
 <div class="public-nav-head"><strong>🚘 ANI DRIVE</strong><button type="button" id="closePublicNav">×</button></div>
-<button type="button" data-page="home" class="active">🏠 Գլխավոր էջ</button>
-<button type="button" data-page="registration">📝 Օնլայն գրանցում — ավտովարման դասեր</button>
-<button type="button" data-page="about">ℹ️ Մեր մասին</button>
-<button type="button" data-page="ani">🚘 Անի Դրայվի մասին</button>
-<button type="button" data-page="instructors">👨‍🏫 Հրահանգիչներ</button>
-<button type="button" data-page="licenses">📜 Լիցենզիաներ</button>
-<button type="button" data-page="reviews">⭐ Կարծիքներ</button>
-<button type="button" data-page="grounds">🅿️ Քննական տարածքներ</button>
-<button type="button" data-page="routes">🛣️ Քննական երթուղիներ</button>
-<button type="button" data-page="offices">🏢 ՀՔԲ — հասցեներ</button>
-<button type="button" data-page="documents">📄 Քննության համար անհրաժեշտ փաստաթղթեր</button>
-<button type="button" data-page="links">🔗 Կարևոր կայքերի հղումներ</button>
-<button type="button" data-page="content">📚 Այլ նյութեր</button>
-<button type="button" data-page="media">🖼️ Նկարներ և տեսանյութեր</button>
+<button type="button" data-page="home" data-art="home" class="active"><span class="nav-thumb" aria-hidden="true">🏠</span><span class="nav-label">Գլխավոր էջ</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="registration" data-art="registration"><span class="nav-thumb" aria-hidden="true">📝</span><span class="nav-label">Օնլայն գրանցում — ավտովարման դասեր</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="about" data-art="about"><span class="nav-thumb" aria-hidden="true">ℹ️</span><span class="nav-label">Մեր մասին</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="ani" data-art="car"><span class="nav-thumb" aria-hidden="true">🚘</span><span class="nav-label">Անի Դրայվի մասին</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="instructors" data-art="instructor"><span class="nav-thumb" aria-hidden="true">👨‍🏫</span><span class="nav-label">Հրահանգիչներ</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="licenses" data-art="license"><span class="nav-thumb" aria-hidden="true">📜</span><span class="nav-label">Լիցենզիաներ</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="reviews" data-art="review"><span class="nav-thumb" aria-hidden="true">⭐</span><span class="nav-label">Կարծիքներ</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="grounds" data-art="parking"><span class="nav-thumb" aria-hidden="true">🅿️</span><span class="nav-label">Քննական տարածքներ</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="routes" data-art="route"><span class="nav-thumb" aria-hidden="true">🛣️</span><span class="nav-label">Քննական երթուղիներ</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="offices" data-art="office"><span class="nav-thumb" aria-hidden="true">🏢</span><span class="nav-label">ՀՔԲ — հասցեներ</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="documents" data-art="document"><span class="nav-thumb" aria-hidden="true">📄</span><span class="nav-label">Քննության համար անհրաժեշտ փաստաթղթեր</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="links" data-art="link"><span class="nav-thumb" aria-hidden="true">🔗</span><span class="nav-label">Կարևոր կայքերի հղումներ</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="content" data-art="books"><span class="nav-thumb" aria-hidden="true">📚</span><span class="nav-label">Այլ նյութեր</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
+<button type="button" data-page="media" data-art="gallery"><span class="nav-thumb" aria-hidden="true">🖼️</span><span class="nav-label">Նկարներ և տեսանյութեր</span><span class="nav-chevron" aria-hidden="true">↗</span></button>
 </aside>
 <button type="button" class="nav-open-btn" id="openPublicNav">☰ Բաժիններ</button>
 
