@@ -8,6 +8,7 @@
 <title>ANI DRIVE — Ավտոդպրոց</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&display=swap');
 :root {
   --navy:#071a36;
   --blue:#1769d2;
@@ -18,7 +19,7 @@
 * {box-sizing:border-box}
 body {
   margin:0;
-  font-family:Arial,sans-serif;
+  font-family:"Noto Sans Armenian","Noto Sans","Segoe UI",Arial,sans-serif;
   color:#17243a;
   background:white;
 }
@@ -3493,17 +3494,17 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
  function toolbar(){
   if(document.getElementById('aniUniversalEditor'))return;
   const box=document.createElement('div');box.id='aniUniversalEditor';
-  box.innerHTML='<strong>🛠️ Կայքի տեղային խմբագրում</strong><span id="aniEditTarget">Ընտրեք էջի բլոկը</span><input id="aniEditText" placeholder="Տեքստ (միայն պարզ տեքստային բլոկների համար)"><div class="ani-edit-controls"><label>Տեքստի գույն<input id="aniEditColor" type="color" value="#17243a"></label><label>Ֆոնի գույն<input id="aniEditBg" type="color" value="#ffffff"></label><label>Տառաչափ<input id="aniEditSize" type="number" min="10" max="64" value="16"></label><label>Ներքին բացատ<input id="aniEditPad" type="number" min="0" max="80" value="0"></label></div><button type="button" id="aniEditApply">Կիրառել ընտրված բլոկին</button><button type="button" id="aniEditSave" class="blue">💾 Պահպանել կայքում</button><button type="button" id="aniEditExit" class="gray">Փակել խմբագրումը</button><small>Օրացույցի ժամերը, ամրագրումները և աշակերտների տվյալները չեն փոխվում․ խմբագրվում է դրանց տեսքը և տեքստային բլոկները։</small>';
+  box.innerHTML='<strong>🛠️ Կայքի տեղային խմբագրում</strong><span id="aniEditTarget">Ընտրեք էջի բլոկը</span><input id="aniEditText" placeholder="Տեքստ (միայն պարզ տեքստային բլոկների համար)"><div class="ani-edit-controls"><label>Տեքստի գույն<input id="aniEditColor" type="color" value="#17243a"></label><label>Ֆոնի գույն<input id="aniEditBg" type="color" value="#ffffff"></label><label>Տառաչափ<input id="aniEditSize" type="number" min="10" max="64" value="16"></label><label>Ներքին բացատ<input id="aniEditPad" type="number" min="0" max="80" value="0"></label><label>Տառատեսակ<select id="aniEditFont"><option value='"Noto Sans Armenian","Noto Sans",Arial,sans-serif'>Նուրբ հայկական</option><option value='"Segoe UI","Noto Sans Armenian",sans-serif'>Ժամանակակից</option><option value='Georgia,"Noto Serif Armenian",serif'>Դասական</option><option value='Arial,sans-serif'>Պարզ</option></select></label><label>Տեքստի դիրք<select id="aniEditAlign"><option value="">Ըստ էջի</option><option value="left">Ձախ</option><option value="center">Կենտրոն</option><option value="right">Աջ</option><option value="justify">Հավասարեցված</option></select></label></div><button type="button" id="aniEditApply">Կիրառել ընտրված բլոկին</button><button type="button" id="aniEditSave" class="blue">💾 Պահպանել կայքում</button><button type="button" id="aniEditExit" class="gray">Փակել խմբագրումը</button><small>Օրացույցի ժամերը, ամրագրումները և աշակերտների տվյալները չեն փոխվում․ խմբագրվում է դրանց տեսքը և տեքստային բլոկները։</small>';
   document.body.append(box);
   document.getElementById('aniEditExit').onclick=()=>toggle(false);
   document.getElementById('aniEditApply').onclick=applySelected;
   document.getElementById('aniEditSave').onclick=saveAll;
  }
- function styleFrom(el){return {color:el.style.color||'',backgroundColor:el.style.backgroundColor||'',fontSize:el.style.fontSize||'',padding:el.style.padding||'',borderRadius:el.style.borderRadius||''};}
+ function styleFrom(el){return {color:el.style.color||'',backgroundColor:el.style.backgroundColor||'',fontSize:el.style.fontSize||'',padding:el.style.padding||'',borderRadius:el.style.borderRadius||'',fontFamily:el.style.fontFamily||'',textAlign:el.style.textAlign||''};}
  function applyRecord(el,r){
   if(!el||!r)return;
   if(r.text!==undefined&&!el.children.length&&el.textContent!==r.text)el.textContent=r.text;
-  for(const k of ['color','backgroundColor','fontSize','padding','borderRadius'])if(r.style&&r.style[k])el.style[k]=r.style[k];
+  for(const k of ['color','backgroundColor','fontSize','padding','borderRadius','fontFamily','textAlign'])if(r.style&&r.style[k])el.style[k]=r.style[k];
  }
  async function loadAll(){
   if(typeof db==='undefined')return;
@@ -3523,7 +3524,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
   const path=safePath(selected),r=edits[path]||{style:{}};
   const text=document.getElementById('aniEditText').value;
   if(text.trim()&&!selected.children.length)r.text=text;
-  r.style={color:document.getElementById('aniEditColor').value,backgroundColor:document.getElementById('aniEditBg').value,fontSize:Math.max(10,Math.min(64,+document.getElementById('aniEditSize').value||16))+'px',padding:Math.max(0,Math.min(80,+document.getElementById('aniEditPad').value||0))+'px',borderRadius:selected.style.borderRadius||''};
+  r.style={color:document.getElementById('aniEditColor').value,backgroundColor:document.getElementById('aniEditBg').value,fontSize:Math.max(10,Math.min(64,+document.getElementById('aniEditSize').value||16))+'px',padding:Math.max(0,Math.min(80,+document.getElementById('aniEditPad').value||0))+'px',borderRadius:selected.style.borderRadius||'',fontFamily:document.getElementById('aniEditFont').value,textAlign:document.getElementById('aniEditAlign').value};
   edits[path]=r;applyRecord(selected,r);
  }
  async function saveAll(){
@@ -3569,6 +3570,8 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
   document.getElementById('aniEditBg').value=st.backgroundColor||'#ffffff';
   document.getElementById('aniEditSize').value=parseInt(st.fontSize)||16;
   document.getElementById('aniEditPad').value=parseInt(st.padding)||0;
+  document.getElementById('aniEditFont').value=st.fontFamily||'"Noto Sans Armenian","Noto Sans",Arial,sans-serif';
+  document.getElementById('aniEditAlign').value=st.textAlign||'';
   document.getElementById('aniUniversalEditor').style.display='grid';
  }
  document.addEventListener('click',e=>{
@@ -3581,7 +3584,7 @@ if(currentUser&&!isAdmin){checkStudentLessonReminder();setInterval(checkStudentL
  },true);
  window.aniEnableUniversalEditor=()=>toggle(true);
  window.aniLoadUniversalEdits=loadAll;
- const css=document.createElement('style');css.textContent='#aniContextEditBadge{font-family:Arial,sans-serif}#aniUniversalEditor{display:none;position:fixed;right:16px;bottom:16px;z-index:99999;width:min(390px,calc(100vw - 24px));max-height:75vh;overflow:auto;padding:16px;background:#071a36;color:white;border:1px solid #f4b942;border-radius:16px;box-shadow:0 15px 45px #0006;gap:10px;font:14px Arial}#aniUniversalEditor input{width:100%;padding:7px;margin-top:4px}#aniUniversalEditor .ani-edit-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}#aniUniversalEditor label{font-size:12px;color:#e5edf8}#aniUniversalEditor small{color:#d4dfef;line-height:1.5}.ani-edit-mode h1,.ani-edit-mode h2,.ani-edit-mode h3,.ani-edit-mode h4,.ani-edit-mode p,.ani-edit-mode .card,.ani-edit-mode .panel,.ani-edit-mode section,.ani-edit-mode article{cursor:crosshair}.ani-edit-selected{outline:3px dashed #e4a927!important;outline-offset:3px!important}';
+ const css=document.createElement('style');css.textContent='#aniContextEditBadge{font-family:'Noto Sans Armenian','Noto Sans',Arial,sans-serif}#aniUniversalEditor{font-family:'Noto Sans Armenian','Noto Sans',Arial,sans-serif}#aniUniversalEditor{display:none;position:fixed;right:16px;bottom:16px;z-index:99999;width:min(390px,calc(100vw - 24px));max-height:75vh;overflow:auto;padding:16px;background:#071a36;color:white;border:1px solid #f4b942;border-radius:16px;box-shadow:0 15px 45px #0006;gap:10px;font:14px Arial}#aniUniversalEditor input{width:100%;padding:7px;margin-top:4px}#aniUniversalEditor .ani-edit-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}#aniUniversalEditor label{font-size:12px;color:#e5edf8}#aniUniversalEditor small{color:#d4dfef;line-height:1.5}.ani-edit-mode h1,.ani-edit-mode h2,.ani-edit-mode h3,.ani-edit-mode h4,.ani-edit-mode p,.ani-edit-mode .card,.ani-edit-mode .panel,.ani-edit-mode section,.ani-edit-mode article{cursor:crosshair}.ani-edit-selected{outline:3px dashed #e4a927!important;outline-offset:3px!important}';
  document.head.append(css);
  const mo=new MutationObserver(()=>{if(isAdmin){Object.entries(edits).forEach(([path,record])=>{try{applyRecord(document.querySelector(path),record);}catch(e){}});}if(isAdmin&&!document.getElementById('aniEditLaunch')){const host=document.querySelector('#admin .admin-account-dashboard');if(host){const b=document.createElement('button');b.id='aniEditLaunch';b.type='button';b.className='blue';b.textContent='🖊️ Խմբագրել ցանկացած բլոկ / բաժին';b.onclick=()=>toggle(true);host.append(b);}}});
  mo.observe(document.body,{childList:true,subtree:true});
