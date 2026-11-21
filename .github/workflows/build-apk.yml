@@ -8,6 +8,9 @@ on:
       - "index.html"
       - ".github/workflows/build-apk.yml"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
