@@ -293,3 +293,27 @@ begin
   return new;
 end;
 $$;
+
+-- Automatically associate a student's booking with their active package.
+create or replace function public.ani_attach_active_package_to_booking()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare active_package record;
+begin
+  if new.package_enrollment_id is null and new.customer_user_id is not null then
+    select id, package_name, address into active_package
+    from public.student_package_enrollments
+    where student_user_id = new.customer_user_id and status = 'active'
+    order by created_at desc limit 1;
+    if active_package.id is not null then
+      new.package_enrollment_id := active_package.id;
+      new.package_name := active_package.package_name;
+      new.package_address := coalesce(active_package.address,'');
+    end if;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists ani_attach_active_package_before_booking on public.bookings;
+create trigger ani_attach_active_package_before_booking
+before insert on public.bookings
+for each row execute function public.ani_attach_active_package_to_booking();
