@@ -1297,12 +1297,31 @@ ob.observe(document.body,{subtree:true,childList:true,attributes:true,attributeF
 })();
 </script>
 <style id="ani-admin-preview-layout-fix">
-#adminPublicPreview>div:first-child{height:62px!important;min-height:62px!important;flex-basis:62px!important;padding:8px 14px!important;gap:10px!important;box-sizing:border-box}
-#adminPublicPreview>div:first-child>b{font-size:13px!important;line-height:1.25!important;max-width:55%;white-space:normal}
-#closeAdminPublicPreview{margin-top:8px!important;padding:7px 12px!important;font-size:12px!important;line-height:1.2!important;white-space:nowrap}
-#adminPublicPreviewFrame{height:calc(100% - 62px)!important}
-@media(max-width:600px){#adminPublicPreview>div:first-child{height:70px!important;min-height:70px!important;flex-basis:70px!important;padding:8px!important}#adminPublicPreview>div:first-child>b{font-size:11px!important;max-width:45%}#closeAdminPublicPreview{margin-top:10px!important;padding:7px 9px!important;font-size:11px!important}#adminPublicPreviewFrame{height:calc(100% - 70px)!important}}
-#aniPublic #ap-instructors{display:block!important}
+/* Preview controls: keep the return action well below the phone status area. */
+#adminPublicPreview{padding-top:env(safe-area-inset-top,0px)!important;box-sizing:border-box}
+#adminPublicPreview>div:first-child{
+ height:112px!important;min-height:112px!important;flex:0 0 112px!important;
+ display:flex!important;flex-direction:column!important;align-items:stretch!important;
+ justify-content:flex-start!important;gap:9px!important;padding:14px 14px 10px!important;
+ box-sizing:border-box!important;background:#061a33!important
+}
+#adminPublicPreview>div:first-child>b{
+ display:block!important;width:100%!important;max-width:none!important;
+ font-size:12px!important;line-height:1.25!important;white-space:normal!important;
+ overflow-wrap:anywhere!important
+}
+#closeAdminPublicPreview{
+ display:block!important;align-self:flex-end!important;margin:8px 0 0!important;
+ padding:8px 13px!important;font-size:12px!important;line-height:1.2!important;
+ min-height:38px!important;white-space:nowrap!important
+}
+#adminPublicPreviewFrame{height:calc(100% - 112px)!important;min-height:0!important;flex:1 1 auto!important}
+@media(min-width:700px){
+ #adminPublicPreview>div:first-child{height:88px!important;min-height:88px!important;flex-basis:88px!important;padding:12px 20px!important}
+ #adminPublicPreview>div:first-child>b{font-size:14px!important}
+ #closeAdminPublicPreview{margin-top:10px!important}
+ #adminPublicPreviewFrame{height:calc(100% - 88px)!important}
+}
 </style>
 <script id="ani-public-section-order-fix">
 (function(){
