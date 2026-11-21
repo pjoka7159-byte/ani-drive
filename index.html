@@ -1492,20 +1492,30 @@ db.auth.onAuthStateChange(function(event,session){if(session&&session.user)user=
 </script>
 
 <script id="ani-practical-packages-public">
-(function(){var db=window.__aniDriveGetClient('https://jtzogkpclweudpfhagvw.supabase.co','sb_publishable_UA3KSIc0wy3oiNf8sdkN4A_2Qn96sZU');function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-async function draw(){var root=document.getElementById('aniPublic');if(!root)return;var r=await db.from('site_sections').select('style,is_published,is_frozen').eq('slug','practical-lesson-packages').maybeSingle();if(r.error||!r.data||!r.data.is_published||r.data.is_frozen)return;var list=r.data.style&&r.data.style.packages||[];if(!list.length)return;
-var nav=root.querySelector('.ap-links')||root.querySelector('.ap-nav');if(!nav)return;
-var old=document.getElementById('aniPackagesNavWrap');if(old)old.remove();
-var wrap=document.createElement('div');wrap.id='aniPackagesNavWrap';wrap.style.cssText='position:relative;display:inline-flex;align-items:center';
-var trigger=document.createElement('button');trigger.type='button';trigger.className='ap-btn';trigger.textContent='ԳՈՐԾՆԱԿԱՆ ԴԱՍԵՐԻ ՓԱԹԵԹՆԵՐ';trigger.style.cssText='white-space:nowrap;cursor:pointer;background:#12385a;color:#fff;border:1px solid #36baf3;border-radius:10px;font-weight:800;padding:8px 11px;font-size:12px';
-var panel=document.createElement('div');panel.id='aniPackagesMenu';panel.hidden=true;panel.style.cssText='position:absolute;z-index:9999;top:calc(100% + 9px);left:0;width:min(360px,calc(100vw - 28px));max-height:70vh;overflow:auto;padding:10px;border:1px solid #2d5c7c;border-radius:13px;background:#071a30;box-shadow:0 16px 40px #0009';
-var detail=document.createElement('div');detail.id='aniPackageDetail';detail.hidden=true;detail.style.cssText='margin-top:10px;padding:12px;border-radius:10px;background:#102b46;color:#f4f8ff';
-panel.innerHTML='<div style="font-weight:900;color:#bcecff;padding:7px 8px">ԸՆՏՐԻՐ ՓԱԹԵԹԸ</div>'+list.map(function(p,i){return '<button type="button" data-package-index="'+i+'" style="display:block;width:100%;text-align:left;padding:11px;margin:5px 0;border:1px solid #315675;border-radius:9px;background:#102944;color:#fff;font-weight:800;cursor:pointer">'+esc(p.name||'Փաթեթ '+(i+1))+' <span style="float:right;color:#61d0ff">'+esc(p.price||'')+'</span></button>';}).join('');panel.appendChild(detail);wrap.appendChild(trigger);wrap.appendChild(panel);nav.appendChild(wrap);
-trigger.onclick=function(){panel.hidden=!panel.hidden;detail.hidden=true;};
-panel.querySelectorAll('[data-package-index]').forEach(function(btn){btn.onclick=function(){var p=list[Number(btn.dataset.packageIndex)]||{};detail.hidden=false;detail.innerHTML=(p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" style="width:100%;max-height:180px;object-fit:cover;border-radius:9px;margin-bottom:9px">':'')+'<h3 style="margin:3px 0 8px;color:#fff">'+esc(p.name||'Փաթեթ')+'</h3><div style="font-size:21px;font-weight:900;color:#55caff;margin-bottom:9px">'+esc(p.price||'Գինը նշված չէ')+'</div><p>Դասաժամերի քանակ՝ <b>'+esc(p.lessons||'—')+'</b></p><p>Տևողություն՝ <b>'+esc(p.duration||'—')+'</b></p><p>Տարածք՝ <b>'+esc(p.area||'—')+'</b></p>';};});
-document.addEventListener('click',function(e){if(!wrap.contains(e.target))panel.hidden=true;});
+(function(){
+var db=window.__aniDriveGetClient('https://jtzogkpclweudpfhagvw.supabase.co','sb_publishable_UA3KSIc0wy3oiNf8sdkN4A_2Qn96sZU');
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+async function draw(){
+var root=document.getElementById('aniPublic');if(!root)return;
+var r=await db.from('site_sections').select('style,is_published,is_frozen').eq('slug','practical-lesson-packages').maybeSingle();
+if(r.error||!r.data||!r.data.is_published||r.data.is_frozen)return;
+var list=r.data.style&&r.data.style.packages||[];if(!list.length)return;
+var quick=root.querySelector('.ap-quick-sections');if(!quick)return;
+var old=root.querySelector('#aniPackagesQuickItem');if(old)old.remove();
+var tile=document.createElement('div');tile.id='aniPackagesQuickItem';tile.style.cssText='position:relative;min-width:0';
+var trigger=document.createElement('button');trigger.type='button';trigger.innerHTML='<span>🚗</span><b>Գործնական դասերի փաթեթներ</b>';trigger.style.cssText='width:100%;height:100%;min-height:58px;display:flex;align-items:center;gap:9px;text-align:left;padding:13px;border:1px solid #285477;border-radius:12px;background:#0b2742;color:#eef8ff;font:inherit;cursor:pointer';
+var panel=document.createElement('div');panel.id='aniPackagesMenu';panel.hidden=true;panel.style.cssText='grid-column:1/-1;margin-top:10px;padding:12px;border:1px solid #285477;border-radius:13px;background:#081d33;color:#fff';
+var listBox=document.createElement('div');listBox.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px';
+list.forEach(function(p,i){var b=document.createElement('button');b.type='button';b.textContent=(p.name||'Փաթեթ '+(i+1))+(p.price?' · '+p.price:'');b.style.cssText='padding:11px;text-align:left;border:1px solid #315675;border-radius:9px;background:#102944;color:#fff;font-weight:800;cursor:pointer';b.onclick=function(){detail.hidden=false;detail.innerHTML=(p.image?'<img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" style="width:100%;max-width:420px;max-height:190px;object-fit:cover;border-radius:9px;margin-bottom:10px">':'')+'<h3 style="margin:3px 0 8px;color:#fff">'+esc(p.name||'Փաթեթ')+'</h3><div style="font-size:21px;font-weight:900;color:#55caff;margin-bottom:9px">'+esc(p.price||'Գինը նշված չէ')+'</div><p>Դասաժամերի քանակ՝ <b>'+esc(p.lessons||'—')+'</b></p><p>Տևողություն՝ <b>'+esc(p.duration||'—')+'</b></p><p>Տարածք՝ <b>'+esc(p.area||'—')+'</b></p>';};listBox.appendChild(b)});
+var detail=document.createElement('div');detail.hidden=true;detail.style.cssText='margin-top:12px;padding:13px;border-radius:10px;background:#102b46;color:#f4f8ff';
+panel.appendChild(listBox);panel.appendChild(detail);
+trigger.onclick=function(){panel.hidden=!panel.hidden;};
+tile.appendChild(trigger);
+var instructor=quick.querySelector('a[href="#ap-instructors"]');
+if(instructor&&instructor.parentNode===quick)instructor.after(tile);else quick.appendChild(tile);
+quick.after(panel);
 }
-draw().catch(function(e){console.warn('ANI packages:',e)});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){draw().catch(function(e){console.warn('ANI packages:',e)})},{once:true});else draw().catch(function(e){console.warn('ANI packages:',e)});
 })();
 </script>
 <script id="ani-cms-public-renderer">
