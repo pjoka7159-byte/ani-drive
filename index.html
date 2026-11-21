@@ -1134,7 +1134,7 @@ if(form){form.onsubmit=function(e){return window.__aniLogin(e);};}
 </div><script id="admin-public-preview-logic">(function(){
  const open=document.getElementById('adminPublicPreviewBtn'),panel=document.getElementById('adminPublicPreview'),frame=document.getElementById('adminPublicPreviewFrame'),close=document.getElementById('closeAdminPublicPreview');
  if(!open||!panel||!frame||!close)return;
- open.addEventListener('click',function(){panel.style.display='flex';panel.classList.remove('hidden');document.body.style.overflow='hidden';frame.src='about:blank';frame.src=location.origin+'/?publicPreview=1&fresh='+Date.now();});
+ open.addEventListener('click',function(){panel.style.display='flex';panel.classList.remove('hidden');document.body.style.overflow='hidden';frame.src='about:blank';frame.src=location.origin+location.pathname+'?publicPreview=1&fresh='+Date.now();});
  close.addEventListener('click',function(){panel.style.display='none';panel.classList.add('hidden');document.body.style.overflow='';});
 })();</script><style id="ani-public-preview-force-css">html,body{min-height:100%!important;overflow:auto!important}body.ani-public-mode #aniPublic{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important}body.ani-public-mode #authScreen,body.ani-public-mode #studentView,body.ani-public-mode #adminView,body.ani-public-mode>header.top{display:none!important;visibility:hidden!important}</style><script id="public-preview-mode">(function(){
 if(new URLSearchParams(location.search).get('publicPreview')!=='1')return;
