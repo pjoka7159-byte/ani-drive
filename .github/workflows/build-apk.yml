@@ -37,3 +37,10 @@ jobs:
           name: ANI Drive
           path: android/app/build/outputs/apk/debug/ANI Drive.apk
           if-no-files-found: error
+
+      - name: Publish APK download
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cp "app/build/outputs/apk/debug/ANI Drive.apk" "app/build/outputs/apk/debug/ANI-Drive.apk"
+          gh release create android-latest "app/build/outputs/apk/debug/ANI-Drive.apk" --repo "${GITHUB_REPOSITORY}" --title "ANI DRIVE Android" --notes "Latest ANI DRIVE Android application" --latest || gh release upload android-latest "app/build/outputs/apk/debug/ANI-Drive.apk" --repo "${GITHUB_REPOSITORY}" --clobber
