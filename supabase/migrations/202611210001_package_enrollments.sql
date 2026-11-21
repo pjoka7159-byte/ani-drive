@@ -39,3 +39,29 @@ create policy "admin update package days" on public.student_package_days for upd
 
 drop policy if exists "student update own package days" on public.student_package_days;
 create policy "student update own package days" on public.student_package_days for update to authenticated using (student_user_id = auth.uid()) with check (student_user_id = auth.uid());
+
+alter table public.student_package_days add column if not exists lesson_starts_at timestamptz;
+create or replace function public.enforce_package_day_change_rules()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  allowed_changes integer;
+  admin_user boolean;
+begin
+  admin_user := lower(coalesce(auth.jwt()->>'email','')) in ('pjoka7159@gmail.com','graergrigoryan1986@gmail.com');
+  if old.lesson_starts_at is distinct from new.lesson_starts_at and not admin_user then
+    select change_limit into allowed_changes from public.student_package_enrollments where id = old.enrollment_id;
+    if old.lesson_starts_at is not null and old.lesson_starts_at <= now() + interval '24 hours' then
+      raise exception 'Փաթեթի դասաժամը կարելի է փոխել միայն առնվազն 24 ժամ առաջ։';
+    end if;
+    if old.change_count >= coalesce(allowed_changes,0) then
+      raise exception 'Փաթեթի փոփոխությունների թույլատրելի քանակը սպառվել է։';
+    end if;
+    new.change_count := old.change_count + 1;
+    new.status := 'changed';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists student_package_day_change_guard on public.student_package_days;
+create trigger student_package_day_change_guard before update on public.student_package_days
+for each row execute function public.enforce_package_day_change_rules();
