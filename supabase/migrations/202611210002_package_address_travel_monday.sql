@@ -207,3 +207,49 @@ drop trigger if exists ani_minimum_package_days_before_completion on public.stud
 create trigger ani_minimum_package_days_before_completion
 before update of status on public.student_package_enrollments
 for each row execute function public.ani_require_minimum_package_days_before_completion();
+
+-- Recalculate the 30-minute travel block when an admin or student reschedules a package booking.
+create or replace function public.ani_apply_package_travel_buffer()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare lesson_end timestamptz;
+declare next_slot record;
+declare old_block record;
+begin
+  if tg_op = 'UPDATE' and old.slot_id is distinct from new.slot_id and old.package_enrollment_id is not null then
+    for old_block in
+      select slot_id, was_available from public.package_travel_blocks where booking_id = old.id
+    loop
+      if old_block.was_available and not exists (
+        select 1 from public.bookings b
+        where b.slot_id = old_block.slot_id and b.id <> old.id
+          and b.status in ('pending','confirmed')
+      ) then
+        update public.booking_slots set is_available = true where id = old_block.slot_id;
+      end if;
+    end loop;
+    delete from public.package_travel_blocks where booking_id = old.id;
+  elsif tg_op = 'UPDATE'
+    and old.package_enrollment_id is not distinct from new.package_enrollment_id
+    and old.slot_id is not distinct from new.slot_id then
+    return new;
+  end if;
+  if new.package_enrollment_id is null then return new; end if;
+  select ends_at into lesson_end from public.booking_slots where id = new.slot_id;
+  if lesson_end is null then return new; end if;
+  for next_slot in
+    select id, is_available from public.booking_slots
+    where starts_at >= lesson_end and starts_at < lesson_end + interval '30 minutes'
+      and is_available = true
+  loop
+    insert into public.package_travel_blocks(booking_id,slot_id,was_available)
+    values(new.id,next_slot.id,next_slot.is_available)
+    on conflict (booking_id,slot_id) do nothing;
+    update public.booking_slots set is_available = false where id = next_slot.id;
+  end loop;
+  return new;
+end;
+$$;
+drop trigger if exists ani_package_travel_buffer on public.bookings;
+create trigger ani_package_travel_buffer
+after insert or update of package_enrollment_id, slot_id on public.bookings
+for each row execute function public.ani_apply_package_travel_buffer();
