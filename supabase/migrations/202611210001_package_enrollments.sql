@@ -36,3 +36,6 @@ drop policy if exists "student package days insert own or admin" on public.stude
 create policy "student package days insert own or admin" on public.student_package_days for insert to authenticated with check (student_user_id = auth.uid() or lower(coalesce(auth.jwt()->>'email','')) in ('pjoka7159@gmail.com','graergrigoryan1986@gmail.com'));
 drop policy if exists "admin update package days" on public.student_package_days;
 create policy "admin update package days" on public.student_package_days for update to authenticated using (lower(coalesce(auth.jwt()->>'email','')) in ('pjoka7159@gmail.com','graergrigoryan1986@gmail.com')) with check (lower(coalesce(auth.jwt()->>'email','')) in ('pjoka7159@gmail.com','graergrigoryan1986@gmail.com'));
+
+drop policy if exists "student update own package days" on public.student_package_days;
+create policy "student update own package days" on public.student_package_days for update to authenticated using (student_user_id = auth.uid()) with check (student_user_id = auth.uid());
