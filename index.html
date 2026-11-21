@@ -1276,18 +1276,18 @@ ob.observe(document.body,{subtree:true,childList:true,attributes:true,attributeF
  function enableAudio(){readyAudio=true;try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){ctx=ctx||new AC();if(ctx.state==='suspended')ctx.resume()}}catch(e){}}
  document.addEventListener('pointerdown',enableAudio,{once:true,capture:true});
  document.addEventListener('keydown',enableAudio,{once:true,capture:true});
- function beep(){if(!readyAudio)return;try{var AC=window.AudioContext||window.webkitAudioContext;ctx=ctx||new AC();if(ctx.state==='suspended')ctx.resume();[880,660,880].forEach(function(f,i){var o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,ctx.currentTime+i*.18);g.gain.exponentialRampToValueAtTime(.16,ctx.currentTime+i*.18+.02);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+i*.18+.14);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+i*.18);o.stop(ctx.currentTime+i*.18+.16)})}catch(e){}}
+ function beep(){}
  function show(msg,button){if(!toast){toast=document.createElement('div');toast.style.cssText='position:fixed;z-index:999999;right:14px;bottom:18px;max-width:min(360px,calc(100vw - 28px));padding:12px 14px;border:1px solid #258fe0;border-radius:13px;background:#061b36;color:#fff;box-shadow:0 10px 35px #0009;font:600 13px/1.5 Arial';document.body.appendChild(toast)}toast.textContent=msg;if(button){var b=document.createElement('button');b.textContent='Թարմացնել';b.style.cssText='margin-left:10px;padding:7px 10px;border:0;border-radius:8px;background:#087ff0;color:white;font-weight:800';b.onclick=function(){location.reload()};toast.appendChild(b)}}
  function refresh(){if(pending)return;pending=true;setTimeout(function(){pending=false;var el=document.activeElement,editing=el&&(/INPUT|TEXTAREA|SELECT/.test(el.tagName)||el.isContentEditable);if(editing){show('Կայքի տվյալները թարմացվել են։ Պահպանիր ընթացիկ փոփոխություններդ, ապա թարմացրու էջը։',true)}else{location.reload()}},900)}
  db.auth.getSession().then(function(r){admin=!!(r.data&&r.data.session&&r.data.session.user&&emails.indexOf(String(r.data.session.user.email||'').toLowerCase())>=0);
- if(admin){show('Ադմինի կենդանի կապը միացված է։ Ձայնը կաշխատի առաջին հպումից հետո։',false)}
+ 
  });
  db.auth.onAuthStateChange(function(_e,s){admin=!!(s&&s.user&&emails.indexOf(String(s.user.email||'').toLowerCase())>=0)});
  var channel=db.channel('ani-drive-live-sync-v1');
  ['bookings','booking_slots','admin_notifications','site_sections','content_blocks','customer_profiles','registration_requests','student_progress','student_payments','student_documents','student_ratings','chat_messages'].forEach(function(table){
  channel.on('postgres_changes',{event:'*',schema:'public',table:table},function(payload){
  var isBooking=table==='bookings'||table==='admin_notifications';
- if(admin&&isBooking&&(payload.eventType==='INSERT'||table==='admin_notifications')){beep();if('Notification'in window&&Notification.permission==='granted'){try{new Notification('ANI DRIVE — նոր ամրագրում',{body:'Ադմինի վահանակում կա նոր թարմացում։',tag:'ani-drive-booking'})}catch(e){}}show('Նոր ամրագրում կամ ադմինային ծանուցում։',false)}
+ if(admin&&isBooking&&(payload.eventType==='INSERT'||table==='admin_notifications')){beep();show('Նոր ամրագրում կամ ադմինային ծանուցում։',false)}
  refresh();
  });
  });
@@ -1295,7 +1295,30 @@ ob.observe(document.body,{subtree:true,childList:true,attributes:true,attributeF
  window.addEventListener('ani-drive-enable-notifications',function(){if('Notification'in window&&Notification.permission==='default')Notification.requestPermission()});
  document.addEventListener('click',function(e){if(admin&&e.target.closest('button,a')){if('Notification'in window&&Notification.permission==='default')Notification.requestPermission().catch(function(){})}},{once:true,capture:true});
 })();
-</script></body></html><style>.pending-booking-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:14px 0 20px}.pending-booking-card{display:flex;flex-direction:column;gap:8px;text-align:left;padding:17px;border:1px solid #8b6b28;border-radius:17px;background:linear-gradient(145deg,#192f49,#0b1b30);color:#eef6ff;cursor:pointer;box-shadow:0 10px 28px #0003}.pending-booking-card:hover{border-color:#facc15}.pending-booking-card{cursor:default}.pending-proposal-box{margin-top:12px;padding:12px;border:1px solid #315675;border-radius:12px;background:#081a2e}.pending-booking-card small{color:#9fb4ca}.pending-detail-status{background:#59451b;color:#ffe28a;border-radius:10px;padding:10px;font-weight:900;text-align:center}.pending-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pending-detail-grid>div{background:#0b2036;border:1px solid #294663;border-radius:12px;padding:11px}.pending-detail-grid small{display:block;color:#91abc4;margin-bottom:5px}.pending-detail-grid b{overflow-wrap:anywhere}@media(max-width:520px){.pending-detail-grid{grid-template-columns:1fr}}</style>
+</script>
+<style id="ani-admin-preview-layout-fix">
+#adminPublicPreview>div:first-child{height:62px!important;min-height:62px!important;flex-basis:62px!important;padding:8px 14px!important;gap:10px!important;box-sizing:border-box}
+#adminPublicPreview>div:first-child>b{font-size:13px!important;line-height:1.25!important;max-width:55%;white-space:normal}
+#closeAdminPublicPreview{margin-top:8px!important;padding:7px 12px!important;font-size:12px!important;line-height:1.2!important;white-space:nowrap}
+#adminPublicPreviewFrame{height:calc(100% - 62px)!important}
+@media(max-width:600px){#adminPublicPreview>div:first-child{height:70px!important;min-height:70px!important;flex-basis:70px!important;padding:8px!important}#adminPublicPreview>div:first-child>b{font-size:11px!important;max-width:45%}#closeAdminPublicPreview{margin-top:10px!important;padding:7px 9px!important;font-size:11px!important}#adminPublicPreviewFrame{height:calc(100% - 70px)!important}}
+#aniPublic #ap-instructors{display:block!important}
+</style>
+<script id="ani-public-section-order-fix">
+(function(){
+ function arrange(){
+  var root=document.getElementById('aniPublic');if(!root)return;
+  var about=root.querySelector('#ap-about'),instructors=root.querySelector('#ap-instructors');
+  if(about&&instructors&&about.nextElementSibling!==instructors)about.insertAdjacentElement('afterend',instructors);
+ }
+ arrange();
+ var root=document.getElementById('aniPublic');
+ if(root){var mo=new MutationObserver(arrange);mo.observe(root,{childList:true,subtree:true});}
+ document.addEventListener('DOMContentLoaded',arrange);
+ setTimeout(arrange,500);setTimeout(arrange,1500);setTimeout(arrange,3500);
+})();
+</script>
+</body></html><style>.pending-booking-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:14px 0 20px}.pending-booking-card{display:flex;flex-direction:column;gap:8px;text-align:left;padding:17px;border:1px solid #8b6b28;border-radius:17px;background:linear-gradient(145deg,#192f49,#0b1b30);color:#eef6ff;cursor:pointer;box-shadow:0 10px 28px #0003}.pending-booking-card:hover{border-color:#facc15}.pending-booking-card{cursor:default}.pending-proposal-box{margin-top:12px;padding:12px;border:1px solid #315675;border-radius:12px;background:#081a2e}.pending-booking-card small{color:#9fb4ca}.pending-detail-status{background:#59451b;color:#ffe28a;border-radius:10px;padding:10px;font-weight:900;text-align:center}.pending-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pending-detail-grid>div{background:#0b2036;border:1px solid #294663;border-radius:12px;padding:11px}.pending-detail-grid small{display:block;color:#91abc4;margin-bottom:5px}.pending-detail-grid b{overflow-wrap:anywhere}@media(max-width:520px){.pending-detail-grid{grid-template-columns:1fr}}</style>
 <style id="ani-editor-v2-css">
 #aniEditorLaunch{position:fixed;right:18px;bottom:18px;z-index:9998;display:none;border:1px solid #38bdf8;background:linear-gradient(135deg,#075985,#0ea5e9);color:#fff;border-radius:999px;padding:13px 18px;font-weight:900;box-shadow:0 12px 36px #0008}
 #aniEditorOverlay{position:fixed;inset:0;z-index:9999;background:#020817ed;display:none;overflow:auto;padding:18px;color:#eef6ff;font:14px/1.45 Inter,Arial,sans-serif}
