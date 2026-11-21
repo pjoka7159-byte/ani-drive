@@ -12,7 +12,7 @@ import android.graphics.Color;
 
 public class MainActivity extends Activity {
     private WebView webView;
-    private static final String SITE_URL = "https://ani-drive-4qcv4p29l-pjoka7159-5657.vercel.app/";
+    private static final String SITE_URL = "https://pjoka7159-byte.github.io/ani-drive/";
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
