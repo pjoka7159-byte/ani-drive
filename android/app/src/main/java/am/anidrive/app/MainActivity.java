@@ -9,6 +9,7 @@ import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.ValueCallback;
 import android.graphics.Color;
 
@@ -32,6 +33,9 @@ public class MainActivity extends Activity {
         settings.setUseWideViewPort(true);
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setSupportMultipleWindows(false);
+        // Always fetch the current published site; do not show an old WebView-cached page.
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.clearCache(true);
         webView.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return false;
@@ -56,8 +60,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        if (savedInstanceState == null) webView.loadUrl(SITE_URL);
-        else webView.restoreState(savedInstanceState);
+        webView.loadUrl(SITE_URL + "?app_refresh=" + System.currentTimeMillis());
     }
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
