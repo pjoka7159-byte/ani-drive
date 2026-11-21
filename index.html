@@ -746,6 +746,7 @@ host.querySelectorAll('[data-admin-cancel-booking]').forEach(btn=>btn.onclick=as
  btn.disabled=true;btn.textContent='Չեղարկվում է…';
  const result=await db.from('bookings').update({status:'cancelled',cancelled_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',id).in('status',['pending','confirmed']);
  if(result.error){alert('Չհաջողվեց չեղարկել ամրագրումը․ '+result.error.message);btn.disabled=false;btn.textContent='Չեղարկել';return;}
+ const packageDay=await db.from('student_package_days').update({status:'cancelled'}).eq('booking_id',id);if(packageDay.error)console.warn('Package day cancellation:',packageDay.error.message);
  await loadAdmin();
 });host.querySelectorAll('[data-pending-open-detail]').forEach(btn=>btn.onclick=()=>openBookingDetails(btn.dataset.pendingOpenDetail));
 host.querySelectorAll('[data-pending-reject]').forEach(btn=>btn.onclick=()=>{const id=btn.dataset.pendingReject;const reason=host.querySelector('[data-reject-reason="'+id+'"]').value.trim();setPendingDecision(id,'rejected',reason||'Մերժվել է ադմինի կողմից։');});
