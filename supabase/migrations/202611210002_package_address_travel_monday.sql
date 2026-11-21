@@ -253,3 +253,43 @@ drop trigger if exists ani_package_travel_buffer on public.bookings;
 create trigger ani_package_travel_buffer
 after insert or update of package_enrollment_id, slot_id on public.bookings
 for each row execute function public.ani_apply_package_travel_buffer();
+
+-- Apply the 24-hour and package change-count rules to admins as well as students.
+create or replace function public.enforce_package_day_change_rules()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare allowed_changes integer;
+declare admin_user boolean;
+begin
+  admin_user := lower(coalesce(auth.jwt()->>'email','')) in ('pjoka7159@gmail.com','graergrigoryan1986@gmail.com');
+  if not admin_user then
+    if new.enrollment_id is distinct from old.enrollment_id
+      or new.student_user_id is distinct from old.student_user_id
+      or new.booking_id is distinct from old.booking_id
+      or new.created_at is distinct from old.created_at then
+      raise exception 'Փաթեթի ամրագրման կապակցված տվյալները փոփոխել չի կարելի։';
+    end if;
+  end if;
+  if old.lesson_starts_at is distinct from new.lesson_starts_at then
+    select change_limit into allowed_changes from public.student_package_enrollments where id = old.enrollment_id;
+    if old.lesson_starts_at is not null and old.lesson_starts_at <= now() + interval '24 hours' then
+      raise exception 'Փաթեթի դասաժամը կարելի է փոխել միայն առնվազն 24 ժամ առաջ։';
+    end if;
+    if old.change_count >= coalesce(allowed_changes,0) then
+      raise exception 'Փաթեթի փոփոխությունների թույլատրելի քանակը սպառվել է։';
+    end if;
+    new.change_count := old.change_count + 1;
+    new.status := 'changed';
+  else
+    if new.lesson_date is distinct from old.lesson_date then
+      raise exception 'Օրը փոխելու համար ընտրեք նոր ազատ դասաժամ։';
+    end if;
+    if new.change_count is distinct from old.change_count then
+      raise exception 'Փոփոխությունների հաշվիչը ձեռքով փոխել չի կարելի։';
+    end if;
+    if not admin_user and new.status is distinct from old.status and new.status <> 'cancelled' then
+      raise exception 'Աշակերտը կարող է միայն չեղարկել փաթեթի օրը։';
+    end if;
+  end if;
+  return new;
+end;
+$$;
