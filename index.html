@@ -1368,6 +1368,9 @@ ob.observe(document.body,{subtree:true,childList:true,attributes:true,attributeF
  channel.on('postgres_changes',{event:'*',schema:'public',table:table},function(payload){
  var isBooking=table==='bookings'||table==='admin_notifications';
  if(admin&&isBooking&&(payload.eventType==='INSERT'||table==='admin_notifications')){beep();show('Նոր ամրագրում կամ ադմինային ծանուցում։',false)}
+ // Slot availability changes are handled locally by the admin calendar; do not reload that page.
+ var adminCalendar=document.getElementById('adminCalendarPage');
+ if(table==='booking_slots'&&adminCalendar&&!adminCalendar.classList.contains('hidden'))return;
  refresh();
  });
  });
