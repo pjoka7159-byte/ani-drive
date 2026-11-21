@@ -120,3 +120,90 @@ for update to authenticated
 using (student_user_id = auth.uid())
 with check (student_user_id = auth.uid());
 
+
+-- Prevent students from editing package ownership, limits, or enrollment status.
+create or replace function public.ani_limit_package_address_changes()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if lower(coalesce(auth.jwt()->>'email','')) not in ('pjoka7159@gmail.com','graergrigoryan1986@gmail.com') then
+    if new.student_user_id is distinct from old.student_user_id
+      or new.package_name is distinct from old.package_name
+      or new.package_snapshot is distinct from old.package_snapshot
+      or new.min_required_days is distinct from old.min_required_days
+      or new.change_limit is distinct from old.change_limit
+      or new.status is distinct from old.status
+      or new.address_change_limit is distinct from old.address_change_limit
+      or new.address_change_count is distinct from old.address_change_count then
+      raise exception 'Աշակերտը կարող է փոխել միայն փաթեթի հանդիպման հասցեն։';
+    end if;
+  end if;
+  if old.address is distinct from new.address then
+    if old.address_change_count >= coalesce(old.address_change_limit,2) then
+      raise exception 'Փաթեթի հասցեն կարելի է փոխել առավելագույնը 2 անգամ։';
+    end if;
+    new.address_change_count := old.address_change_count + 1;
+  else
+    new.address_change_count := old.address_change_count;
+  end if;
+  return new;
+end;
+$$;
+
+-- Students may only reschedule their package day; they cannot forge completion or change ownership.
+create or replace function public.enforce_package_day_change_rules()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare allowed_changes integer;
+declare admin_user boolean;
+begin
+  admin_user := lower(coalesce(auth.jwt()->>'email','')) in ('pjoka7159@gmail.com','graergrigoryan1986@gmail.com');
+  if not admin_user then
+    if new.enrollment_id is distinct from old.enrollment_id
+      or new.student_user_id is distinct from old.student_user_id
+      or new.booking_id is distinct from old.booking_id
+      or new.created_at is distinct from old.created_at then
+      raise exception 'Փաթեթի ամրագրման կապակցված տվյալները փոփոխել չի կարելի։';
+    end if;
+    if old.lesson_starts_at is distinct from new.lesson_starts_at then
+      select change_limit into allowed_changes from public.student_package_enrollments where id = old.enrollment_id;
+      if old.lesson_starts_at is not null and old.lesson_starts_at <= now() + interval '24 hours' then
+        raise exception 'Փաթեթի դասաժամը կարելի է փոխել միայն առնվազն 24 ժամ առաջ։';
+      end if;
+      if old.change_count >= coalesce(allowed_changes,0) then
+        raise exception 'Փաթեթի փոփոխությունների թույլատրելի քանակը սպառվել է։';
+      end if;
+      new.change_count := old.change_count + 1;
+      new.status := 'changed';
+    else
+      if new.lesson_date is distinct from old.lesson_date then
+        raise exception 'Օրը փոխելու համար ընտրեք նոր ազատ դասաժամ։';
+      end if;
+      if new.change_count is distinct from old.change_count then
+        raise exception 'Փոփոխությունների հաշվիչը ձեռքով փոխել չի կարելի։';
+      end if;
+      if new.status is distinct from old.status and new.status <> 'cancelled' then
+        raise exception 'Աշակերտը կարող է միայն չեղարկել փաթեթի օրը։';
+      end if;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+create or replace function public.ani_require_minimum_package_days_before_completion()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare day_count integer;
+begin
+  if new.status = 'completed' and old.status is distinct from new.status then
+    select count(*) into day_count from public.student_package_days
+    where enrollment_id = new.id and status <> 'cancelled';
+    if day_count < new.min_required_days then
+      raise exception 'Փաթեթը ավարտելու համար անհրաժեշտ է ամրագրել առնվազն % տարբեր օր։', new.min_required_days;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists ani_minimum_package_days_before_completion on public.student_package_enrollments;
+create trigger ani_minimum_package_days_before_completion
+before update of status on public.student_package_enrollments
+for each row execute function public.ani_require_minimum_package_days_before_completion();
