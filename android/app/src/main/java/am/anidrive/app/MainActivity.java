@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
             webView.evaluateJavascript(
                 "(function(){var e=document.getElementById('aniEditorOverlay');if(e&&e.classList.contains('open')){var b=document.getElementById('aniEdClose');if(b)b.click();return 'editor';}var m=document.getElementById('modal');if(m&&!m.classList.contains('hidden')){m.classList.add('hidden');return 'modal';}return 'none';})()",
                 value -> {
-                    if ("\\"editor\\"".equals(value) || "\\"modal\\"".equals(value)) return;
+                    if ("\"editor\"".equals(value) || "\"modal\"".equals(value)) return;
                     if (webView != null && webView.canGoBack()) webView.goBack();
                     else superOnBackPressed();
                 }
