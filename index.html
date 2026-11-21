@@ -1579,3 +1579,33 @@ render();
  #aniPublic .ap-head-actions #logoutBtn{min-width:88px!important;min-height:40px!important;padding:8px 9px!important;font-size:11px!important;margin:4px 0 4px 5px!important}
 }
 </style>
+<script>
+(function(){
+  if(window.__aniApkPromoInit)return;window.__aniApkPromoInit=true;
+  var KEY='ani_drive_apk_promo_seen_v1',COOLDOWN=3*24*60*60*1000;
+  try{if(Date.now()-Number(localStorage.getItem(KEY)||0)<COOLDOWN)return;}catch(e){}
+  function show(){
+    if(!document.body||document.getElementById('ani-apk-promo'))return;
+    try{localStorage.setItem(KEY,String(Date.now()));}catch(e){}
+    var box=document.createElement('aside');box.id='ani-apk-promo';
+    box.innerHTML='<button type="button" class="ani-apk-close" aria-label="Փակել">×</button><div class="ani-apk-copy"><span class="ani-apk-icon">↓</span><span><b>ANI DRIVE հավելված</b><small>Ներբեռնիր Android-ի համար</small></span></div><a class="ani-apk-download" href="https://github.com/pjoka7159-byte/ani-drive/releases/download/android-latest/ANI-Drive.apk" download>Ներբեռնել APK</a>';
+    document.body.appendChild(box);
+    box.querySelector('.ani-apk-close').addEventListener('click',function(){box.remove();});
+    box.querySelector('.ani-apk-download').addEventListener('click',function(){box.remove();});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(show,12000);},{once:true});
+  else setTimeout(show,12000);
+})();
+</script>
+<style>
+#ani-apk-promo{position:fixed;right:18px;bottom:18px;z-index:99990;width:min(310px,calc(100vw - 28px));padding:13px 14px 14px;background:linear-gradient(145deg,#102d4d,#07182d);border:1px solid rgba(75,190,255,.48);border-radius:15px;box-shadow:0 12px 38px rgba(0,0,0,.34);color:#f4f8ff;font-family:inherit;animation:aniApkIn .35s ease-out}
+#ani-apk-promo .ani-apk-close{position:absolute;right:7px;top:5px;border:0;background:transparent;color:#a9c3df;font-size:22px;line-height:1;cursor:pointer;padding:3px 6px}
+#ani-apk-promo .ani-apk-copy{display:flex;align-items:center;gap:10px;padding-right:20px}
+#ani-apk-promo .ani-apk-icon{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:10px;background:#123f65;color:#72d8ff;font-size:23px;font-weight:900}
+#ani-apk-promo .ani-apk-copy b{display:block;font-size:13px;line-height:1.35}
+#ani-apk-promo .ani-apk-copy small{display:block;margin-top:3px;color:#a9c1da;font-size:11px}
+#ani-apk-promo .ani-apk-download{display:block;margin-top:11px;padding:9px 12px;border-radius:9px;text-align:center;text-decoration:none;background:#168bd0;color:white;font-size:12px;font-weight:850}
+#ani-apk-promo .ani-apk-download:hover{background:#20a9ed}
+@keyframes aniApkIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){#ani-apk-promo{right:10px;bottom:10px;width:min(285px,calc(100vw - 20px));padding:11px}}
+</style>
