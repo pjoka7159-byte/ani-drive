@@ -530,7 +530,27 @@ function closeModal(){$('modal').classList.add('hidden');}
 $('closeModal').onclick=closeModal;$('modal').addEventListener('click',e=>{if(e.target===$('modal'))closeModal();});
 async function login(e){e.preventDefault();const btn=$('loginBtn');btn.disabled=true;$('loginMsg').textContent='Մուտքը ստուգվում է…';try{const {data,error}=await db.functions.invoke('phone-password-login',{body:{identifier:$('identifier').value.trim(),password:$('password').value}});if(error)throw error;const session=data&&data.session;if(!session||!session.access_token||!session.refresh_token)throw new Error(data&&data.error?data.error:'Մուտքի պատասխանը թերի է։');const {error:setError}=await db.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});if(setError)throw setError;const {data:who,error:whoError}=await db.auth.getUser();if(whoError)throw whoError;user=who.user;await loadApp();}catch(err){$('loginMsg').textContent=(err&&err.message)||'Մուտքը չհաջողվեց։ Ստուգեք տվյալները։';}finally{btn.disabled=false;}}
 window.__aniLogin=login;
-$('logoutBtn').onclick=async()=>{await db.auth.signOut();user=null;profile=null;showPublic();};
+$('logoutBtn').onclick=async(e)=>{
+ e&&e.preventDefault();
+ const btn=$('logoutBtn');
+ if(btn.dataset.signingOut==='1')return;
+ btn.dataset.signingOut='1';btn.disabled=true;btn.textContent='Դուրս է գալիս…';
+ try{
+  const result=await db.auth.signOut({scope:'local'});
+  if(result&&result.error)throw result.error;
+  user=null;profile=null;
+  const preview=$('adminPublicPreview');
+  if(preview){preview.style.display='none';preview.classList.add('hidden');}
+  document.body.style.overflow='';
+  showPublic();
+  window.scrollTo({top:0,behavior:'instant'});
+ }catch(err){
+  btn.textContent='Դուրս գալ ↗';
+  alert('Դուրս գալ չհաջողվեց։ '+((err&&err.message)||'Կրկին փորձեք։'));
+ }finally{
+  btn.disabled=false;delete btn.dataset.signingOut;
+ }
+};
 function syncHeaderProfile(){const btn=$('headerProfileBtn'),avatar=$('headerProfileAvatar'),nameEl=$('headerProfileName');if(!btn||!user)return;const meta=user.user_metadata||{};const label=(profile&&profile.full_name)||meta.full_name||meta.name||(user.email||'Օգտատեր').split('@')[0]||'Օգտատեր';nameEl.textContent=label;avatar.replaceChildren();const photo=(profile&&profile.avatar_url)||meta.avatar_url||meta.picture||'';if(photo){try{const u=new URL(photo);if(u.protocol==='https:'||u.protocol==='http:'){const img=document.createElement('img');img.src=u.href;img.alt='Պրոֆիլի լուսանկար';avatar.appendChild(img);}else avatar.textContent='👤';}catch(_){avatar.textContent='👤';}}else avatar.textContent=(label.trim().charAt(0)||'👤').toUpperCase();btn.classList.remove('hidden');}
 async function loadApp(){document.body.classList.remove('ani-public-mode','ani-auth-mode');document.body.classList.add('ani-dashboard-mode');const publicRoot=$('aniPublic');if(publicRoot)publicRoot.style.display='none';const top=document.querySelector('header.top');if(top)top.style.display='flex';if(!user){const {data,error}=await db.auth.getUser();if(error||!data.user){showAuth('Մուտքի սեսիան չի հաստատվել։ Կրկին մուտք գործեք։');return;}user=data.user;}isAdmin=ADMIN_EMAILS.includes(String(user.email||'').toLowerCase())||(user.app_metadata&&['admin','operator'].includes(user.app_metadata.role));$('authScreen').classList.add('hidden');document.querySelectorAll('[data-ap-login]').forEach(b=>{b.hidden=true;b.style.display='none';});const er=$('extraRegister');if(er)er.classList.add('hidden');$('logoutBtn').classList.remove('hidden');$('userLabel').textContent=user.email||'';if(isAdmin){$('studentView').classList.add('hidden');$('adminView').classList.remove('hidden');try{await loadAdmin();syncHeaderProfile();}catch(err){$('adminPanel').innerHTML='<div class="notice">Մուտքը հաջողվեց, բայց ադմինի տվյալները չբեռնվեցին․ '+esc(err&&err.message?err.message:String(err))+' <button class="btn ghost" id="retryAdminLoad">↻ Կրկին փորձել</button></div>';const retry=$('retryAdminLoad');if(retry)retry.onclick=()=>loadApp();}}else{$('adminView').classList.add('hidden');$('studentView').classList.remove('hidden');try{await loadStudent();syncHeaderProfile();}catch(err){$('studentPanel').innerHTML='<div class="notice">Մուտքը հաջողվեց, բայց աշակերտի տվյալները չբեռնվեցին․ '+esc(err&&err.message?err.message:String(err))+' <button class="btn ghost" id="retryStudentLoad">↻ Կրկին փորձել</button></div>';const retry=$('retryStudentLoad');if(retry)retry.onclick=()=>loadApp();}setPublicCalendarLoginState(true);currentStudentTab='book';renderStudent();$('studentView').classList.remove('hidden');if(publicRoot)publicRoot.style.display='block';document.body.classList.remove('ani-dashboard-mode','ani-auth-mode');document.body.classList.add('ani-public-mode');const actions=document.querySelector('#aniPublic .ap-head-actions');const hp=$('headerProfileBtn'),logout=$('logoutBtn');if(actions&&hp&&logout){actions.appendChild(hp);actions.appendChild(logout);hp.classList.remove('hidden');logout.classList.remove('hidden');hp.style.display='inline-flex';logout.style.display='inline-flex';hp.style.marginLeft='8px';logout.style.marginLeft='8px';hp.style.padding='7px 10px';hp.style.border='1px solid #28749a';hp.style.borderRadius='10px';hp.style.background='#0d2944';hp.style.color='#e7f6ff';logout.style.padding='8px 10px';logout.style.borderRadius='10px';}}}
 function aniHyDate(value,parts={}){const d=value instanceof Date?value:new Date(value);if(!Number.isFinite(d.getTime()))return '—';const weekdays=['կիրակի','երկուշաբթի','երեքշաբթի','չորեքշաբթի','հինգշաբթի','ուրբաթ','շաբաթ'];const months=['հունվար','փետրվար','մարտ','ապրիլ','մայիս','հունիս','հուլիս','օգոստոս','սեպտեմբեր','հոկտեմբեր','նոյեմբեր','դեկտեմբեր'];const a=[];if(parts.weekday)a.push(weekdays[d.getDay()]);if(parts.day)a.push(d.getDate());if(parts.month)a.push(months[d.getMonth()]);if(parts.year)a.push(d.getFullYear());return a.join(' ');}
@@ -1443,3 +1463,19 @@ extra.innerHTML=dynamic.join('');
 render();
 })();
 </script>
+
+<style id="ani-logout-button-fix">
+#aniPublic .ap-head-actions #logoutBtn,#adminView~#logoutBtn,header.top #logoutBtn{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ visibility:visible!important;opacity:1!important;pointer-events:auto!important;
+ min-height:42px!important;min-width:92px!important;padding:9px 12px!important;
+ margin:6px 0 6px 8px!important;border:1px solid #48b9f2!important;border-radius:11px!important;
+ background:#12385a!important;color:#fff!important;font-size:13px!important;
+ font-weight:850!important;line-height:1.2!important;white-space:nowrap!important;
+ cursor:pointer!important;touch-action:manipulation!important;z-index:20!important;
+}
+#logoutBtn:disabled{opacity:.7!important;cursor:wait!important}
+@media(max-width:600px){
+ #aniPublic .ap-head-actions #logoutBtn{min-width:88px!important;min-height:40px!important;padding:8px 9px!important;font-size:11px!important;margin:4px 0 4px 5px!important}
+}
+</style>
