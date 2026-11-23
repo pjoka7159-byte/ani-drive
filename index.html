@@ -807,30 +807,50 @@ async function renderStudentPackagePanel(){
  const host=$('studentPackageHome');if(!host)return;
  const button=$('openMyPackages');if(!button)return;
  button.onclick=async()=>{
+  if(!user||!user.id)return alert('Խնդրում ենք կրկին մուտք գործել։');
   button.disabled=true;button.textContent='Բեռնվում է…';
   try{
-   const er=await db.from('student_package_enrollments').select('*').eq('student_user_id',user.id).in('status',['active','completed','pending']).order('created_at',{ascending:false});
-   if(er.error)throw er.error;
-   const enrollments=er.data||[];
+   const [er,br]=await Promise.all([
+    db.from('student_package_enrollments').select('*').eq('student_user_id',user.id).order('created_at',{ascending:false}),
+    db.from('bookings').select('id,slot_id,customer_name,customer_phone,status,created_at,updated_at,package_name,package_summary,package_address,package_enrollment_id,booking_slots:booking_slots!bookings_slot_id_fkey(starts_at,ends_at)').eq('customer_user_id',user.id).order('created_at',{ascending:false})
+   ]);
+   if(er.error)throw er.error;if(br.error)throw br.error;
+   const enrollments=er.data||[],bookings=(br.data||[]).filter(b=>b.package_name||b.package_enrollment_id);
    let html='';
-   const packageDayById=new Map(),packageEnrollmentById=new Map();
+   const packageDayById=new Map(),packageEnrollmentById=new Map(),coveredBookingIds=new Set();
+   const parseSnapshot=v=>{if(!v)return {};if(typeof v==='string'){try{return JSON.parse(v);}catch(e){return {};}}return v;};
+   const showDay=(d,i,linked)=>{
+    const start=(linked&&linked.booking_slots&&linked.booking_slots.starts_at)||d.lesson_starts_at;
+    const clock=start?new Date(start).toLocaleTimeString('hy-AM',{timeZone:'Asia/Yerevan',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}):'';
+    const date=d.lesson_date||(start?new Date(start).toLocaleDateString('en-CA',{timeZone:'Asia/Yerevan'}):'—');
+    const editable=!!(linked&&linked.status==='pending'&&start&&new Date(start).getTime()>Date.now());
+    return '<div class="listrow" style="gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><b>Դասաժամ №'+(i+1)+'</b><div class="muted small">📅 '+esc(date)+(clock?' · '+esc(clock):'')+'</div></div><span class="pill">'+esc(({booked:'Ամրագրված',changed:'Փոփոխված',cancelled:'Չեղարկված',completed:'Կայացած'})[d.status]||d.status||'Ամրագրված')+'</span>'+(editable?'<div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn ghost" data-package-day-edit="'+esc(d.id||'')+'" data-booking-id="'+esc(linked.id)+'">✏️ Փոխել</button><button type="button" class="btn danger" data-package-day-remove="'+esc(d.id||'')+'" data-booking-id="'+esc(linked.id)+'" style="padding:6px 10px">✕</button></div>':'')+'</div>';
+   };
+   const packageStatus={active:'Ակտիվ',completed:'Ավարտված',pending:'Սպասում է հաստատման',cancelled:'Չեղարկված',rejected:'Մերժված'};
    for(const e of enrollments){
     packageEnrollmentById.set(e.id,e);
     const dr=await db.from('student_package_days').select('*').eq('enrollment_id',e.id).order('lesson_date',{ascending:true});
     if(dr.error)throw dr.error;
-    const days=dr.data||[],snap=e.package_snapshot||{};days.forEach(d=>packageDayById.set(d.id,d));
-    const dayHtml=days.map((d,i)=>{const linked=(studentBookings||[]).find(b=>b.id===d.booking_id),start=(linked&&linked.booking_slots&&linked.booking_slots.starts_at)||d.lesson_starts_at,future=start&&new Date(start).getTime()>Date.now(),editable=d.status!=='completed'&&d.status!=='cancelled'&&linked&&linked.status==='pending'&&future,clock=start?new Date(start).toLocaleTimeString('hy-AM',{timeZone:'Asia/Yerevan',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}):'';return '<div class="listrow" style="gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><b>Դասաժամ №'+(i+1)+'</b><div class="muted small">📅 '+esc(d.lesson_date||'—')+(clock?' · '+esc(clock):'')+'</div></div><span class="pill">'+esc(({booked:'Ամրագրված',changed:'Փոփոխված',cancelled:'Չեղարկված',completed:'Կայացած'})[d.status]||d.status||'—')+'</span>'+(editable?'<div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn ghost" data-package-day-edit="'+esc(d.id)+'" data-booking-id="'+esc(linked.id)+'">✏️ Փոխել</button><button type="button" class="btn danger" data-package-day-remove="'+esc(d.id)+'" data-booking-id="'+esc(linked.id)+'" style="padding:6px 10px">✕</button></div>':'')+'</div>';}).join('')||'<div class="notice">Դասաժամեր դեռ ամրագրված չեն։</div>';
-    html+='<section class="card" style="margin:12px 0;border:1px solid #38bdf8;background:linear-gradient(145deg,#123b61,#081a2d)"><div class="row"><h3 style="margin:0">📦 '+esc(e.package_name||'Փաթեթ')+'</h3><span class="pill">'+esc(({active:'Ակտիվ',completed:'Ավարտված',pending:'Սպասում է հաստատման',cancelled:'Չեղարկված',rejected:'Մերժված'})[e.status]||e.status||'—')+'</span></div><div class="kv" style="margin-top:12px"><div><small>Արժեք</small>'+esc(snap.price||'—')+'</div><div><small>Դասաժամերի քանակ</small>'+esc(snap.lessons||'—')+'</div><div><small>Տևողություն</small>'+esc(snap.duration||'—')+'</div><div><small>Տարածք</small>'+esc(snap.area||'—')+'</div><div><small>Մեկնարկի հասցե</small>'+esc(e.address||snap.address||'—')+'</div><div><small>Ավարտի հասցե</small>'+esc(snap.endAddress||'—')+'</div><div><small>Պարտադիր օրեր</small>'+Number(e.min_required_days||0)+'</div><div><small>Փոփոխությունների սահմանաչափ</small>'+Number(e.change_limit||0)+'</div><div><small>Փաթեթի ակտիվացման ամսաթիվ</small>'+esc(e.created_at?new Date(e.created_at).toLocaleDateString('hy-AM',{timeZone:'Asia/Yerevan'}):'—')+'</div><div><small>Առաջին դասի ամսաթիվ</small>'+esc(e.first_lesson_date||'Կսահմանվի առաջին ամրագրումից')+'</div><div><small>Փաթեթի ավարտի ամսաթիվ</small>'+esc(e.expires_on||'Կհաշվարկվի առաջին դասից հետո')+'</div><div><small>Գործողության ժամկետ</small>'+Number(e.validity_days||snap.validityDays||30)+' օր՝ առաջին դասից</div></div><h4 style="margin:14px 0 8px">Դասաժամերի հերթականություն</h4>'+dayHtml+'</section>';
+    const days=dr.data||[],snap=parseSnapshot(e.package_snapshot);
+    const linkedBookings=bookings.filter(b=>b.package_enrollment_id===e.id);
+    linkedBookings.forEach(b=>coveredBookingIds.add(b.id));
+    const dayRows=days.length?days.map((d,i)=>{packageDayById.set(d.id,d);return showDay(d,i,bookings.find(b=>b.id===d.booking_id)||linkedBookings.find(b=>b.id===d.booking_id));}):linkedBookings.map((b,i)=>showDay({lesson_date:(b.booking_slots||{}).starts_at?new Date(b.booking_slots.starts_at).toLocaleDateString('en-CA',{timeZone:'Asia/Yerevan'}):'—',status:b.status},i,b));
+    const dayHtml=dayRows.join('')||'<div class="notice">Դասաժամերի տվյալները դեռ հասանելի չեն։</div>';
+    html+='<section class="card" style="margin:12px 0;border:1px solid #38bdf8;background:linear-gradient(145deg,#123b61,#081a2d)"><div class="row"><h3 style="margin:0">📦 '+esc(e.package_name||snap.name||'Վարորդական դասերի փաթեթ')+'</h3><span class="pill">'+esc(packageStatus[e.status]||e.status||'—')+'</span></div><div class="kv" style="margin-top:12px"><div><small>Արժեք</small>'+esc(snap.price||e.price||'—')+'</div><div><small>Դասաժամերի քանակ</small>'+esc(snap.lessons||snap.lessonCount||days.length||linkedBookings.length||'—')+'</div><div><small>Տևողություն</small>'+esc(snap.duration||'—')+'</div><div><small>Տարածք</small>'+esc(snap.area||'—')+'</div><div><small>Մեկնարկի հասցե</small>'+esc(e.address||snap.address||'—')+'</div><div><small>Ավարտի հասցե</small>'+esc(snap.endAddress||e.end_address||'—')+'</div><div><small>Պարտադիր օրեր</small>'+Number(e.min_required_days||0)+'</div><div><small>Փոփոխությունների սահմանաչափ</small>'+Number(e.change_limit||0)+'</div><div><small>Փաթեթի ակտիվացման ամսաթիվ</small>'+esc(e.created_at?new Date(e.created_at).toLocaleDateString('hy-AM',{timeZone:'Asia/Yerevan'}):'—')+'</div><div><small>Առաջին դասի ամսաթիվ</small>'+esc(e.first_lesson_date||'Կսահմանվի առաջին ամրագրումից')+'</div><div><small>Փաթեթի ավարտի ամսաթիվ</small>'+esc(e.expires_on||'Կհաշվարկվի առաջին դասից հետո')+'</div><div><small>Գործողության ժամկետ</small>'+Number(e.validity_days||snap.validityDays||30)+' օր՝ առաջին դասից</div></div><h4 style="margin:14px 0 8px">Դասաժամերի հերթականություն</h4>'+dayHtml+'</section>';
    }
-   html+='<div class="notice" style="margin-top:14px;border-left-color:#fb7185;background:#321b29;color:#ffd5dc"><b>⚠️ Չեղարկման պայման</b><br>Դասաժամը, ամբողջ փաթեթը կամ աշակերտի կողմից փաթեթի/դասի չեղարկման դեպքում վճարված գումարը հետ չի վերադարձվում։</div>';
-   const requests=(studentBookings||[]).filter(b=>b.package_name&&!['cancelled','rejected','auto_cancelled'].includes(b.status));
-   if(requests.length){
-    html+='<section class="card" style="margin:12px 0;border:1px solid #b8892e"><h3 style="margin-top:0">🟡 Փաթեթային հայտեր</h3>'+requests.map(b=>'<div class="listrow"><div><b>📦 '+esc(b.package_name)+'</b><div class="muted small">'+esc(dateTime((b.booking_slots||{}).starts_at))+' · '+esc(statusLabel(b.status))+'</div></div><span class="pill gold">'+esc(statusLabel(b.status))+'</span></div>').join('')+'</section>';
+   const fallbackGroups=new Map();
+   bookings.filter(b=>!coveredBookingIds.has(b.id)).forEach(b=>{const key=b.package_enrollment_id||b.package_name||'package';const a=fallbackGroups.get(key)||[];a.push(b);fallbackGroups.set(key,a);});
+   for(const [key,items] of fallbackGroups){
+    const first=items[0],snap=parseSnapshot(first.package_summary);
+    const sorted=items.slice().sort((a,b)=>new Date((a.booking_slots||{}).starts_at||0)-new Date((b.booking_slots||{}).starts_at||0));
+    const dates=sorted.map((b,i)=>{const st=(b.booking_slots||{}).starts_at;return '<div class="listrow"><div><b>Դասաժամ №'+(i+1)+'</b><div class="muted small">📅 '+esc(st?dateTime(st):'Ամսաթիվը դեռ նշված չէ')+'</div></div><span class="pill">'+esc(statusLabel(b.status))+'</span></div>';}).join('');
+    html+='<section class="card" style="margin:12px 0;border:1px solid #38bdf8;background:linear-gradient(145deg,#123b61,#081a2d)"><div class="row"><h3 style="margin:0">📦 '+esc(first.package_name||snap.name||'Վարորդական դասերի փաթեթ')+'</h3><span class="pill">'+esc(statusLabel(first.status))+'</span></div><div class="kv" style="margin-top:12px"><div><small>Արժեք</small>'+esc(snap.price||snap.totalPrice||'—')+'</div><div><small>Դասաժամերի քանակ</small>'+esc(snap.lessons||snap.lessonCount||sorted.length)+'</div><div><small>Ակտիվացման ամսաթիվ</small>'+esc(first.created_at?new Date(first.created_at).toLocaleDateString('hy-AM',{timeZone:'Asia/Yerevan'}):'—')+'</div><div><small>Մեկնարկի հասցե</small>'+esc(first.package_address||snap.address||'—')+'</div></div><h4 style="margin:14px 0 8px">Ընտրված օրերն ու ժամերը</h4>'+dates+'</section>';
    }
-   showModal('📦 Իմ փաթեթները',html||'<div class="notice">Ձեր հաշվին դեռ փաթեթ չի ամրագրվել։ Փաթեթը կցելու համար կապվեք ANI DRIVE ադմինի հետ։</div>');
+   if(html)html+='<div class="notice" style="margin-top:14px;border-left-color:#fb7185;background:#321b29;color:#ffd5dc"><b>⚠️ Չեղարկման պայման</b><br>Դասաժամը, ամբողջ փաթեթը կամ աշակերտի կողմից փաթեթի/դասի չեղարկման դեպքում վճարված գումարը հետ չի վերադարձվում։</div>';
+   showModal('📦 Իմ ամրագրված փաթեթները',html||'<div class="notice">Ձեր հաշվին դեռ փաթեթ չի ամրագրվել։ Եթե ադմինը փաթեթ է հաստատել, բայց այն այստեղ չի երևում, խնդրում ենք կապվել ANI DRIVE ադմինի հետ։</div>');
    const modalContent=$('modalContent');
    modalContent.querySelectorAll('[data-package-day-remove]').forEach(btn=>btn.onclick=async()=>{
-    const dayId=btn.dataset.packageDayRemove,bookingId=btn.dataset.bookingId,day=packageDayById.get(dayId),booking=(studentBookings||[]).find(x=>x.id===bookingId);
+    const dayId=btn.dataset.packageDayRemove,bookingId=btn.dataset.bookingId,day=packageDayById.get(dayId),booking=bookings.find(x=>x.id===bookingId);
     if(!day||!booking||booking.status!=='pending'||!booking.booking_slots||new Date(booking.booking_slots.starts_at)<=new Date())return alert('Այս օրը հնարավոր է հեռացնել միայն ադմինի հաստատումից առաջ։');
     if(!confirm('Հեռացնե՞լ '+day.lesson_date+' օրվա դասաժամը այս փաթեթից։ Ամրագրումը կչեղարկվի, իսկ փաթեթի մնացած օրերը կմնան։'))return;
     btn.disabled=true;btn.textContent='…';
@@ -838,8 +858,8 @@ async function renderStudentPackagePanel(){
     catch(err){alert('Չհաջողվեց հեռացնել օրը․ '+(err.message||'Սխալ'));btn.disabled=false;btn.textContent='✕';}
    });
    modalContent.querySelectorAll('[data-package-day-edit]').forEach(btn=>btn.onclick=async()=>{
-    const dayId=btn.dataset.packageDayEdit,bookingId=btn.dataset.bookingId,day=packageDayById.get(dayId),booking=(studentBookings||[]).find(x=>x.id===bookingId),e=packageEnrollmentById.get(day&&day.enrollment_id);
-    if(!day||!booking||booking.status!=='pending'||!booking.booking_slots||new Date(booking.booking_slots.starts_at)<=new Date())return alert('Փոխել կարելի է միայն ադմինի կողմից դեռ չհաստատված ապագա օրը։');
+    const dayId=btn.dataset.packageDayEdit,bookingId=btn.dataset.bookingId,day=packageDayById.get(dayId),booking=bookings.find(x=>x.id===bookingId),e=packageEnrollmentById.get(day&&day.enrollment_id);
+    if(!day||!booking||!e||booking.status!=='pending'||!booking.booking_slots||new Date(booking.booking_slots.starts_at)<=new Date())return alert('Փոխել կարելի է միայն ադմինի կողմից դեռ չհաստատված ապագա օրը։');
     if(new Date(booking.booking_slots.starts_at).getTime()-Date.now()<24*60*60*1000)return alert('Փաթեթի դասաժամը կարելի է փոխել միայն առնվազն 24 ժամ առաջ։');
     if(Number(day.change_count||0)>=Number(e.change_limit||0))return alert('Փաթեթի համար թույլատրված փոփոխությունների քանակը սպառվել է։');
     btn.disabled=true;btn.textContent='Բեռնում…';
@@ -856,7 +876,6 @@ async function renderStudentPackagePanel(){
      wrap.append(select,save,cancel);btn.closest('.listrow').append(wrap);btn.textContent='✏️ Փոխել';
     }catch(err){alert('Չհաջողվեց բեռնել ազատ օրերը․ '+(err.message||'Սխալ'));btn.disabled=false;btn.textContent='✏️ Փոխել';}
    });
-
   }catch(err){alert('Փաթեթները բեռնել չհաջողվեց․ '+(err.message||'Սխալ'));}
   finally{button.disabled=false;button.innerHTML='📦 <span>ԻՄ ԱՄՐԱԳՐՎԱԾ ՓԱԹԵԹՆԵՐԸ</span>';}
  };
