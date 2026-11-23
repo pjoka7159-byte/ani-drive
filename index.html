@@ -673,12 +673,36 @@ function showBookingNotice(b,kind){
  }
  playBookingChime();
 }
+function showPackageBookingNotice(items,kind){
+ const sorted=[...items].sort((a,b)=>new Date((a.booking_slots&&a.booking_slots.starts_at)||0)-new Date((b.booking_slots&&b.booking_slots.starts_at)||0));
+ const first=sorted[0],snap=(()=>{try{return typeof first.package_summary==='string'?JSON.parse(first.package_summary):first.package_summary||{};}catch(e){return {};}})();
+ const packageName=first.package_name||snap.name||'Վարորդական դասերի փաթեթ';
+ const title=kind==='confirmed'?'🎉 Ձեր փաթեթը հաստատված է։':kind==='rejected'?'⚠️ Ձեր փաթեթը մերժվել է։':kind==='auto_cancelled'?'⏰ Ձեր փաթեթի հայտը չեղարկվել է։':'📦 Ձեր փաթեթի ամրագրումը ստացվել է։';
+ const color=kind==='confirmed'?'#34d399':kind==='rejected'||kind==='auto_cancelled'?'#fb7185':'#facc15';
+ const pill=kind==='confirmed'?'✅ ՓԱԹԵԹԸ ՀԱՍՏԱՏՎԱԾ Է':kind==='rejected'?'❌ ՓԱԹԵԹԸ ՄԵՐԺՎԱԾ Է':kind==='auto_cancelled'?'⏰ ՉԵՂԱՐԿՎԱԾ Է':'🟡 ՍՊԱՍՈՒՄ Է ՀԱՍՏԱՏՄԱՆ';
+ const rows=sorted.map((b,i)=>{const sl=b.booking_slots||{},dt=sl.starts_at?new Date(sl.starts_at):null;return '<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #29435e"><b>Դաս '+(i+1)+'</b><span style="text-align:right">'+(dt?esc(aniHyDate(dt,{day:true,month:true,year:true})+' · '+dt.toLocaleTimeString('hy-AM',{timeZone:'Asia/Yerevan',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}):'Ժամը դեռ նշված չէ')+'</span></div>';}).join('');
+ const el=document.getElementById('aniBookingNotice')||document.createElement('div');el.id='aniBookingNotice';if(!el.isConnected)document.body.append(el);
+ el.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(1,8,20,.84);backdrop-filter:blur(9px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto';
+ el.innerHTML='<div style="width:min(620px,100%);max-height:94vh;overflow:auto;background:linear-gradient(150deg,#102b49,#07172b 72%);border:2px solid '+color+';border-radius:26px;padding:clamp(20px,4vw,32px);box-shadow:0 25px 100px #000d;color:#f4f8ff;text-align:center"><div style="font-size:48px">📦</div><h2 style="font-size:25px;margin:8px 0 12px">'+title+'</h2><p style="color:#c5d7e9">Ձեր բոլոր ընտրված դասաժամերը ներկայացված են մեկ փաթեթի մեջ, ոչ թե առանձին ամրագրումներով։</p><div style="background:#061629;border:1px solid #35516f;border-radius:18px;padding:18px;text-align:left;margin-top:15px"><div style="color:#8deaff;font-weight:900;margin-bottom:12px">📦 ՓԱԹԵԹԻ ՄԱՆՐԱՄԱՍՆԵՐԸ</div><div style="font-size:19px;font-weight:900;margin-bottom:12px">'+esc(packageName)+'</div><div style="color:#d5e4f2;line-height:1.9">👤 Աշակերտ՝ <b>'+esc(first.customer_name||profile?.full_name||'Աշակերտ')+'</b><br>📞 Հեռախոս՝ <b>'+esc(first.customer_phone||profile?.phone||'—')+'</b><br>💰 Արժեք՝ <b>'+esc(snap.price||'—')+'</b><br>📚 Դասաժամերի քանակ՝ <b>'+sorted.length+'</b></div><div style="height:1px;background:#29435e;margin:14px 0"></div><b style="color:#8deaff">🗓️ Ընտրված բոլոր օրերն ու ժամերը</b>'+rows+'</div><div style="margin:18px auto 12px;background:'+color+';color:#071629;border-radius:999px;padding:14px 18px;font-weight:950;max-width:380px">'+pill+'</div><button id="aniBookingNoticeClose" style="background:#183958;color:white;border:1px solid #54708d;border-radius:13px;padding:12px 30px;font-size:15px;font-weight:800;cursor:pointer">Փակել ծանուցումը</button></div>';
+ el.querySelector('#aniBookingNoticeClose').onclick=()=>{try{const sig=sorted.map(b=>[b.id,b.status,b.slot_id,b.updated_at||b.created_at||''].join('|')).join('||');const key='aniDismissedPackageNotices:'+user.id;let list=JSON.parse(localStorage.getItem(key)||'[]');if(!list.includes(sig))list.push(sig);localStorage.setItem(key,JSON.stringify(list.slice(-50)));}catch(e){}el.remove();};
+ playBookingChime();
+}
 function notifyStudentBookingChanges(rows){
  if(!user||!user.id||!Array.isArray(rows)||!rows.length)return;
  const actionable=rows.filter(b=>(['pending','confirmed','rejected','auto_cancelled'].includes(b.status)||b.proposed_slot_id)&&b.booking_slots?.starts_at);
  if(!actionable.length)return;
- actionable.sort((a,b)=>new Date(b.proposal_updated_at||b.updated_at||b.created_at||0)-new Date(a.proposal_updated_at||a.updated_at||a.created_at||0));
- const b=actionable[0],kind=b.proposed_slot_id?'proposal':b.status==='confirmed'?'confirmed':b.status==='rejected'?'rejected':b.status==='auto_cancelled'?'auto_cancelled':'pending';
+ const packageGroups=new Map();actionable.filter(b=>b.package_enrollment_id).forEach(b=>{const a=packageGroups.get(b.package_enrollment_id)||[];a.push(b);packageGroups.set(b.package_enrollment_id,a);});
+ if(packageGroups.size){
+  const groups=[...packageGroups.values()].sort((a,b)=>new Date(Math.max(...b.map(x=>new Date(x.updated_at||x.created_at||0))))-new Date(Math.max(...a.map(x=>new Date(x.updated_at||x.created_at||0)))));
+  const pack=groups[0].sort((a,b)=>new Date((a.booking_slots&&a.booking_slots.starts_at)||0)-new Date((b.booking_slots&&b.booking_slots.starts_at)||0));
+  const latest=[...pack].sort((a,b)=>new Date(b.proposal_updated_at||b.updated_at||b.created_at||0)-new Date(a.proposal_updated_at||a.updated_at||a.created_at||0))[0];
+  const kind=latest.status==='confirmed'?'confirmed':latest.status==='rejected'?'rejected':latest.status==='auto_cancelled'?'auto_cancelled':'pending';
+  const sig=pack.map(x=>[x.id,x.status,x.slot_id,x.updated_at||x.created_at||''].join('|')).join('||');
+  if(window.__aniLastPackageNoticeSignature!==sig){window.__aniLastPackageNoticeSignature=sig;let dismissed=[];try{dismissed=JSON.parse(localStorage.getItem('aniDismissedPackageNotices:'+user.id)||'[]');}catch(e){}if(!dismissed.includes(sig)){showPackageBookingNotice(pack,kind);return;}}
+ }
+ const ordinary=actionable.filter(b=>!b.package_enrollment_id);if(!ordinary.length)return;
+ ordinary.sort((a,b)=>new Date(b.proposal_updated_at||b.updated_at||b.created_at||0)-new Date(a.proposal_updated_at||a.updated_at||a.created_at||0));
+ const b=ordinary[0],kind=b.proposed_slot_id?'proposal':b.status==='confirmed'?'confirmed':b.status==='rejected'?'rejected':b.status==='auto_cancelled'?'auto_cancelled':'pending';
  const sig=[b.id,b.status,b.slot_id,b.proposed_slot_id||'',b.proposal_updated_at||'',b.updated_at||b.created_at||''].join('|');
  if(window.__aniLastBookingNoticeSignature===sig)return;
  window.__aniLastBookingNoticeSignature=sig;
