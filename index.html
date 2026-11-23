@@ -1113,6 +1113,8 @@ async function customerAction(id,action,extra){
  if(r.error||r.data&&r.data.error)throw new Error(errorText(r.error,r.data));
  return r.data||{};
 }
+// Shared with the student archive panel in the preceding script block.
+window.customerAction=customerAction;
 async function openCompleteStudent(id){
  const modal=$("modal"),content=$("modalContent");
  $("modalTitle").textContent="Աշակերտի ամբողջական անձնական քարտ";
