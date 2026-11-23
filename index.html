@@ -1029,6 +1029,7 @@ const adminCalOpen=$('adminCalendarOpen');if(adminCalOpen)adminCalOpen.onclick=o
 async function boot(){try{const {data,error}=await db.auth.getSession();if(error)throw error;if(data.session){user=data.session.user;await loadApp();}else showPublic();db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){user=null;showPublic();}});}catch(err){showAuth(err.message||'Կապի սխալ։');}}
 function closeStudentPortalToHome(){const sv=$('studentView'),pub=$('aniPublic');if(sv)sv.classList.add('hidden');if(pub)pub.style.display='block';document.body.classList.remove('ani-dashboard-mode','ani-auth-mode','ani-calendar-only');document.body.classList.add('ani-public-mode');window.scrollTo({top:0,behavior:'smooth'});}
 $('studentCloseHome').onclick=closeStudentPortalToHome;$('headerProfileBtn').onclick=()=>{const av=$('adminView'),sv=$('studentView'),pub=$('aniPublic');if(av&&!av.classList.contains('hidden')){currentAdminTab='myprofile';renderAdmin();av.scrollIntoView({behavior:'smooth',block:'start'});return;}if(sv&&!sv.classList.contains('hidden')){closeStudentPortalToHome();return;}if(sv){sv.classList.remove('hidden');if(pub)pub.style.display='block';document.body.classList.remove('ani-public-mode','ani-auth-mode');document.body.classList.add('ani-dashboard-mode');$('studentPortalContent').classList.remove('hidden');$('studentPortalToggle').setAttribute('aria-expanded','true');$('studentPortalChevron').textContent='−';$('studentPortalToggle').querySelector('span').textContent='👤 Իմ անձնական էջը';currentStudentTab='profile';renderStudent();sv.scrollIntoView({behavior:'smooth',block:'start'});}};
+window.__aniLoadApp=async function(nextUser){user=nextUser||null;await loadApp();};
 boot();
 })();
 </script><style>
@@ -1268,7 +1269,8 @@ window.__aniLogin=async function(e){
   try{localStorage.setItem('aniDriveLastLogin',identifier.value.trim());}catch(storageError){}
   if(msg)msg.textContent='Մուտքը հաջողվեց։ Բացվում է անձնական էջը…';
   if(btn)btn.disabled=true;
-  window.location.reload();
+  if(typeof window.__aniLoadApp!=='function')throw new Error('Անձնական էջը բացելու ծառայությունը դեռ պատրաստ չէ։');
+  await window.__aniLoadApp(verified.data.user);
  }catch(err){if(msg)msg.textContent=(err&&err.message)||'Մուտքը չհաջողվեց։';if(btn)btn.disabled=false;}
  return false;
 };
@@ -1552,7 +1554,7 @@ ob.observe(document.body,{subtree:true,childList:true,attributes:true,attributeF
  document.addEventListener('keydown',enableAudio,{once:true,capture:true});
  function beep(){}
  function show(msg,button){if(!toast){toast=document.createElement('div');toast.style.cssText='position:fixed;z-index:999999;right:14px;bottom:18px;max-width:min(360px,calc(100vw - 28px));padding:12px 14px;border:1px solid #258fe0;border-radius:13px;background:#061b36;color:#fff;box-shadow:0 10px 35px #0009;font:600 13px/1.5 Arial';document.body.appendChild(toast)}toast.textContent=msg;if(button){var b=document.createElement('button');b.textContent='Թարմացնել';b.style.cssText='margin-left:10px;padding:7px 10px;border:0;border-radius:8px;background:#087ff0;color:white;font-weight:800';b.onclick=function(){location.reload()};toast.appendChild(b)}}
- function refresh(){if(pending)return;pending=true;setTimeout(function(){pending=false;var el=document.activeElement,editing=el&&(/INPUT|TEXTAREA|SELECT/.test(el.tagName)||el.isContentEditable);if(editing){show('Կայքի տվյալները թարմացվել են։ Պահպանիր ընթացիկ փոփոխություններդ, ապա թարմացրու էջը։',true)}else{location.reload()}},900)}
+ function refresh(table){if(pending)return;pending=true;setTimeout(function(){pending=false;if(table==='site_sections'||table==='content_blocks'||table==='media_assets')show('Կայքում նոր տվյալներ կան։ Էջը չի վերաթարմացվել․ կարող եք շարունակել աշխատանքը։',false)},900)}
  db.auth.getSession().then(function(r){admin=!!(r.data&&r.data.session&&r.data.session.user&&emails.indexOf(String(r.data.session.user.email||'').toLowerCase())>=0);
  
  });
