@@ -1836,3 +1836,56 @@ body.ani-authenticated #aniPublic .ap-head-actions #logoutBtn:not(.hidden){displ
   db.auth.onAuthStateChange(function(event,session){apply(session)});
 })();
 </script>
+
+<!-- ANI_AUTH_BUTTONS_RESTORE_FUNCTIONAL_V2 -->
+<style id="ani-auth-buttons-restore-v2">
+body:not(.ani-authenticated) #aniPublic .ap-head-actions .ap-head-login,
+body:not(.ani-authenticated) #aniPublic .ap-head-actions .ap-head-register,
+body:not(.ani-authenticated) #aniPublic [data-ap-login]{
+ display:inline-flex!important;visibility:visible!important;pointer-events:auto!important;opacity:1!important
+}
+body:not(.ani-authenticated) #aniPublic .ap-head-actions .ap-head-login,
+body:not(.ani-authenticated) #aniPublic .ap-head-actions .ap-head-register{align-items:center;justify-content:center}
+body.ani-authenticated #aniPublic [data-ap-login],
+body.ani-authenticated #extraRegister,
+body.ani-authenticated #extraRegisterOpen{display:none!important;visibility:hidden!important;pointer-events:none!important}
+</style>
+<script id="ani-auth-buttons-restore-v2-script">
+(function(){
+ if(window.__aniAuthButtonsRestoreV2)return;window.__aniAuthButtonsRestoreV2=true;
+ function showLogin(){
+  var pub=document.getElementById('aniPublic'),auth=document.getElementById('authScreen');
+  if(!pub||!auth)return;
+  document.body.classList.remove('ani-public-mode','ani-dashboard-mode');
+  document.body.classList.add('ani-auth-mode');
+  pub.style.display='none';auth.classList.remove('hidden');
+  ['studentView','adminView'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add('hidden')});
+  var top=document.querySelector('header.top');if(top)top.style.display='flex';
+  auth.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ document.addEventListener('click',function(e){
+  var btn=e.target&&e.target.closest?e.target.closest('#aniPublic [data-ap-login],#aniPublic .ap-head-login,#aniPublic .ap-head-register'):null;
+  if(!btn)return;
+  if(document.body.classList.contains('ani-authenticated'))return;
+  e.preventDefault();showLogin();
+ },true);
+ function update(session){
+  var logged=!!(session&&session.user);
+  document.body.classList.toggle('ani-authenticated',logged);
+  if(logged){
+   document.querySelectorAll('#aniPublic [data-ap-login],#aniPublic .ap-head-login,#aniPublic .ap-head-register,#extraRegister,#extraRegisterOpen').forEach(function(el){el.hidden=true;el.style.setProperty('display','none','important')});
+  }else{
+   document.querySelectorAll('#aniPublic [data-ap-login],#aniPublic .ap-head-login,#aniPublic .ap-head-register').forEach(function(el){el.hidden=false;el.style.removeProperty('display');el.classList.remove('hidden');});
+  }
+ }
+ function connect(){
+  if(typeof window.__aniDriveGetClient!=='function'){setTimeout(connect,150);return}
+  try{
+   var db=window.__aniDriveGetClient('https://jtzogkpclweudpfhagvw.supabase.co','sb_publishable_UA3KSIc0wy3oiNf8sdkN4A_2Qn96sZU');
+   db.auth.getSession().then(function(r){update(r&&r.data&&r.data.session)}).catch(function(){update(null)});
+   db.auth.onAuthStateChange(function(ev,session){update(session)});
+  }catch(err){console.warn('ANI auth controls:',err)}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',connect,{once:true});else connect();
+})();
+</script>
