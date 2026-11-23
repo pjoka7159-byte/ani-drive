@@ -640,6 +640,7 @@ function calendarSlotKey(s){return calendarKey(new Date(s.starts_at));}
 async function loadBookingCalendar(){const host=$("studentPanel");host.innerHTML='<div class="notice">🗓️ Բեռնվում է ամրագրման օրացույցը…</div>';try{const {data,error}=await db.functions.invoke("student-booking-calendar",{body:{action:"list"}});if(error)throw error;if(data&&data.error)throw new Error(data.error);bookingCalendarSlots=(data.slots||[]).filter(s=>new Date(s.starts_at).getDay()!==1);const free=bookingCalendarSlots.filter(s=>s.available);if(!bookingCalendarDate||!free.some(s=>calendarSlotKey(s)===bookingCalendarDate))bookingCalendarDate=free.length?calendarSlotKey(free[0]):calendarKey(new Date());bookingCalendarMonth=new Date(bookingCalendarDate+"T12:00:00");bookingCalendarSelectedSlot="";renderBookingCalendar();}catch(e){host.innerHTML='<div class="notice">Չհաջողվեց բեռնել օրացույցը․ '+esc(e.message||"Սխալ")+' <button class="btn ghost" id="retryBookingCalendar">↻ Կրկին փորձել</button></div>';const b=$("retryBookingCalendar");if(b)b.onclick=loadBookingCalendar;}}
 function calendarYerevanNow(){const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Yerevan',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),o={};p.forEach(x=>o[x.type]=x.value);return {key:o.year+'-'+o.month+'-'+o.day,stamp:Date.now()};}
 async function openStudentPackageChooser(preferredName){
+ if(!user){const auth=await db.auth.getUser();if(auth.data&&auth.data.user)user=auth.data.user;}if(!user){alert('Ամրագրելու համար նախ մուտք գործեք աշակերտի հաշվով։');return;}
  const result=await db.from('student_package_enrollments').select('*').eq('student_user_id',user.id).eq('status','active').order('created_at',{ascending:false});
  if(result.error){alert('Փաթեթները բեռնել չհաջողվեց․ '+result.error.message);return;}
  const enrollments=result.data||[];
@@ -661,6 +662,7 @@ async function openStudentPackageChooser(preferredName){
  }
  showModal('Փաթեթի պայմաններ և ամրագրում','<div id="studentPackageChooserBody"></div>');showTerms(chosen);
 }
+window.openStudentPackageChooser=openStudentPackageChooser;
 function renderBookingCalendar(){
  const host=$("studentPanel"),month=bookingCalendarMonth,year=month.getFullYear(),mon=month.getMonth(),label=aniHyDate(month,{month:true,year:true}),first=new Date(year,mon,1),offset=(first.getDay()+6)%7,days=new Date(year,mon+1,0).getDate(),now=calendarYerevanNow(),today=now.key,map={},packageMode=!!(studentPackageEnrollment||studentPackageDraft),required=packageMode?Math.max(3,Number(studentPackageEnrollment?studentPackageEnrollment.min_required_days:studentPackageDraft.minDays||3)):0;
  bookingCalendarSlots.forEach(s=>{const k=calendarSlotKey(s);(map[k]||(map[k]=[])).push(s);});
