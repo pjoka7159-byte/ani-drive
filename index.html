@@ -660,7 +660,7 @@ async function openStudentPackageChooser(preferredName){
  const enrollments=result.data||[];
  const catalogResult=await db.from('site_sections').select('style,is_published,is_frozen').eq('slug','practical-lesson-packages').maybeSingle();
  if(catalogResult.error){alert('Փաթեթների ցանկը բեռնել չհաջողվեց․ '+catalogResult.error.message);return;}
- const catalog=(catalogResult.data&&catalogResult.data.is_published&&!catalogResult.data.is_frozen&&catalogResult.data.style&&catalogResult.data.style.packages)||[];
+ const catalog=((catalogResult.data&&catalogResult.data.is_published&&!catalogResult.data.is_frozen&&catalogResult.data.style&&catalogResult.data.style.packages)||[]).slice();if(catalog.length===4)catalog.push({name:aniPackageDisplayName({},4),description:'Քննական երթուղու նպատակային գործնական պարապմունք՝ քննության ճանապարհին վստահ և պատրաստ լինելու համար։',price:'',minDays:3,area:'',address:'',endAddress:''});
  const choices=[];
  catalog.forEach((p,i)=>{const displayName=aniPackageDisplayName(p,i);if(!choices.some(x=>x.package_name===displayName))choices.push({key:'catalog:'+i,enrollment:null,package_name:displayName,package_snapshot:Object.assign({},p,{name:displayName}),min_required_days:Math.max(3,Number(p.minDays||3)),change_limit:Math.max(3,Number(p.minDays||3)),address:p.address||'',_catalog:true});});
  enrollments.forEach(e=>{if(!choices.some(x=>x.package_name===e.package_name))choices.push({key:'enroll:'+e.id,enrollment:e,package_name:e.package_name,package_snapshot:e.package_snapshot||{},min_required_days:Math.max(3,Number(e.min_required_days||3)),change_limit:Math.max(3,Number(e.change_limit||3)),address:e.address||''});});
