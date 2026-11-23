@@ -943,7 +943,7 @@ async function renderInlineProposal(id){
  box.innerHTML='<div class="field"><label>Առաջարկվող ազատ օր և ժամ</label><select id="proposalSlot-'+id+'"><option value="">Ընտրեք…</option>'+free.map(x=>'<option value="'+esc(x.id)+'">'+esc(dateTime(x.starts_at))+'</option>').join('')+'</select></div><div class="field"><label>Մեկնաբանություն աշակերտին</label><input id="proposalNote-'+id+'" placeholder="Ընտրովի մեկնաբանություն"></div><button type="button" class="btn primary" id="proposalSend-'+id+'">Ուղարկել առաջարկը</button><span class="muted small" id="proposalMsg-'+id+'"></span>';
  $('proposalSend-'+id).onclick=async()=>{const slotId=$('proposalSlot-'+id).value,note=$('proposalNote-'+id).value.trim(),msg=$('proposalMsg-'+id);if(!slotId){msg.textContent='Ընտրեք ազատ դասաժամը։';return;}const upd=await db.from('bookings').update({proposed_slot_id:slotId,proposal_note:note,proposal_updated_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',id).eq('status','pending');if(upd.error){msg.textContent=upd.error.message;return;}const n=await db.from('admin_notifications').insert({booking_id:id,notification_type:'booking_time_proposed',title:'Այլ դասաժամ է առաջարկվել',message:'Ադմինը առաջարկել է նոր օր և ժամ։',details:{student_user_id:b.customer_user_id,proposed_slot_id:slotId,note}});if(n.error){msg.textContent='Առաջարկը պահպանվեց, ծանուցման գրանցումը ձախողվեց․ '+n.error.message;return;}await loadAdmin();};
 }
-async async function openBookingDetails(id){
+async function openBookingDetails(id){
  const b=allBookings.find(x=>x.id===id);if(!b)return;
  const profile=profiles.find(x=>x.user_id===b.customer_user_id)||{};
  const slot=b.booking_slots||{};
