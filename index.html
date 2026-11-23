@@ -1889,3 +1889,61 @@ body.ani-authenticated #extraRegisterOpen{display:none!important;visibility:hidd
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',connect,{once:true});else connect();
 })();
 </script>
+
+
+<!-- ANI PUBLIC AUTH CONTROLS HARD RESTORE -->
+<style id="ani-public-auth-controls-hard-restore">
+body:not(.ani-authenticated) #aniPublic .ap-header .ap-head-actions{display:flex!important;visibility:visible!important;opacity:1!important}
+body:not(.ani-authenticated) #aniPublic .ap-header .ap-head-actions .ap-head-login,
+body:not(.ani-authenticated) #aniPublic .ap-header .ap-head-actions .ap-head-register{display:inline-flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+</style>
+<script id="ani-public-auth-controls-hard-restore-script">
+(function(){
+ if(window.__aniPublicAuthHardRestore)return;window.__aniPublicAuthHardRestore=true;
+ var db=null;
+ function controls(show){
+  var root=document.getElementById('aniPublic');
+  if(!root)return;
+  var actions=root.querySelector('.ap-head-actions');
+  if(actions)actions.style.setProperty('display','flex','important');
+  root.querySelectorAll('.ap-head-login,.ap-head-register,[data-ap-login]').forEach(function(el){
+   if(show){el.hidden=false;el.removeAttribute('aria-hidden');el.classList.remove('hidden');el.style.setProperty('display','inline-flex','important');el.style.setProperty('visibility','visible','important');el.style.setProperty('pointer-events','auto','important');}
+   else{el.hidden=true;el.setAttribute('aria-hidden','true');el.style.setProperty('display','none','important');}
+  });
+ }
+ function appActuallyOpen(){
+  var s=document.getElementById('studentView'),a=document.getElementById('adminView');
+  return !!((s&&!s.classList.contains('hidden'))||(a&&!a.classList.contains('hidden')));
+ }
+ function apply(session){
+  var hasSession=!!(session&&session.user);
+  var active=hasSession&&appActuallyOpen();
+  document.body.classList.toggle('ani-authenticated',active);
+  controls(!active);
+  if(active){
+   var hp=document.getElementById('headerProfileBtn'),out=document.getElementById('logoutBtn');
+   [hp,out].forEach(function(el){if(el){el.hidden=false;el.classList.remove('hidden');}});
+  }
+ }
+ function connect(){
+  if(typeof window.__aniDriveGetClient!=='function'){setTimeout(connect,120);return;}
+  try{
+   db=window.__aniDriveGetClient('https://jtzogkpclweudpfhagvw.supabase.co','sb_publishable_UA3KSIc0wy3oiNf8sdkN4A_2Qn96sZU');
+   db.auth.getSession().then(function(r){apply(r&&r.data&&r.data.session);setTimeout(function(){apply(r&&r.data&&r.data.session)},1800)}).catch(function(){apply(null)});
+   db.auth.onAuthStateChange(function(event,session){
+    if(event==='SIGNED_OUT'||!session){apply(null);return;}
+    setTimeout(function(){apply(session)},500);
+    setTimeout(function(){apply(session)},1800);
+   });
+  }catch(e){apply(null);}
+ }
+ document.addEventListener('click',function(e){
+  var b=e.target&&e.target.closest?e.target.closest('#aniPublic .ap-head-login,#aniPublic .ap-head-register,#aniPublic [data-ap-login]'):null;
+  if(!b||document.body.classList.contains('ani-authenticated'))return;
+  e.preventDefault();
+  var auth=document.getElementById('authScreen'),pub=document.getElementById('aniPublic');
+  if(auth&&pub){document.body.classList.remove('ani-public-mode','ani-dashboard-mode','ani-authenticated');document.body.classList.add('ani-auth-mode');pub.style.display='none';auth.classList.remove('hidden');var top=document.querySelector('header.top');if(top)top.style.display='flex';auth.scrollIntoView({behavior:'smooth',block:'start'});}
+ },true);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',connect,{once:true});else connect();
+})();
+</script>
