@@ -753,6 +753,7 @@ async function openAdminPackageBooking(preferredPackageName){
  if(active.error){alert('Փաթեթները բեռնել չհաջողվեց․ '+active.error.message);return;}
  const enrollments=active.data||[];
  if(!enrollments.length){alert('Ակտիվ փաթեթ ունեցող աշակերտներ դեռ չկան։');return;}
+ for(const e of enrollments){const minDays=Math.max(3,Number(e.min_required_days||3));if(Number(e.min_required_days||0)!==minDays||Number(e.change_limit||0)!==minDays){const fixed=await db.from('student_package_enrollments').update({min_required_days:minDays,change_limit:minDays,updated_at:new Date().toISOString()}).eq('id',e.id);if(fixed.error){alert('Փաթեթի օրերի/փոփոխությունների սահմանաչափը թարմացնել չհաջողվեց․ '+fixed.error.message);return;}e.min_required_days=minDays;e.change_limit=minDays;}}
  const busy=new Set(allBookings.filter(b=>['pending','confirmed'].includes(b.status)).map(b=>b.slot_id));
  const daySlots=adminCalendarSlots.filter(x=>adminDateKey(new Date(x.starts_at))===adminCalendarSelected&&x.is_available&&!busy.has(x.id)&&new Date(x.starts_at)>new Date());
  if(new Date(adminCalendarSelected+'T12:00:00').getDay()===1){alert('Երկուշաբթի օրը ոչ աշխատանքային է։');return;}
