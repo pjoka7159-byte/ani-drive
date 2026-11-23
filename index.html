@@ -1024,7 +1024,7 @@ async function setPendingDecision(id,status,reason){
   lastAllowedDate.setDate(lastAllowedDate.getDate()+30);
   const lastAllowedKey=lastAllowedDate.getFullYear()+'-'+String(lastAllowedDate.getMonth()+1).padStart(2,'0')+'-'+String(lastAllowedDate.getDate()).padStart(2,'0');
   const validDates=unique.filter(d=>d>=firstPackageDate&&d<=lastAllowedKey);
-  if(validDates.length<required){alert('Փաթեթը դեռ չի կարող հաստատվել։ Առաջին դասաժամից հաշված 30 օրվա ընթացքում նշված է '+validDates.length+' օր՝ պահանջվում է առնվազն '+required+' տարբեր օր։');return;}
+  if(validDates.length!==required){alert('Փաթեթը չի կարող հաստատվել։ Պարտադիր է ճիշտ '+required+' տարբեր օր, իսկ նշված է '+validDates.length+'։ Ոչ պակաս, ոչ ավել օր չի թույլատրվում։');return;}
   if(unique.some(d=>d<firstPackageDate||d>lastAllowedKey)){alert('Փաթեթի բոլոր դասաժամերը պետք է լինեն առաջին դասաժամից հաշված 30 օրվա ընթացքում ('+firstPackageDate+' – '+lastAllowedKey+')։');return;}
  }
  const patch={status,updated_at:new Date().toISOString()};
