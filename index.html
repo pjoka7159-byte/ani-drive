@@ -980,20 +980,24 @@ async function setPendingDecision(id,status,reason){
    const list=cat.data&&cat.data.style&&cat.data.style.packages||[],pkg=list.find(x=>x.name===target.package_name);
    required=Math.max(3,Number(pkg&&pkg.minDays||3));
   }
-  const starts=(target.booking_slots&&target.booking_slots.starts_at)||target.starts_at;
-  if(!starts){alert('Չհաջողվեց որոշել ամրագրման ամիսը։');return;}
-  const dt=new Date(starts),from=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-01',to=new Date(dt.getFullYear(),dt.getMonth()+1,1).toISOString().slice(0,10);
-  let unique=[];
+  let packageDates=[];
   if(target.package_enrollment_id){
-   const days=await db.from('student_package_days').select('lesson_date').eq('enrollment_id',target.package_enrollment_id).neq('status','cancelled').gte('lesson_date',from).lt('lesson_date',to);
+   const days=await db.from('student_package_days').select('lesson_date').eq('enrollment_id',target.package_enrollment_id).neq('status','cancelled');
    if(days.error){alert('Փաթեթի օրերը ստուգել չհաջողվեց․ '+days.error.message);return;}
-   unique=[...new Set((days.data||[]).map(x=>x.lesson_date))];
+   packageDates=(days.data||[]).map(x=>x.lesson_date).filter(Boolean);
   }else{
    const bookings=await db.from('bookings').select('booking_slots:booking_slots!bookings_slot_id_fkey(starts_at)').eq('customer_user_id',target.customer_user_id).eq('package_name',target.package_name).in('status',['pending','confirmed']);
    if(bookings.error){alert('Փաթեթի ամրագրումները ստուգել չհաջողվեց․ '+bookings.error.message);return;}
-   unique=[...new Set((bookings.data||[]).map(x=>x.booking_slots&&x.booking_slots.starts_at?new Date(x.booking_slots.starts_at).toLocaleDateString('en-CA',{timeZone:'Asia/Yerevan'}):'').filter(x=>x>=from&&x<to))];
+   packageDates=(bookings.data||[]).map(x=>x.booking_slots&&x.booking_slots.starts_at?new Date(x.booking_slots.starts_at).toLocaleDateString('en-CA',{timeZone:'Asia/Yerevan'}):'').filter(Boolean);
   }
-  if(unique.length<required){alert('Փաթեթը դեռ չի կարող հաստատվել։ Նշված են '+unique.length+' օր՝ պահանջվում է առնվազն '+required+' տարբեր օր նույն օրացուցային ամսվա ընթացքում։');return;}
+  const unique=[...new Set(packageDates)].sort();
+  if(!unique.length){alert('Փաթեթի դասաժամերը չեն գտնվել։');return;}
+  const firstPackageDate=unique[0],lastAllowedDate=new Date(firstPackageDate+'T00:00:00');
+  lastAllowedDate.setDate(lastAllowedDate.getDate()+30);
+  const lastAllowedKey=lastAllowedDate.getFullYear()+'-'+String(lastAllowedDate.getMonth()+1).padStart(2,'0')+'-'+String(lastAllowedDate.getDate()).padStart(2,'0');
+  const validDates=unique.filter(d=>d>=firstPackageDate&&d<=lastAllowedKey);
+  if(validDates.length<required){alert('Փաթեթը դեռ չի կարող հաստատվել։ Առաջին դասաժամից հաշված 30 օրվա ընթացքում նշված է '+validDates.length+' օր՝ պահանջվում է առնվազն '+required+' տարբեր օր։');return;}
+  if(unique.some(d=>d<firstPackageDate||d>lastAllowedKey)){alert('Փաթեթի բոլոր դասաժամերը պետք է լինեն առաջին դասաժամից հաշված 30 օրվա ընթացքում ('+firstPackageDate+' – '+lastAllowedKey+')։');return;}
  }
  const patch={status,updated_at:new Date().toISOString()};
  if(status==='rejected')patch.rejection_reason=reason;
