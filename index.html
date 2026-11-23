@@ -1,5 +1,16 @@
 <!doctype html>
 <html lang="hy"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#061225"><title>ANI DRIVE — Ավտոդպրոց Երևանում</title>
+<script id="ani-drive-client-bootstrap">
+(function(w){
+ if(typeof w.__aniDriveGetClient!=="function"){
+  w.__aniDriveGetClient=function(url,key,options){
+   if(!w.supabase||typeof w.supabase.createClient!=="function")throw new Error("Կայքի մուտքի ծառայությունը դեռ չի բեռնվել։ Թարմացրեք էջը։");
+   if(!w.__aniDriveDb)w.__aniDriveDb=w.supabase.createClient(url,key,options||{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+   return w.__aniDriveDb;
+  };
+ }
+})(window);
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#061225;--panel:#0d2038;--panel2:#122b49;--line:#254363;--blue:#21b8f5;--cyan:#8deaff;--txt:#f4f8ff;--muted:#9db3ce;--green:#36d399;--gold:#f8c65c;--red:#fb7185}
