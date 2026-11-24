@@ -1206,7 +1206,50 @@ async function openBookingDetails(id){
   const detail=$('modalContent').querySelector('.ani-booking-detail');
   if(detail){const move=detail.querySelector('.ani-booking-reschedule');detail.insertBefore(mini,move||null);}
  }
- if(b.package_name){let terms={};try{const raw=JSON.parse(b.package_summary||'{}');terms=raw.terms||raw;}catch(e){}const related=allBookings.filter(x=>x.customer_user_id===b.customer_user_id&&x.package_name===b.package_name&&['pending','confirmed','completed'].includes(x.status));const dayRows=related.map(x=>{const sl=x.booking_slots||{};return '<div class="listrow"><b>'+esc(dateTime(sl.starts_at))+'</b><span class="pill">'+esc(statusLabel(x.status))+'</span></div>';}).join('');const packageBox=document.createElement('section');packageBox.className='card';packageBox.style.cssText='margin:12px 0;border:1px solid #35bfff;background:linear-gradient(145deg,#123b61,#081a2d)';packageBox.innerHTML='<div style="display:inline-block;padding:6px 10px;border-radius:8px;background:#533a0d;color:#ffe6a3;font-weight:950;margin-bottom:8px">⭐ ԱՌԱՋՆԱՀԵՐԹ ՓԱԹԵԹԱՅԻՆ ՀԱՅՏ</div><h3 style="margin:4px 0 10px">📦 '+esc(b.package_name)+'</h3><div class="kv"><div><small>Արժեք</small>'+esc(terms.price||'—')+'</div><div><small>Դասաժամեր</small>'+esc(terms.lessons||'—')+'</div><div><small>Նվազագույն օրեր</small>'+Math.max(3,Number(terms.minDays||3))+'</div><div><small>Փոփոխությունների սահմանաչափ</small>'+Math.max(3,Number(terms.minDays||3))+'</div><div><small>Տևողություն</small>'+esc(terms.duration||'—')+'</div><div><small>Տարածք</small>'+esc(terms.area||'—')+'</div><div><small>Մեկնարկի հասցե</small>'+esc(terms.address||b.package_address||'—')+'</div><div><small>Ավարտի հասցե</small>'+esc(terms.endAddress||'—')+'</div></div><h4>Արդեն ամրագրված փաթեթային օրերը</h4>'+(dayRows||'<div class="notice">Օրերի տվյալները դեռ չեն լրացվել։</div>');const detail=$('modalContent').querySelector('.ani-booking-detail');if(detail){const move=detail.querySelector('.ani-booking-reschedule');detail.insertBefore(packageBox,move||null);}}
+ if(b.package_name){let terms={};try{const raw=JSON.parse(b.package_summary||'{}');terms=raw.terms||raw;}catch(e){}const related=allBookings.filter(x=>x.customer_user_id===b.customer_user_id&&x.package_name===b.package_name&&['pending','confirmed','completed'].includes(x.status));const dayRows=related.map(x=>{const sl=x.booking_slots||{};return '<div class="listrow"><b>'+esc(dateTime(sl.starts_at))+'</b><span class="pill">'+esc(statusLabel(x.status))+'</span></div>';}).join('');const packageBox=document.createElement('section');packageBox.className='card';packageBox.style.cssText='margin:12px 0;border:1px solid #35bfff;background:linear-gradient(145deg,#123b61,#081a2d)';packageBox.innerHTML='<div style="display:inline-block;padding:6px 10px;border-radius:8px;background:#533a0d;color:#ffe6a3;font-weight:950;margin-bottom:8px">⭐ ԱՌԱՋՆԱՀԵՐԹ ՓԱԹԵԹԱՅԻՆ ՀԱՅՏ</div><h3 style="margin:4px 0 10px">📦 '+esc(b.package_name)+'</h3><div class="kv"><div><small>Արժեք</small>'+esc(terms.price||'—')+'</div><div><small>Դասաժամեր</small>'+esc(terms.lessons||'—')+'</div><div><small>Նվազագույն օրեր</small>'+Math.max(3,Number(terms.minDays||3))+'</div><div><small>Փոփոխությունների սահմանաչափ</small>'+Math.max(3,Number(terms.minDays||3))+'</div><div><small>Տևողություն</small>'+esc(terms.duration||'—')+'</div><div><small>Տարածք</small>'+esc(terms.area||'—')+'</div><div><small>Մեկնարկի հասցե</small>'+esc(terms.address||b.package_address||'—')+'</div><div><small>Ավարտի հասցե</small>'+esc(terms.endAddress||'—')+'</div></div><h4>Արդեն ամրագրված փաթեթային օրերը</h4>'+(dayRows||'<div class="notice">Օրերի տվյալները դեռ չեն լրացվել։</div>');const detail=$('modalContent').querySelector('.ani-booking-detail');if(detail){const move=detail.querySelector('.ani-booking-reschedule');detail.insertBefore(packageBox,move||null);
+  const controls=document.createElement('div');controls.className='actions';controls.style.cssText='margin-top:12px;display:flex;gap:8px;flex-wrap:wrap';
+  controls.innerHTML='<button type="button" class="btn danger" id="adminCancelPackageDay">Չեղարկել միայն այս օրը</button><button type="button" class="btn danger" id="adminCancelWholePackage">Չեղարկել ամբողջ փաթեթը</button>';
+  packageBox.appendChild(controls);
+  const cancelDay=$('adminCancelPackageDay');
+  cancelDay.onclick=async()=>{
+   const when=slot.starts_at?dateTime(slot.starts_at):'այս դասաժամը';
+   if(!confirm('Չեղարկե՞լ միայն '+when+' օրվա դասաժամը։ Փաթեթի մյուս օրերը կմնան ակտիվ։'))return;
+   cancelDay.disabled=true;cancelDay.textContent='Չեղարկվում է…';
+   try{
+    const stamp=new Date().toISOString();
+    const upd=await db.from('bookings').update({status:'cancelled',cancelled_at:stamp,updated_at:stamp}).eq('id',b.id).in('status',['pending','confirmed']);
+    if(upd.error)throw upd.error;
+    const dayUpd=await db.from('student_package_days').update({status:'cancelled'}).eq('booking_id',b.id);
+    if(dayUpd.error)throw dayUpd.error;
+    closeModal();await loadAdmin();alert('Միայն ընտրված օրը չեղարկվեց։ Փաթեթի մնացած օրերը պահպանվել են։');
+   }catch(err){alert('Չհաջողվեց չեղարկել օրը․ '+(err.message||err));cancelDay.disabled=false;cancelDay.textContent='Չեղարկել միայն այս օրը';}
+  };
+  const cancelWhole=$('adminCancelWholePackage');
+  cancelWhole.onclick=async()=>{
+   if(!confirm('Չեղարկե՞լ ամբողջ փաթեթը։ Բոլոր դրա չանցկացված դասաժամերը կչեղարկվեն, իսկ փաթեթը կպահպանվի պատմության մեջ։'))return;
+   cancelWhole.disabled=true;cancelWhole.textContent='Չեղարկվում է…';
+   try{
+    const stamp=new Date().toISOString(),enrollmentId=b.package_enrollment_id|| (dayLink.data&&dayLink.data.enrollment_id)||null;
+    let ids=[];
+    if(enrollmentId){
+     const rows=await db.from('student_package_days').select('booking_id').eq('enrollment_id',enrollmentId);
+     if(rows.error)throw rows.error;
+     ids=(rows.data||[]).map(x=>x.booking_id).filter(Boolean);
+    }
+    ids=Array.from(new Set(ids.concat(allBookings.filter(x=>x.customer_user_id===b.customer_user_id&&(enrollmentId?x.package_enrollment_id===enrollmentId:x.package_name===b.package_name)&&['pending','confirmed'].includes(x.status)).map(x=>x.id))));
+    if(!ids.includes(b.id))ids.push(b.id);
+    const upd=await db.from('bookings').update({status:'cancelled',cancelled_at:stamp,updated_at:stamp}).in('id',ids).in('status',['pending','confirmed']);
+    if(upd.error)throw upd.error;
+    if(enrollmentId){
+     const daysUpd=await db.from('student_package_days').update({status:'cancelled'}).eq('enrollment_id',enrollmentId);
+     if(daysUpd.error)throw daysUpd.error;
+     const enrollmentUpd=await db.from('student_package_enrollments').update({status:'cancelled',updated_at:stamp}).eq('id',enrollmentId).in('status',['active','pending']);
+     if(enrollmentUpd.error)throw enrollmentUpd.error;
+    }
+    closeModal();await loadAdmin();alert('Ամբողջ փաթեթը չեղարկվեց։ Աշակերտի էջում այն կերևա որպես չեղարկված։');
+   }catch(err){alert('Չհաջողվեց չեղարկել ամբողջ փաթեթը․ '+(err.message||err));cancelWhole.disabled=false;cancelWhole.textContent='Չեղարկել ամբողջ փաթեթը';}
+  };
+ }}
  let chosenSlot=null;
  const slotsHost=$('bookingMoveSlots'),save=$('bookingMoveSave'),msg=$('bookingMoveMsg');
  $('bookingDetailClose').onclick=closeModal;const removeBooking=$('bookingDetailRemove');if(removeBooking)removeBooking.onclick=async()=>{if(!confirm('Հեռացնե՞լ այս ամրագրումը ակտիվ ցուցակից։ Այն կչեղարկվի և կմնա ամրագրման պատմության մեջ։'))return;removeBooking.disabled=true;removeBooking.textContent='Հեռացվում է…';const result=await db.from('bookings').update({status:'cancelled',cancelled_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',b.id).in('status',['pending','confirmed']);if(result.error){alert('Չհաջողվեց հեռացնել ամրագրումը․ '+result.error.message);removeBooking.disabled=false;removeBooking.textContent='Հեռացնել ամրագրումը';return;}closeModal();await loadAdmin();};$('bookingMoveCancel').onclick=()=>{chosenSlot=null;save.disabled=true;msg.textContent='Փոփոխությունը չեղարկված է։';if($('bookingMoveDate'))$('bookingMoveDate').value=dateValue;loadMoveSlots(dateValue);};
