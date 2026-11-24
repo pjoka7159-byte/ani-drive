@@ -2355,3 +2355,120 @@ body:not(.ani-authenticated) #aniPublic .ap-header .ap-head-actions .ap-head-reg
 </script>
 
 <!-- ANI DRIVE media controls update -->
+
+
+<style id="ani-drive-private-ideas-style">
+#aniIdeasVault{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.4fr);gap:14px}
+#aniIdeasVault .iv-panel{background:linear-gradient(145deg,#102944,#081a2d);border:1px solid #31516e;border-radius:15px;padding:15px;min-width:0}
+#aniIdeasVault .iv-card{background:#0a1e34;border:1px solid #294b6c;border-radius:12px;padding:12px;margin:9px 0}
+#aniIdeasVault .iv-card.active{border-color:#27b9ef;box-shadow:0 0 0 1px #27b9ef55}
+#aniIdeasVault .iv-muted{color:#9db3ce;font-size:12px}
+#aniIdeasVault .iv-field{display:grid;gap:5px;margin:10px 0}
+#aniIdeasVault .iv-field label{font-size:12px;color:#b9d2e9}
+#aniIdeasVault input,#aniIdeasVault textarea,#aniIdeasVault select{width:100%;background:#07172a;color:#eff7ff;border:1px solid #35516f;border-radius:9px;padding:10px}
+#aniIdeasVault textarea{min-height:90px;resize:vertical}
+#aniIdeasVault .iv-images{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:10px}
+#aniIdeasVault .iv-images img{width:100%;height:86px;object-fit:cover;border-radius:9px;border:1px solid #35516f}
+#aniIdeasVault .iv-actions{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:760px){#aniIdeasVault{grid-template-columns:1fr}}
+</style>
+<script id="ANI_DRIVE_PRIVATE_IDEAS_V1">
+(function(){
+"use strict";
+if(window.__aniDrivePrivateIdeasV1)return;window.__aniDrivePrivateIdeasV1=true;
+const db=window.__aniDriveGetClient("https://jtzogkpclweudpfhagvw.supabase.co","sb_publishable_UA3KSIc0wy3oiNf8sdkN4A_2Qn96sZU");
+const ADMINS=["pjoka7159@gmail.com","graergrigoryan1986@gmail.com"];
+const VAULT_SLUG="ani-drive-private-ideas";
+const $=id=>document.getElementById(id);
+const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let vault=null,ideas=[],selectedId="",userId="";
+function isAdmin(u){return !!u&&(ADMINS.includes(String(u.email||"").toLowerCase())||["admin","operator"].includes(String((u.app_metadata||{}).role||"")));}
+function say(t){const n=$("ivMessage");if(n)n.textContent=t;}
+function publicUrl(path){return db.storage.from("ani-drive-media").getPublicUrl(path).data.publicUrl;}
+async function ensureVault(){
+ const q=await db.from("site_sections").select("id,title,slug,description,style,is_published,is_frozen").eq("slug",VAULT_SLUG).maybeSingle();
+ if(q.error)throw q.error;
+ if(q.data){vault=q.data;ideas=Array.isArray(vault.style&&vault.style.ideas)?vault.style.ideas:[];return;}
+ const ins=await db.from("site_sections").insert({title:"ANI DRIVE — Գաղափարների և փաթեթների պահոց",slug:VAULT_SLUG,description:"Ադմինի ներքին պահոց՝ նոր գաղափարների, ծառայությունների և փաթեթների համար։",position:9999,is_published:false,is_frozen:false,style:{ideas:[]}}).select("id,title,slug,description,style,is_published,is_frozen").single();
+ if(ins.error)throw ins.error;vault=ins.data;ideas=[];
+}
+async function persist(){
+ const style=Object.assign({},vault.style||{},{ideas:ideas});
+ const r=await db.from("site_sections").update({style:style,is_published:false,is_frozen:false,updated_at:new Date().toISOString()}).eq("id",vault.id);
+ if(r.error)throw r.error;vault.style=style;
+}
+function render(){
+ const host=$("adminPanel");if(!host)return;
+ const chosen=ideas.find(x=>x.id===selectedId)||null;
+ host.innerHTML='<div id="aniIdeasVault">'+
+ '<div class="iv-panel"><div class="row"><div><b style="font-size:17px">💡 ANI DRIVE ԳԱՂԱՓԱՐՆԵՐ</b><div class="iv-muted">Միայն ադմինի համար · Ներքին պահոց</div></div><span class="pill">PRIVATE</span></div>'+
+ '<p class="iv-muted">Այստեղ պահիր նոր ծառայությունները, գովազդային գաղափարները, փաթեթները, նկարներն ու պայմանները։ Պահոցը հրապարակային կայքում չի ցուցադրվում։</p>'+
+ '<button class="btn primary" id="ivNew">＋ Ավելացնել նոր գաղափար / փաթեթ</button>'+
+ '<div style="margin-top:12px"><b>Պահպանված գաղափարներ ('+ideas.length+')</b></div>'+
+ (ideas.map(x=>'<div class="iv-card '+(x.id===selectedId?'active':'')+'"><div class="row"><b>'+esc(x.title||"Անվերնագիր")+'</b><span class="pill '+(x.stage==="ready"?'':'gold')+'">'+(x.stage==="ready"?"Պատրաստ է":"Սևագիր")+'</span></div><div class="iv-muted">'+esc(x.kind||"Գաղափար")+' · '+(x.images||[]).length+' նկար</div><div class="iv-actions" style="margin-top:8px"><button class="btn" data-iv-edit="'+esc(x.id)+'">Բացել / խմբագրել</button></div></div>').join("")||'<div class="iv-card iv-muted">Դեռ գաղափարներ չկան։ Ավելացրու առաջինը։</div>')+
+ '</div>'+
+ '<div class="iv-panel"><div class="row"><b>'+(chosen?"Խմբագրել գաղափարը":"Նոր գաղափար")+'</b><span class="iv-muted">Բոլոր փոփոխությունները պահվում են</span></div>'+
+ '<form id="ivForm">'+
+ '<div class="iv-field"><label>Վերնագիր</label><input name="title" required value="'+esc(chosen&&chosen.title||"")+'" placeholder="Օր․ DRIVE THE FUTURE"></div>'+
+ '<div class="iv-field"><label>Կարճ գովազդային կարգախոս</label><input name="tagline" value="'+esc(chosen&&chosen.tagline||"")+'" placeholder="Վարիր իրականությունից առաջ"></div>'+
+ '<div class="iv-field"><label>Գաղափարի տեսակ</label><select name="kind"><option '+(!chosen||chosen.kind==="Գաղափար"?'selected':'')+'>Գաղափար</option><option '+(chosen&&chosen.kind==="Ծառայություն"?'selected':'')+'>Ծառայություն</option><option '+(chosen&&chosen.kind==="Փաթեթ"?'selected':'')+'>Փաթեթ</option><option '+(chosen&&chosen.kind==="Ակցիա"?'selected':'')+'>Ակցիա</option></select></div>'+
+ '<div class="iv-field"><label>Գովազդային նկարագրություն</label><textarea name="description" placeholder="Ներկայացրու ծառայությունը գրավիչ ձևով...">'+esc(chosen&&chosen.description||"")+'</textarea></div>'+
+ '<div class="iv-field"><label>Պայմաններ և ինչ է ներառված (յուրաքանչյուր կետը՝ նոր տողից)</label><textarea name="features" placeholder="Օր․ Փորձնական քննություն&#10;Սխալների վերլուծություն">'+esc(chosen&&chosen.features||"")+'</textarea></div>'+
+ '<div class="iv-field"><label>Արժեք / գնային նշում</label><input name="price" value="'+esc(chosen&&chosen.price||"")+'" placeholder="Օր․ Գինը՝ անհատական հաշվարկով"></div>'+
+ '<div class="iv-field"><label>Ներքին նշումներ՝ միայն ադմինի համար</label><textarea name="notes" placeholder="Գործընկերներ, սարքավորումներ, ծախսեր, իրականացման քայլեր...">'+esc(chosen&&chosen.notes||"")+'</textarea></div>'+
+ '<div class="iv-field"><label>Կարգավիճակ</label><select name="stage"><option value="draft" '+(!chosen||chosen.stage!=="ready"?'selected':'')+'>Սևագիր</option><option value="ready" '+(chosen&&chosen.stage==="ready"?'selected':'')+'>Պատրաստ է քննարկման / հրապարակման</option></select></div>'+
+ '<div class="iv-field"><label>Ավելացնել նկարներ հեռախոսից կամ համակարգչից</label><input id="ivFiles" type="file" multiple accept="image/*"></div>'+
+ '<div class="iv-muted">Նկարները կկցվեն այս գաղափարին։ Յուրաքանչյուր գաղափարի համար՝ առավելագույնը 20 նկար։</div>'+
+ '<div class="iv-images">'+((chosen&&chosen.images)||[]).map((p,i)=>'<div><img src="'+esc(publicUrl(p))+'" alt=""><button type="button" class="btn danger" style="width:100%;margin-top:4px;padding:5px" data-iv-remove-image="'+i+'">Հեռացնել</button></div>').join("")+'</div>'+
+ '<div class="iv-actions" style="margin-top:14px"><button class="btn primary" type="submit">Պահպանել</button><button class="btn ghost" type="button" id="ivClear">Մաքրել ձևը</button>'+(chosen?'<button class="btn danger" type="button" id="ivDelete">Ջնջել գաղափարը</button>':'')+'</div><div id="ivMessage" class="iv-muted" style="margin-top:10px"></div></form></div></div>';
+ $("ivNew").onclick=()=>{selectedId="";render();};
+ host.querySelectorAll("[data-iv-edit]").forEach(b=>b.onclick=()=>{selectedId=b.dataset.ivEdit;render();});
+ $("ivClear").onclick=()=>{selectedId="";render();};
+ host.querySelectorAll("[data-iv-remove-image]").forEach(b=>b.onclick=async()=>{const x=ideas.find(y=>y.id===selectedId);if(!x)return;x.images=(x.images||[]).filter((_,i)=>i!==Number(b.dataset.ivRemoveImage));try{await persist();render();}catch(e){say("Չհաջողվեց պահպանել․ "+e.message);}});
+ $("ivForm").onsubmit=async e=>{
+  e.preventDefault();const f=new FormData(e.target),old=ideas.find(x=>x.id===selectedId);
+  const item=Object.assign({},old||{id:(window.crypto&&crypto.randomUUID?crypto.randomUUID():"idea-"+Date.now()),images:[]},{
+   title:String(f.get("title")||"").trim(),tagline:String(f.get("tagline")||"").trim(),kind:String(f.get("kind")||"Գաղափար"),
+   description:String(f.get("description")||"").trim(),features:String(f.get("features")||"").trim(),price:String(f.get("price")||"").trim(),
+   notes:String(f.get("notes")||"").trim(),stage:String(f.get("stage")||"draft"),updated_at:new Date().toISOString()
+  });
+  if(!old)item.created_at=new Date().toISOString();
+  const files=Array.from(($("ivFiles")&&$("ivFiles").files)||[]);
+  if((item.images||[]).length+files.length>20){say("Մեկ գաղափարի համար կարելի է կցել առավելագույնը 20 նկար։");return;}
+  ideas=old?ideas.map(x=>x.id===item.id?item:x):[item,...ideas];selectedId=item.id;
+  try{
+   await persist();say("Տեքստը պահպանվեց։ Նկարները վերբեռնվում են…");
+   for(const file of files){
+    if(!file.type.startsWith("image/"))continue;
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    const path=vault.id+"/ideas/"+item.id+"/"+Date.now()+"-"+safe;
+    const up=await db.storage.from("ani-drive-media").upload(path,file,{upsert:false});
+    if(up.error)throw up.error;
+    item.images.push(path);
+   }
+   ideas=ideas.map(x=>x.id===item.id?item:x);await persist();render();say("Գաղափարը և նկարները հաջողությամբ պահպանվեցին։");
+  }catch(err){say("Պահպանման խնդիր․ "+(err.message||"Սխալ"));}
+ };
+ if($("ivDelete"))$("ivDelete").onclick=async()=>{if(!confirm("Ջնջե՞լ այս գաղափարը պահոցից։"))return;ideas=ideas.filter(x=>x.id!==selectedId);selectedId="";try{await persist();render();}catch(e){say("Չհաջողվեց ջնջել․ "+e.message);}};
+}
+async function openVault(){
+ const host=$("adminPanel");if(!host)return;host.innerHTML='<div class="notice">Բեռնում եմ ANI DRIVE-ի ներքին պահոցը…</div>';
+ try{await ensureVault();render();}catch(e){host.innerHTML='<div class="notice">Պահոցը բացել չհաջողվեց․ '+esc(e.message||"Սխալ")+'</div>';}
+}
+function addTab(){
+ const tabs=$("adminTabs");if(tabs&&!tabs.querySelector('[data-extra="aniIdeasVault"]'))tabs.insertAdjacentHTML("beforeend",'<button data-extra="aniIdeasVault">💡 ANI DRIVE գաղափարներ</button>');
+}
+async function init(){
+ const r=await db.auth.getUser(),u=r.data&&r.data.user;
+ if(!isAdmin(u))return;userId=u.id;addTab();
+}
+document.addEventListener("click",function(e){
+ const b=e.target&&e.target.closest?e.target.closest('#adminTabs [data-extra="aniIdeasVault"]'):null;
+ if(!b)return;
+ document.querySelectorAll("#adminTabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+ openVault();
+});
+db.auth.onAuthStateChange(function(event,session){if(session&&isAdmin(session.user)){userId=session.user.id;addTab();}});
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
+})();
+</script>
